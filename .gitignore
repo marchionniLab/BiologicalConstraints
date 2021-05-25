@@ -12,3 +12,4 @@ Breast/Figs/
 *.Rhistory
 *.Rproj
 *.user
+.Rproj.user
