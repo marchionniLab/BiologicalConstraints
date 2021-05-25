@@ -7,6 +7,7 @@ Breast/Figs/
 *.Rproj
 *.user
 *renv/
+*renv.lock
 *.Rprofile
 *.Rhistory
 *.Rproj
