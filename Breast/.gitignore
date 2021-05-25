@@ -1,0 +1,8 @@
+.Rhistory
+.Rprofile
+Data/
+Objs/
+Figs/
+renv/
+*.Rproj
+*.user

@@ -1,0 +1,13 @@
+*Objs/
+*Data/
+*Text/
+Bladder/DataW.rda
+Bladder/Figs/
+Breast/Figs/
+*.Rproj
+*.user
+*renv/
+*.Rprofile
+*.Rhistory
+*.Rproj
+*.user
