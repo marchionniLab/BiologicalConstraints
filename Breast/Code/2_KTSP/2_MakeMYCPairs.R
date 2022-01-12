@@ -32,14 +32,14 @@ names(GeneList) <- gsub(".+\\.",  "",  names(GeneList))
 ######################################################
 #### Pro Notch
 ProMYC <- GeneList[c(#"LEE_LIVER_CANCER_MYC_UP",
-                     #"LEE_LIVER_CANCER_MYC_TGFA_UP",
-                     #"LEE_LIVER_CANCER_MYC_E2F1_UP",
-                     #"COLLER_MYC_TARGETS_UP",
-                     #"YU_MYC_TARGETS_UP",
-                     "BILD_MYC_ONCOGENIC_SIGNATURE",
-                     #"ELLWOOD_MYC_TARGETS_UP",
-                     "PID_MYC_ACTIV_PATHWAY",
-                     "HALLMARK_MYC_TARGETS_V2"
+  #"LEE_LIVER_CANCER_MYC_TGFA_UP",
+  #"LEE_LIVER_CANCER_MYC_E2F1_UP",
+  "COLLER_MYC_TARGETS_UP",
+  "YU_MYC_TARGETS_UP",
+  "BILD_MYC_ONCOGENIC_SIGNATURE",
+  "ELLWOOD_MYC_TARGETS_UP",
+  "PID_MYC_ACTIV_PATHWAY",
+  "HALLMARK_MYC_TARGETS_V2"
 )]
 
 
@@ -59,11 +59,11 @@ length(ConsensusPM)
 ######################################################
 #### Anti Notch
 AntiMYC <- GeneList[c(#"LEE_LIVER_CANCER_MYC_E2F1_DN", 
-                      #"LEE_LIVER_CANCER_MYC_DN",
-                      #"COLLER_MYC_TARGETS_DN",
-                      #"YU_MYC_TARGETS_DN",
-                      #"ELLWOOD_MYC_TARGETS_DN",
-                      "PID_MYC_REPRESS_PATHWAY"
+  #"LEE_LIVER_CANCER_MYC_DN",
+  "COLLER_MYC_TARGETS_DN",
+  "YU_MYC_TARGETS_DN",
+  "ELLWOOD_MYC_TARGETS_DN",
+  "PID_MYC_REPRESS_PATHWAY"
 )]
 
 

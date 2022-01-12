@@ -13,7 +13,6 @@ library(sampling)
 library(limma)
 library(genefilter)
 library(edgeR)
-library(survJamda)
 library(caret)
 library(sampling)
 
@@ -645,5 +644,5 @@ table(mixTestGroup)
 save(exprsChemo_TNBC, 
      mixTrainMat, mixTrainGroup, mixTrainStudy,
      mixTestMat, mixTestGroup, mixTestStudy,
-     file="./Objs/ChemoDataNew.rda")
+     file="./Objs/ChemoDataNew_filt.rda")
 
