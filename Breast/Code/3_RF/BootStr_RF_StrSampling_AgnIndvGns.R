@@ -22,14 +22,19 @@ library(boot)
 
 
 ## Load data
-load("./Objs/KTSP/TNBC_KTSP_STATs_Mechanistic_NotchAndMyc.rda")
-load("./Objs/ChemoData2.rda")
+load("./Objs/KTSP/TNBC_KTSP_STATs_Mechanistic_NotchAndMyc2.rda")
+load("./Objs/ChemoDataNew.rda")
 
 
-usedTrainGroup <- UsedTrainGroup
-usedTestGroup <- UsedTestGroup
+### Quantile normalize
+usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
+usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")
 
+####
+usedTrainGroup <- mixTrainGroup
+usedTestGroup <- mixTestGroup
 
+######3
 predictor_data_Train_Mech <- t(KTSP_STATs_Train_Mechanistic)
 predictor_data_Test_Mech <- t(KTSP_STATs_Test_Mechanistic)
 
@@ -78,20 +83,18 @@ colnames(AUCs_RF_Mech) <- c("AUC_Train", "AUC_Test", "N_ImportanVariables")
 
 
 ## Load the data
-load("./Objs/ChemoData2.rda")
+load("./Objs/ChemoDataNew.rda")
 
-### Normalization
-usedTrainMat <- UsedTrainMat
-usedTestMat <- UsedTestMat
+### Quantile normalize
+usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
+usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")
 
-### Associated groups
-usedTrainGroup <- UsedTrainGroup
-usedTestGroup <- UsedTestGroup
+####
+usedTrainGroup <- mixTrainGroup
+usedTestGroup <- mixTestGroup
 
-names(usedTrainGroup) <- colnames(usedTrainMat)
 all(names(usedTrainGroup) == colnames(usedTrainMat))
 
-names(usedTestGroup) <- colnames(usedTestMat)
 all(names(usedTestGroup) ==colnames(usedTestMat))
 
 #########
@@ -150,20 +153,18 @@ bootobjectAgnostic_50 <- boot(data= DataAgnostic_Train, statistic= RF_Strap, R= 
 # Agnostic top 100 DEGs
 
 ## Load the data
-load("./Objs/ChemoData2.rda")
+load("./Objs/ChemoDataNew.rda")
 
-### Normalization
-usedTrainMat <- UsedTrainMat
-usedTestMat <- UsedTestMat
+### Quantile normalize
+usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
+usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")
 
-### Associated groups
-usedTrainGroup <- UsedTrainGroup
-usedTestGroup <- UsedTestGroup
+####
+usedTrainGroup <- mixTrainGroup
+usedTestGroup <- mixTestGroup
 
-names(usedTrainGroup) <- colnames(usedTrainMat)
 all(names(usedTrainGroup) == colnames(usedTrainMat))
 
-names(usedTestGroup) <- colnames(usedTestMat)
 all(names(usedTestGroup) ==colnames(usedTestMat))
 
 #########
@@ -221,20 +222,19 @@ bootobjectAgnostic_100 <- boot(data= DataAgnostic_Train, statistic= RF_Strap, R=
 ################################################################################
 # Agnostic top 200 DEGs
 
-load("./Objs/ChemoData2.rda")
+## Load the data
+load("./Objs/ChemoDataNew.rda")
 
-### Normalization
-usedTrainMat <- UsedTrainMat
-usedTestMat <- UsedTestMat
+### Quantile normalize
+usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
+usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")
 
-### Associated groups
-usedTrainGroup <- UsedTrainGroup
-usedTestGroup <- UsedTestGroup
+####
+usedTrainGroup <- mixTrainGroup
+usedTestGroup <- mixTestGroup
 
-names(usedTrainGroup) <- colnames(usedTrainMat)
 all(names(usedTrainGroup) == colnames(usedTrainMat))
 
-names(usedTestGroup) <- colnames(usedTestMat)
 all(names(usedTestGroup) ==colnames(usedTestMat))
 
 #########
@@ -294,20 +294,18 @@ bootobjectAgnostic_200 <- boot(data= DataAgnostic_Train, statistic= RF_Strap, R=
 # Agnostic top 500 DEGs
 
 ## Load the data
-load("./Objs/ChemoData2.rda")
+load("./Objs/ChemoDataNew.rda")
 
-### Normalization
-usedTrainMat <- UsedTrainMat
-usedTestMat <- UsedTestMat
+### Quantile normalize
+usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
+usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")
 
-### Associated groups
-usedTrainGroup <- UsedTrainGroup
-usedTestGroup <- UsedTestGroup
+####
+usedTrainGroup <- mixTrainGroup
+usedTestGroup <- mixTestGroup
 
-names(usedTrainGroup) <- colnames(usedTrainMat)
 all(names(usedTrainGroup) == colnames(usedTrainMat))
 
-names(usedTestGroup) <- colnames(usedTestMat)
 all(names(usedTestGroup) ==colnames(usedTestMat))
 
 #########
@@ -317,8 +315,8 @@ TopDEgenes <- SWAP.Filter.Wilcoxon(phenoGroup = usedTrainGroup, inputMat = usedT
 ## Subset the expression matrix to the top DE genes only
 usedTrainMat <- usedTrainMat[TopDEgenes, ]
 usedTestMat <- usedTestMat[TopDEgenes, ]
-########################
 
+########################
 
 predictor_data_Train_Agnostic <- t(usedTrainMat)
 predictor_data_Test_Agnostic <- t(usedTestMat)
