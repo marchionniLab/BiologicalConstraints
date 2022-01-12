@@ -25,8 +25,7 @@ library(Ckmeans.1d.dp)
 
 
 ## Load data
-load("./Objs/ChemoData2.rda")
-load("./Objs/CombinedIndepTestingData.rda")
+load("./Objs/ChemoDataNew.rda")
 
 ## Load the selected genes (TFs-Targets)
 load("./Objs/NotchPairs.rda")
@@ -36,12 +35,19 @@ load("./Objs/MycPairs.rda")
 myTSPs <- rbind(NotchPairs, MycPairs)
 colnames(myTSPs) <- c("BadGene", "GoodGene")
 
-### Common genes
-keepGns <- intersect(as.vector(myTSPs), rownames(UsedTrainMat))
+### Quantile normalize
+usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
+usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")
 
-UsedTrainMat <- UsedTrainMat[keepGns, ]
-UsedTestMat <- UsedTestMat[keepGns, ]
-usedTestMat2 <- normalizeBetweenArrays(usedTestMat2, method = "quantile")[keepGns, ]
+####
+usedTrainGroup <- mixTrainGroup
+usedTestGroup <- mixTestGroup
+
+### Common genes
+keepGns <- intersect(as.vector(myTSPs), rownames(usedTrainMat))
+
+usedTrainMat <- usedTrainMat[keepGns, ]
+UsedTestMat <- usedTestMat[keepGns, ]
 
 ### For the TSP
 myTSPs <- myTSPs[myTSPs[,1] %in% keepGns & myTSPs[,2] %in% keepGns , ]
@@ -51,13 +57,13 @@ myTSPs <- myTSPs[myTSPs[,1] %in% keepGns & myTSPs[,2] %in% keepGns , ]
 ###########################################################################
 
 ### Set Feature number and max k
-featNo <- nrow(UsedTrainMat)
+featNo <- nrow(usedTrainMat)
 
 ### Train a classifier using default filtering function based on Wilcoxon
 set.seed(333)
 
 ktspPredictorRes <- SWAP.Train.KTSP(
-  UsedTrainMat, UsedTrainGroup, krange=84, featureNo= featNo, 
+  usedTrainMat, usedTrainGroup, krange=65, featureNo= featNo, 
   FilterFunc = SWAP.Filter.Wilcoxon, RestrictedPairs = myTSPs)
 
 ktspPredictorRes
@@ -88,7 +94,7 @@ ktspPredictorRes
 
 ############################################################################
 ### Compute the sum and find the best threshold: All training samples
-ktspStatsTrainRes <- SWAP.KTSP.Statistics(inputMat = UsedTrainMat, classifier = ktspPredictorRes, CombineFunc = sum)
+ktspStatsTrainRes <- SWAP.KTSP.Statistics(inputMat = usedTrainMat, classifier = ktspPredictorRes, CombineFunc = sum)
 summary(ktspStatsTrainRes$statistics)
 
 KTSP_STATs_Train_Mechanistic <- t(ktspStatsTrainRes$comparisons)
@@ -99,22 +105,13 @@ KTSP_STATs_Train_Mechanistic[KTSP_STATs_Train_Mechanistic == FALSE] <- 0
 ### Testing
 
 ## Compute the sum and find the best threshold
-ktspStatsTestRes <- SWAP.KTSP.Statistics(inputMat = UsedTestMat, classifier = ktspPredictorRes, CombineFunc = sum)
+ktspStatsTestRes <- SWAP.KTSP.Statistics(inputMat = usedTestMat, classifier = ktspPredictorRes, CombineFunc = sum)
 summary(ktspStatsTestRes$statistics)
 
 KTSP_STATs_Test_Mechanistic <- t(ktspStatsTestRes$comparisons)
 KTSP_STATs_Test_Mechanistic[KTSP_STATs_Test_Mechanistic == FALSE] <- 0
 
-### Testing2
-
-## Compute the sum and find the best threshold
-ktspStatsTest2Res <- SWAP.KTSP.Statistics(inputMat = usedTestMat2, classifier = ktspPredictorRes, CombineFunc = sum)
-summary(ktspStatsTest2Res$statistics)
-
-KTSP_STATs_Test2_Mechanistic <- t(ktspStatsTest2Res$comparisons)
-KTSP_STATs_Test2_Mechanistic[KTSP_STATs_Test2_Mechanistic == FALSE] <- 0
 
 
-
-save(KTSP_STATs_Train_Mechanistic, KTSP_STATs_Test_Mechanistic, KTSP_STATs_Test2_Mechanistic, file = "./Objs/KTSP/TNBC_KTSP_STATs_Mechanistic_NotchAndMYC2.rda")
+save(KTSP_STATs_Train_Mechanistic, KTSP_STATs_Test_Mechanistic, file = "./Objs/KTSP/TNBC_KTSP_STATs_Mechanistic_NotchAndMYC2.rda")
 

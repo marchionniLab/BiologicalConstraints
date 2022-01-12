@@ -25,7 +25,7 @@ library(boot)
 library(patchwork)
 
 ### Load expression and phenotype data
-load("./Objs/ChemoData2.rda")
+load("./Objs/ChemoDataNew.rda")
 
 #########
 ## Load the selected genes *(Notch pairs)
@@ -35,16 +35,17 @@ load("./Objs/MycPairs.rda")
 myTSPs <- rbind(NotchPairs, MycPairs)
 colnames(myTSPs) <- c("BadGene", "GoodGene")
 
-### 
-usedTrainMat <- UsedTrainMat
-usedTestMat <- UsedTestMat
+### Quantile normalize
+usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
+usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")
 
 ####
-usedTrainGroup <- UsedTrainGroup
-usedTestGroup <- UsedTestGroup
+usedTrainGroup <- mixTrainGroup
+usedTestGroup <- mixTestGroup
 
 ### Common genes
 keepGns <- intersect(as.vector(myTSPs), rownames(usedTrainMat))
+
 
 ### For the TSP
 myTSPs <- myTSPs[myTSPs[,1] %in% keepGns & myTSPs[,2] %in% keepGns , ]
@@ -93,8 +94,7 @@ SWAP.Train.KTSPStrap <- function(data, indices) {
   Diff_Mechanistic <- AUC_Train_Mech - AUC_Test_Mech
   return(c(N_Pairs_Agnostic, AUC_Train_Agnostic, AUC_Test_Agnostic, N_Pairs_Mech, AUC_Train_Mech, AUC_Test_Mech, Diff_Agnostic, Diff_Mechanistic))
 }
-# 
-# 
+
 set.seed(333)
 bootobject_50 <- boot(data= Data, statistic= SWAP.Train.KTSPStrap, R= 1000, parallel = "multicore", ncpus = 15)
 
