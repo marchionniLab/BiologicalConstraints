@@ -17,13 +17,13 @@ library(patchwork)
 ## SVM
 # Mechanistic
 ## Load data
-load("./Objs/KTSP/TNBC_KTSP_STATs_Mechanistic_NotchAndMyc.rda")
-load("./Objs/ChemoData2.rda")
+load("./Objs/KTSP/TNBC_KTSP_STATs_Mechanistic_NotchAndMyc2.rda")
+load("./Objs/ChemoDataNew.rda")
 
+####
+usedTrainGroup <- mixTrainGroup
+usedTestGroup <- mixTestGroup
 
-### Associated groups
-usedTrainGroup <- UsedTrainGroup
-usedTestGroup <- UsedTestGroup
 
 ### Transpose usedTrainMat (making samples as rows instead of columns)
 Training <- t(KTSP_STATs_Train_Mechanistic)
@@ -86,16 +86,17 @@ colnames(AUCs_SVM_Mech) <- c("AUC_Train", "AUC_Test", "N_ImportanVariables")
 ### top 50 DEGs
 
 ## Load data
-load("./Objs/ChemoData2.rda")
+load("./Objs/ChemoDataNew.rda")
 
 
-### Normalization
-usedTrainMat <- UsedTrainMat
-usedTestMat <- UsedTestMat
+### Quantile normalize
+usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
+usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")
 
-### Associated groups
-usedTrainGroup <- UsedTrainGroup
-usedTestGroup <- UsedTestGroup
+####
+usedTrainGroup <- mixTrainGroup
+usedTestGroup <- mixTestGroup
+
 
 #names(usedTrainGroup) <- colnames(usedTrainMat)
 all(names(usedTrainGroup) == colnames(usedTrainMat))
@@ -110,6 +111,7 @@ TopDEgenes <- SWAP.Filter.Wilcoxon(phenoGroup = usedTrainGroup, inputMat = usedT
 ## Subset the expression matrix to the top DE genes only
 usedTrainMat <- usedTrainMat[TopDEgenes, ]
 usedTestMat <- usedTestMat[TopDEgenes, ]
+
 #################################################################
 ### Transpose usedTrainMat (making samples as rows instead of columns)
 Training <- t(usedTrainMat)
@@ -167,16 +169,17 @@ bootobjectAgnostic_50 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, R
 ### top 100 DEGs
 
 ## Load data
-load("./Objs/ChemoData2.rda")
+load("./Objs/ChemoDataNew.rda")
 
 
-### Normalization
-usedTrainMat <- UsedTrainMat
-usedTestMat <- UsedTestMat
+### Quantile normalize
+usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
+usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")
 
-### Associated groups
-usedTrainGroup <- UsedTrainGroup
-usedTestGroup <- UsedTestGroup
+####
+usedTrainGroup <- mixTrainGroup
+usedTestGroup <- mixTestGroup
+
 
 #names(usedTrainGroup) <- colnames(usedTrainMat)
 all(names(usedTrainGroup) == colnames(usedTrainMat))
@@ -248,16 +251,17 @@ bootobjectAgnostic_100 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, 
 ### top 200 DEGs
 
 ## Load data
-load("./Objs/ChemoData2.rda")
+load("./Objs/ChemoDataNew.rda")
 
 
-### Normalization
-usedTrainMat <- UsedTrainMat
-usedTestMat <- UsedTestMat
+### Quantile normalize
+usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
+usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")
 
-### Associated groups
-usedTrainGroup <- UsedTrainGroup
-usedTestGroup <- UsedTestGroup
+####
+usedTrainGroup <- mixTrainGroup
+usedTestGroup <- mixTestGroup
+
 
 #names(usedTrainGroup) <- colnames(usedTrainMat)
 all(names(usedTrainGroup) == colnames(usedTrainMat))
@@ -329,16 +333,17 @@ bootobjectAgnostic_200 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, 
 ### top 500 DEGs
 
 ## Load data
-load("./Objs/ChemoData2.rda")
+load("./Objs/ChemoDataNew.rda")
 
 
-### Normalization
-usedTrainMat <- UsedTrainMat
-usedTestMat <- UsedTestMat
+### Quantile normalize
+usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
+usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")
 
-### Associated groups
-usedTrainGroup <- UsedTrainGroup
-usedTestGroup <- UsedTestGroup
+####
+usedTrainGroup <- mixTrainGroup
+usedTestGroup <- mixTestGroup
+
 
 #names(usedTrainGroup) <- colnames(usedTrainMat)
 all(names(usedTrainGroup) == colnames(usedTrainMat))

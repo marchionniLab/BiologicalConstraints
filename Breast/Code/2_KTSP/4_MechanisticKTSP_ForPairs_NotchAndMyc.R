@@ -80,17 +80,17 @@ ktspPredictorRes
 
 ###########################################################################
 ### Check consistency with biology
-# keep <- ktspPredictorRes$TSPs[,1] %in% myTSPs[,"TF"]
+# keep <- ktspPredictorRes$TSPs[,1] %in% myTSPs[,1]
 # table(keep)
-# # 
+# #
 # # ###Subset
 # ktspPredictorRes$name <- paste(sum(keep), "TSPs", sep="")
 # ktspPredictorRes$TSPs <- ktspPredictorRes$TSPs[ keep, ]
 # ktspPredictorRes$score <- ktspPredictorRes$score[ keep ]
-# # 
+# #
 # # ### Visualize the classifier
 # ktspPredictorRes
-# 
+
 
 ############################################################################
 ### Compute the sum and find the best threshold: All training samples

@@ -17,13 +17,13 @@ library(doParallel)
 ## SVM
 # Mechanistic
 ## Load data
-load("./Objs/KTSP/TNBC_KTSP_STATs_Mechanistic_NotchAndMyc.rda")
-load("./Objs/ChemoData2.rda")
+load("./Objs/KTSP/TNBC_KTSP_STATs_Mechanistic_NotchAndMyc2.rda")
+load("./Objs/ChemoDataNew.rda")
 
 
 ### Associated groups
-usedTrainGroup <- UsedTrainGroup
-usedTestGroup <- UsedTestGroup
+usedTrainGroup <- mixTrainGroup
+usedTestGroup <- mixTestGroup
 
 ### Transpose usedTrainMat (making samples as rows instead of columns)
 Training <- t(KTSP_STATs_Train_Mechanistic)
@@ -52,7 +52,7 @@ names(Data_train_Mechanistic) <- make.names(names(Data_train_Mechanistic))
 colnames(Training) <- make.names(colnames(Training))
 colnames(Testing) <- make.names(colnames(Testing))
 
-Grid <- expand.grid(degree = 3, scale = 10, C = 0.25)
+Grid <- expand.grid(degree = 3, scale = 0.01, C = 0.25)
 
 # The function for bootstraping
 SVM_Strap <- function(data, indices) {
@@ -89,12 +89,13 @@ colnames(AUCs_SVM_Mech) <- c("AUC_Train", "AUC_Test", "N_ImportanVariables")
 
 ## Load data
 load("./Objs/KTSP/TNBC_KTSP_STATs_Agnostic_25.rda")
-load("./Objs/ChemoData2.rda")
+load("./Objs/ChemoDataNew.rda")
 
 
-### Associated groups
-usedTrainGroup <- UsedTrainGroup
-usedTestGroup <- UsedTestGroup
+####
+usedTrainGroup <- mixTrainGroup
+usedTestGroup <- mixTestGroup
+
 
 ### Transpose usedTrainMat (making samples as rows instead of columns)
 Training <- t(KTSP_STATs_Train_Agnostic_25)
@@ -123,7 +124,7 @@ names(Data_train_Agnostic) <- make.names(names(Data_train_Agnostic))
 colnames(Training) <- make.names(colnames(Training))
 colnames(Testing) <- make.names(colnames(Testing))
 
-Grid <- expand.grid(degree = 1, scale = 0.01, C = 0.25)
+Grid <- expand.grid(degree = 5, scale = 0.01, C = 0.25)
 # The function for bootstraping
 SVM_Strap <- function(data, indices) {
   d <- data[indices, ] # allows boot to select sample
@@ -156,12 +157,13 @@ bootobjectAgnostic_25 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, R
 
 ## Load data
 load("./Objs/KTSP/TNBC_KTSP_STATs_Agnostic_50.rda")
-load("./Objs/ChemoData2.rda")
+load("./Objs/ChemoDataNew.rda")
 
 
 ### Associated groups
-usedTrainGroup <- UsedTrainGroup
-usedTestGroup <- UsedTestGroup
+usedTrainGroup <- mixTrainGroup
+usedTestGroup <- mixTestGroup
+
 
 ### Transpose usedTrainMat (making samples as rows instead of columns)
 Training <- t(KTSP_STATs_Train_Agnostic_50)
@@ -223,12 +225,13 @@ bootobjectAgnostic_50 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, R
 
 ## Load data
 load("./Objs/KTSP/TNBC_KTSP_STATs_Agnostic_100.rda")
-load("./Objs/ChemoData2.rda")
+load("./Objs/ChemoDataNew.rda")
 
 
 ### Associated groups
-usedTrainGroup <- UsedTrainGroup
-usedTestGroup <- UsedTestGroup
+usedTrainGroup <- mixTrainGroup
+usedTestGroup <- mixTestGroup
+
 
 ### Transpose usedTrainMat (making samples as rows instead of columns)
 Training <- t(KTSP_STATs_Train_Agnostic_100)
@@ -290,12 +293,13 @@ bootobjectAgnostic_100 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, 
 
 ## Load data
 load("./Objs/KTSP/TNBC_KTSP_STATs_Agnostic_250.rda")
-load("./Objs/ChemoData2.rda")
+load("./Objs/ChemoDataNew.rda")
 
 
 ### Associated groups
-usedTrainGroup <- UsedTrainGroup
-usedTestGroup <- UsedTestGroup
+usedTrainGroup <- mixTrainGroup
+usedTestGroup <- mixTestGroup
+
 
 ### Transpose usedTrainMat (making samples as rows instead of columns)
 Training <- t(KTSP_STATs_Train_Agnostic_250)
