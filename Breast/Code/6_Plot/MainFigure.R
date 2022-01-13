@@ -83,7 +83,7 @@ dev.off()
 
 
 
-BS_AUC_ModelCompare <- ggplot(ModelCompare_SVM_DiffNoFeat, aes(x = AUC, y = modelType, fill = NofFeatAgn, height = ..ndensity..)) + 
+BS_AUC_ModelCompare <- ggplot(ModelCompare_XGB_DiffNoFeat, aes(x = AUC, y = modelType, fill = NofFeatAgn, height = ..ndensity..)) + 
   geom_density_ridges(stat = "density", alpha = 0.9, bw = 0.8, adjust= 0.01, scale=1.2) +
   scale_x_continuous(limits = c(0.65, 1), breaks = seq(0.3, 0.9, by = 0.1), expand = c(0, 0)) +
   scale_y_discrete(expand = c(0, 0)) +

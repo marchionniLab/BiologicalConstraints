@@ -13,7 +13,6 @@ library(pROC)
 library(caret)
 library(DiagrammeR)
 library(ggplot2)
-library(xgboostExplainer)
 library(dplyr)
 library(Ckmeans.1d.dp)
 library(mltools)
@@ -23,13 +22,13 @@ library(patchwork)
 ## XGB
 # Mechanistic
 ## Load data
-load("./Objs/KTSP/TNBC_KTSP_STATs_Mechanistic_NotchAndMyc.rda")
-load("./Objs/ChemoData2.rda")
+load("./Objs/KTSP/TNBC_KTSP_STATs_Mechanistic_NotchAndMyc2.rda")
+load("./Objs/ChemoDataNew.rda")
 
 
 ### Associated groups
-usedTrainGroup <- UsedTrainGroup
-usedTestGroup <- UsedTestGroup
+usedTrainGroup <- mixTrainGroup
+usedTestGroup <- mixTestGroup
 
 ### Transpose usedTrainMat (making samples as rows instead of columns)
 Training <- t(KTSP_STATs_Train_Mechanistic)
@@ -177,12 +176,12 @@ colnames(AUCs_XG_Mech) <- c("AUC_Train", "AUC_Test", "N_ImportanVariables")
 
 ## Load data
 load("./Objs/KTSP/TNBC_KTSP_STATs_Agnostic_25.rda")
-load("./Objs/ChemoData2.rda")
+load("./Objs/ChemoDataNew.rda")
 
 
 ### Associated groups
-usedTrainGroup <- UsedTrainGroup
-usedTestGroup <- UsedTestGroup
+usedTrainGroup <- mixTrainGroup
+usedTestGroup <- mixTestGroup
 
 ### Transpose usedTrainMat (making samples as rows instead of columns)
 Training <- t(KTSP_STATs_Train_Agnostic_25)
@@ -330,12 +329,12 @@ bootobjectAgnostic_25 <- boot(data= Data_train_Agnostic, statistic= XGBStrap, R=
 
 ## Load data
 load("./Objs/KTSP/TNBC_KTSP_STATs_Agnostic_50.rda")
-load("./Objs/ChemoData2.rda")
+load("./Objs/ChemoDataNew.rda")
 
 
 ### Associated groups
-usedTrainGroup <- UsedTrainGroup
-usedTestGroup <- UsedTestGroup
+usedTrainGroup <- mixTrainGroup
+usedTestGroup <- mixTestGroup
 
 ### Transpose usedTrainMat (making samples as rows instead of columns)
 Training <- t(KTSP_STATs_Train_Agnostic_50)
@@ -482,12 +481,12 @@ bootobjectAgnostic_50 <- boot(data= Data_train_Agnostic, statistic= XGBStrap, R=
 
 ## Load data
 load("./Objs/KTSP/TNBC_KTSP_STATs_Agnostic_100.rda")
-load("./Objs/ChemoData2.rda")
+load("./Objs/ChemoDataNew.rda")
 
 
 ### Associated groups
-usedTrainGroup <- UsedTrainGroup
-usedTestGroup <- UsedTestGroup
+usedTrainGroup <- mixTrainGroup
+usedTestGroup <- mixTestGroup
 
 ### Transpose usedTrainMat (making samples as rows instead of columns)
 Training <- t(KTSP_STATs_Train_Agnostic_100)
@@ -634,12 +633,12 @@ bootobjectAgnostic_100 <- boot(data= Data_train_Agnostic, statistic= XGBStrap, R
 
 ## Load data
 load("./Objs/KTSP/TNBC_KTSP_STATs_Agnostic_250.rda")
-load("./Objs/ChemoData2.rda")
+load("./Objs/ChemoDataNew.rda")
 
 
 ### Associated groups
-usedTrainGroup <- UsedTrainGroup
-usedTestGroup <- UsedTestGroup
+usedTrainGroup <- mixTrainGroup
+usedTestGroup <- mixTestGroup
 
 ### Transpose usedTrainMat (making samples as rows instead of columns)
 Training <- t(KTSP_STATs_Train_Agnostic_250)
