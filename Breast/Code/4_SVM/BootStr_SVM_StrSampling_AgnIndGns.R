@@ -415,7 +415,7 @@ bootobjectAgnostic_500 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, 
 save(bootobjectMech, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_200, bootobjectAgnostic_500, file= "./Objs/SVM/SVMBootObjects_NotchAndMyc.rda")
 
 ## Load
-load("./Objs/SVM/SVMBootObjects_NotchAndMyc.rda")
+#load("./Objs/SVM/SVMBootObjects_NotchAndMyc.rda")
 
 ########################################################################################
 ########################################################################################

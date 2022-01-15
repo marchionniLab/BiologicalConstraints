@@ -70,11 +70,11 @@ Expr1 <- Expr1[!(rownames(Expr1) == ""), ]
 dim(Expr1)
 
 ## Filtering
-X1 <- Expr1
-ffun <- pOverA(p = 1, A = 50)
-Filt1 <- genefilter(2^X1, ffun)
-Expr1 <- Expr1[Filt1, ]
-dim(Expr1)
+# X1 <- Expr1
+# ffun <- pOverA(p = 1, A = 50)
+# Filt1 <- genefilter(2^X1, ffun)
+# Expr1 <- Expr1[Filt1, ]
+# dim(Expr1)
 
 #Expr1 <- t(scale(t(Expr1), center = TRUE, scale = TRUE))
 
@@ -90,11 +90,11 @@ Expr2 <- Expr2[!(rownames(Expr2) == ""), ]
 dim(Expr2)
 
 ## Filtering
-X2 <- Expr2
-Filt2 <- genefilter(2^X2, ffun)
-Expr2 <- Expr2[Filt2, ]
-dim(Expr2)
-
+# X2 <- Expr2
+# Filt2 <- genefilter(2^X2, ffun)
+# Expr2 <- Expr2[Filt2, ]
+# dim(Expr2)
+# 
 #Expr2 <- t(scale(t(Expr2), center = TRUE, scale = TRUE))
 
 ## Annotation of Expr3
@@ -109,10 +109,10 @@ Expr3 <- Expr3[!(rownames(Expr3) == ""), ]
 dim(Expr3)
 
 ## Filtering
-X3 <- Expr3
-Filt3 <- genefilter(2^X3, ffun)
-Expr3 <- Expr3[Filt3, ]
-dim(Expr3)
+# X3 <- Expr3
+# Filt3 <- genefilter(2^X3, ffun)
+# Expr3 <- Expr3[Filt3, ]
+# dim(Expr3)
 
 ## Annotation of Expr4
 rownames(Expr4) <- FeatData4$`Gene symbol`
@@ -126,10 +126,10 @@ Expr4 <- Expr4[!(rownames(Expr4) == ""), ]
 dim(Expr4)
 
 ## Filtering
-X4 <- Expr4
-Filt4 <- genefilter(2^X4, ffun)
-Expr4 <- Expr4[Filt4, ]
-dim(Expr4)
+# X4 <- Expr4
+# Filt4 <- genefilter(2^X4, ffun)
+# Expr4 <- Expr4[Filt4, ]
+# dim(Expr4)
 
 ## Annotation of Expr6
 rownames(Expr6) <- FeatData6$`Gene symbol`
@@ -143,10 +143,10 @@ Expr6 <- Expr6[!(rownames(Expr6) == ""), ]
 dim(Expr6)
 
 ## Filtering
-X6 <- Expr6
-Filt6 <- genefilter(2^X6, ffun)
-Expr6 <- Expr6[Filt6, ]
-dim(Expr6)
+# X6 <- Expr6
+# Filt6 <- genefilter(2^X6, ffun)
+# Expr6 <- Expr6[Filt6, ]
+# dim(Expr6)
 
 ## Annotation of Expr7
 rownames(Expr7) <- FeatData7$`Gene symbol`
@@ -164,10 +164,10 @@ range(Expr7)
 Expr7 <- log2(Expr7 + 1)
 
 ## Filtering
-X7 <- Expr7
-Filt7 <- genefilter(2^X7, ffun)
-Expr7 <- Expr7[Filt7, ]
-dim(Expr7)
+# X7 <- Expr7
+# Filt7 <- genefilter(2^X7, ffun)
+# Expr7 <- Expr7[Filt7, ]
+# dim(Expr7)
 
 ## Annotation of Expr8
 rownames(Expr8) <- FeatData8$`Gene symbol`
@@ -181,10 +181,10 @@ Expr8 <- Expr8[!(rownames(Expr8) == ""), ]
 dim(Expr8)
 
 ## Filtering
-X8 <- Expr8
-Filt8 <- genefilter(2^X8, ffun)
-Expr8 <- Expr8[Filt8, ]
-dim(Expr8)
+# X8 <- Expr8
+# Filt8 <- genefilter(2^X8, ffun)
+# Expr8 <- Expr8[Filt8, ]
+# dim(Expr8)
 
 
 ###########################################
@@ -421,6 +421,150 @@ all(rownames(allPheno_TNBC$GSE20194) == colnames(exprsChemo_TNBC$GSE20194))
 all(rownames(allPheno_TNBC$GSE20271) == colnames(exprsChemo_TNBC$GSE20271))
 all(rownames(allPheno_TNBC$GSE32646) == colnames(exprsChemo_TNBC$GSE32646))
 
+###################################################################
+#############
+## Cross-study validation
+
+# Leave GSE25055 out
+train <- c("GSE25065", "GSE140494", "GSE103668", "GSE20194", "GSE20271", "GSE32646")
+test <- c("GSE25055")
+
+## Training
+trainMat <- do.call("cbind", exprsChemo_TNBC[train])
+trainGroup <- factor(do.call("c", ChemoSensitivity_ALL_TNBC[train]))
+levels(trainGroup) <- c("Sensitive", "Resistant")
+table(trainGroup)
+
+## Testing
+testMat <- exprsChemo_TNBC$GSE25055
+testGroup <- factor(do.call("c", ChemoSensitivity_ALL_TNBC[test]))
+levels(testGroup) <- c("Sensitive", "Resistant")
+table(testGroup)
+
+# Save for cross-study validation
+save(trainMat, trainGroup, testMat, testGroup, file = "./Objs/ChemoDataNew_GSE25055Out.rda")
+
+##########################
+# Leave GSE25065 out
+train <- c("GSE25055", "GSE140494", "GSE103668", "GSE20194", "GSE20271", "GSE32646")
+test <- c("GSE25065")
+
+## Training
+trainMat <- do.call("cbind", exprsChemo_TNBC[train])
+trainGroup <- factor(do.call("c", ChemoSensitivity_ALL_TNBC[train]))
+levels(trainGroup) <- c("Sensitive", "Resistant")
+table(trainGroup)
+
+## Testing
+testMat <- exprsChemo_TNBC$GSE25065
+testGroup <- factor(do.call("c", ChemoSensitivity_ALL_TNBC[test]))
+levels(testGroup) <- c("Sensitive", "Resistant")
+table(testGroup)
+
+# Save for cross-study validation
+save(trainMat, trainGroup, testMat, testGroup, file = "./Objs/ChemoDataNew_GSE25065Out.rda")
+
+##########################
+# Leave GSE140494 out
+train <- c("GSE25055", "GSE25065", "GSE103668", "GSE20194", "GSE20271", "GSE32646")
+test <- c("GSE140494")
+
+## Training
+trainMat <- do.call("cbind", exprsChemo_TNBC[train])
+trainGroup <- factor(do.call("c", ChemoSensitivity_ALL_TNBC[train]))
+levels(trainGroup) <- c("Sensitive", "Resistant")
+table(trainGroup)
+
+## Testing
+testMat <- exprsChemo_TNBC$GSE140494
+testGroup <- factor(do.call("c", ChemoSensitivity_ALL_TNBC[test]))
+levels(testGroup) <- c("Sensitive", "Resistant")
+table(testGroup)
+
+# Save for cross-study validation
+save(trainMat, trainGroup, testMat, testGroup, file = "./Objs/ChemoDataNew_GSE140494Out.rda")
+
+##########################
+# Leave GSE103668 out
+train <- c("GSE25055", "GSE25065", "GSE140494", "GSE20194", "GSE20271", "GSE32646")
+test <- c("GSE103668")
+
+## Training
+trainMat <- do.call("cbind", exprsChemo_TNBC[train])
+trainGroup <- factor(do.call("c", ChemoSensitivity_ALL_TNBC[train]))
+levels(trainGroup) <- c("Sensitive", "Resistant")
+table(trainGroup)
+
+## Testing
+testMat <- exprsChemo_TNBC$GSE103668
+testGroup <- factor(do.call("c", ChemoSensitivity_ALL_TNBC[test]))
+levels(testGroup) <- c("Sensitive", "Resistant")
+table(testGroup)
+
+# Save for cross-study validation
+save(trainMat, trainGroup, testMat, testGroup, file = "./Objs/ChemoDataNew_GSE103668Out.rda")
+
+##########################
+# Leave GSE20194 out
+train <- c("GSE25055", "GSE25065", "GSE140494", "GSE103668", "GSE20271", "GSE32646")
+test <- c("GSE20194")
+
+## Training
+trainMat <- do.call("cbind", exprsChemo_TNBC[train])
+trainGroup <- factor(do.call("c", ChemoSensitivity_ALL_TNBC[train]))
+levels(trainGroup) <- c("Sensitive", "Resistant")
+table(trainGroup)
+
+## Testing
+testMat <- exprsChemo_TNBC$GSE20194
+testGroup <- factor(do.call("c", ChemoSensitivity_ALL_TNBC[test]))
+levels(testGroup) <- c("Sensitive", "Resistant")
+table(testGroup)
+
+# Save for cross-study validation
+save(trainMat, trainGroup, testMat, testGroup, file = "./Objs/ChemoDataNew_GSE20194Out.rda")
+
+##########################
+# Leave GSE20271 out
+train <- c("GSE25055", "GSE25065", "GSE140494", "GSE103668", "GSE20194", "GSE32646")
+test <- c("GSE20271")
+
+## Training
+trainMat <- do.call("cbind", exprsChemo_TNBC[train])
+trainGroup <- factor(do.call("c", ChemoSensitivity_ALL_TNBC[train]))
+levels(trainGroup) <- c("Sensitive", "Resistant")
+table(trainGroup)
+
+## Testing
+testMat <- exprsChemo_TNBC$GSE20271
+testGroup <- factor(do.call("c", ChemoSensitivity_ALL_TNBC[test]))
+levels(testGroup) <- c("Sensitive", "Resistant")
+table(testGroup)
+
+# Save for cross-study validation
+save(trainMat, trainGroup, testMat, testGroup, file = "./Objs/ChemoDataNew_GSE20271Out.rda")
+
+##########################
+# Leave GSE32646 out
+train <- c("GSE25055", "GSE25065", "GSE140494", "GSE103668", "GSE20194", "GSE20271")
+test <- c("GSE32646")
+
+## Training
+trainMat <- do.call("cbind", exprsChemo_TNBC[train])
+trainGroup <- factor(do.call("c", ChemoSensitivity_ALL_TNBC[train]))
+levels(trainGroup) <- c("Sensitive", "Resistant")
+table(trainGroup)
+
+## Testing
+testMat <- exprsChemo_TNBC$GSE32646
+testGroup <- factor(do.call("c", ChemoSensitivity_ALL_TNBC[test]))
+levels(testGroup) <- c("Sensitive", "Resistant")
+table(testGroup)
+
+# Save for cross-study validation
+save(trainMat, trainGroup, testMat, testGroup, file = "./Objs/ChemoDataNew_GSE32646Out.rda")
+
+
 ##################################################################################
 #####################
 ## All combined
@@ -644,5 +788,5 @@ table(mixTestGroup)
 save(exprsChemo_TNBC, 
      mixTrainMat, mixTrainGroup, mixTrainStudy,
      mixTestMat, mixTestGroup, mixTestStudy,
-     file="./Objs/ChemoDataNew_filt.rda")
+     file="./Objs/ChemoDataNew.rda")
 
