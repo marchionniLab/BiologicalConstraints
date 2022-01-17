@@ -1,9 +1,16 @@
 *Objs/
 *Data/
 *Text/
-Bladder/DataW.rda
+Bladder/Data/
 Bladder/Figs/
+Bladder/Objs
 Breast/Figs/
+Breast/Data/
+Breast/Figs/
+Breast/Objs/
+Prostate/Data/
+Prostate/Figs/
+Prostate/Objs/
 *.Rproj
 *.user
 *renv/
