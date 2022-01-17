@@ -22,7 +22,7 @@ library(patchwork)
 ## XGB
 # Mechanistic
 ## Load data
-load("./Objs/KTSP/TNBC_KTSP_STATs_Mechanistic_NotchAndMyc2.rda")
+load("./Objs/KTSP/TNBC_KTSP_STATs_Mechanistic_NotchAndMyc2_100.rda")
 load("./Objs/ChemoDataNew.rda")
 
 
@@ -133,7 +133,7 @@ parameters <- list(
   subsample          = 0.5,             #0.4  # default = 1,   range: (0,1]
   colsample_bytree   = 1,             # 1   # default = 1,   range: (0,1]
   colsample_bylevel  = 1,             #1    # default = 1,   range: (0,1]
-  lambda             = 0,             #    # default = 1
+  lambda             = 1,             #    # default = 1
   alpha              = 0,           # 0.1    # default = 0
   # Task Parameters
   objective          = "binary:logistic",   # default = "reg:linear"
@@ -780,10 +780,10 @@ bootobjectAgnostic_250 <- boot(data= Data_train_Agnostic, statistic= XGBStrap, R
 ################################################################################################
 
 ### Save boot objects
-save(bootobjectMech, bootobjectAgnostic_25, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_250, file = "./Objs/XGB/XGBBootObjects_NotchAndMyc_AgnPairs.rda")
+save(bootobjectMech, bootobjectAgnostic_25, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_250, file = "./Objs/XGB/XGBBootObjects_NotchAndMyc_AgnPairs_mech100pairs.rda")
 
 # Load
-load("./Objs/XGB/XGBBootObjects_NotchAndMyc_AgnPairs.rda")
+load("./Objs/XGB/XGBBootObjects_NotchAndMyc_AgnPairs_mech100pairs.rda")
 
 ################################################################################################
 ################################################################################################
@@ -837,11 +837,11 @@ ModelCompareAUC_Test_25$NofFeatAgn <- "25_Pairs"
 ## For the main figure
 ModelCompare_XGB <- rbind(ModelCompareAUC_Train_25, ModelCompareAUC_Test_25)
 ModelCompare_XGB$algorithm <- "XGB"
-save(ModelCompare_XGB, file = "./Objs/XGB/ModelCompare_XGB_AgnPairs.rda")
+save(ModelCompare_XGB, file = "./Objs/XGB/ModelCompare_XGB_AgnPairs_mech100pairs.rda")
 
 ####################################
 # Load the AUC comparisons from the indivdial genes and combine them with pairs
-load("./Objs/XGB/ModelCompareAUC_50.rda")
+load("./Objs/XGB/ModelCompareAUC_50_mech100pairs.rda")
 
 # Combine
 ModelCompareAUC_Train_25_50 <- rbind(ModelCompareAUC_Train_25, ModelCompareAUC_Train_50)
@@ -901,7 +901,7 @@ ModelCompareAUC_Test_50$NofFeatAgn <- "50_Pairs"
 
 ####################################
 # Load the AUC comparisons from the indivdial genes and combine them with pairs
-load("./Objs/XGB/ModelCompareAUC_100.rda")
+load("./Objs/XGB/ModelCompareAUC_100_mech100pairs.rda")
 
 ModelCompareAUC_Train_50_100 <- rbind(ModelCompareAUC_Train_50, ModelCompareAUC_Train_100)
 ModelCompareAUC_Test_50_100 <- rbind(ModelCompareAUC_Test_50, ModelCompareAUC_Test_100)
@@ -944,7 +944,7 @@ ModelCompareAUC_Test_100$NofFeatAgn <- "100_Pairs"
 
 ####################################
 # Load the AUC comparisons from the indivdial genes and combine them with pairs
-load("./Objs/XGB/ModelCompareAUC_200.rda")
+load("./Objs/XGB/ModelCompareAUC_200_mech100pairs.rda")
 
 ModelCompareAUC_Train_100_200 <- rbind(ModelCompareAUC_Train_100, ModelCompareAUC_Train_200)
 ModelCompareAUC_Test_100_200 <- rbind(ModelCompareAUC_Test_100, ModelCompareAUC_Test_200)
@@ -987,7 +987,7 @@ ModelCompareAUC_Test_250$NofFeatAgn <- "250_Pairs"
 
 ####################################
 # Load the AUC comparisons from the indivdial genes and combine them with pairs
-load("./Objs/XGB/ModelCompareAUC_500.rda")
+load("./Objs/XGB/ModelCompareAUC_500_mech100pairs.rda")
 
 ModelCompareAUC_Train_250_500 <- rbind(ModelCompareAUC_Train_250, ModelCompareAUC_Train_500)
 ModelCompareAUC_Test_250_500 <- rbind(ModelCompareAUC_Test_250, ModelCompareAUC_Test_500)
@@ -1007,7 +1007,7 @@ ModelCompare_XGB_DiffNoFeat <- rbind(ModelCompareAUC_Train_25_50,
                                      ModelCompareAUC_Test_250_500
 )
 
-save(ModelCompare_XGB_DiffNoFeat, file = "./Objs/XGB/ModelCompare_XGB_DiffNoFeat.rda")
+save(ModelCompare_XGB_DiffNoFeat, file = "./Objs/XGB/ModelCompare_XGB_DiffNoFeat_mech100pairs.rda")
 
 ####################################################################################
 ####################################################################################

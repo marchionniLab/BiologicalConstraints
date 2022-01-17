@@ -17,7 +17,7 @@ library(patchwork)
 ## SVM
 # Mechanistic
 ## Load data
-load("./Objs/KTSP/TNBC_KTSP_STATs_Mechanistic_NotchAndMyc2.rda")
+load("./Objs/KTSP/TNBC_KTSP_STATs_Mechanistic_NotchAndMyc2_100.rda")
 load("./Objs/ChemoDataNew.rda")
 
 ####
@@ -412,10 +412,10 @@ bootobjectAgnostic_500 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, 
 ########################################################################################
 ########################################################################################
 ## Save all Objects
-save(bootobjectMech, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_200, bootobjectAgnostic_500, file= "./Objs/SVM/SVMBootObjects_NotchAndMyc.rda")
+save(bootobjectMech, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_200, bootobjectAgnostic_500, file= "./Objs/SVM/SVMBootObjects_NotchAndMyc_mech100pairs.rda")
 
 ## Load
-#load("./Objs/SVM/SVMBootObjects_NotchAndMyc.rda")
+load("./Objs/SVM/SVMBootObjects_NotchAndMyc.rda")
 
 ########################################################################################
 ########################################################################################
@@ -463,13 +463,13 @@ ModelCompareAUCTest_50$data_type <- "Testing"
 ModelCompareAUCTrain_50$NofFeatAgn <- "50_Genes"
 ModelCompareAUCTest_50$NofFeatAgn <- "50_Genes"
 
-save(ModelCompareAUCTrain_50, ModelCompareAUCTest_50, file = "./Objs/SVM/ModelCompareAUC_50.rda")
+save(ModelCompareAUCTrain_50, ModelCompareAUCTest_50, file = "./Objs/SVM/ModelCompareAUC_50_mech100pairs.rda")
 
 # ###########################################################################3
 # ## Save for the main figure
 ModelCompare_SVM <- rbind(ModelCompareAUCTrain_50, ModelCompareAUCTest_50)
 ModelCompare_SVM$algorithm <- "SVM"
-save(ModelCompare_SVM, file = "./Objs/SVM/ModelCompare_SVM.rda")
+save(ModelCompare_SVM, file = "./Objs/SVM/ModelCompare_SVM_mech100pairs.rda")
 
 ########################################################################################
 ########################################################################################
@@ -515,7 +515,7 @@ ModelCompareAUCTest_100$data_type <- "Testing"
 ModelCompareAUCTrain_100$NofFeatAgn <- "100_Genes"
 ModelCompareAUCTest_100$NofFeatAgn <- "100_Genes"
 
-save(ModelCompareAUCTrain_100, ModelCompareAUCTest_100, file = "./Objs/SVM/ModelCompareAUC_100.rda")
+save(ModelCompareAUCTrain_100, ModelCompareAUCTest_100, file = "./Objs/SVM/ModelCompareAUC_100_mech100pairs.rda")
 
 ###########################################################################3
 ## Save for the main figure
@@ -558,7 +558,7 @@ ModelCompareAUCTest_200$data_type <- "Testing"
 ModelCompareAUCTrain_200$NofFeatAgn <- "200_Genes"
 ModelCompareAUCTest_200$NofFeatAgn <- "200_Genes"
 
-save(ModelCompareAUCTrain_200, ModelCompareAUCTest_200, file = "./Objs/SVM/ModelCompareAUC_200.rda")
+save(ModelCompareAUCTrain_200, ModelCompareAUCTest_200, file = "./Objs/SVM/ModelCompareAUC_200_mech100pairs.rda")
 
 ########################################################################################
 ########################################################################################
@@ -595,5 +595,5 @@ ModelCompareAUCTest_500$data_type <- "Testing"
 ModelCompareAUCTrain_500$NofFeatAgn <- "500_Genes"
 ModelCompareAUCTest_500$NofFeatAgn <- "500_Genes"
 
-save(ModelCompareAUCTrain_500, ModelCompareAUCTest_500, file = "./Objs/SVM/ModelCompareAUC_500.rda")
+save(ModelCompareAUCTrain_500, ModelCompareAUCTest_500, file = "./Objs/SVM/ModelCompareAUC_500_mech100pairs.rda")
 

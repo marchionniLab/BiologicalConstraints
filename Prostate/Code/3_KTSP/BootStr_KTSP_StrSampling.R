@@ -207,9 +207,9 @@ bootobject_500 <- boot(data= Data, statistic= SWAP.Train.KTSPStrap, R= 1000, par
 
 ############################################################
 ## Save all
-save(bootobject_50, bootobject_100, bootobject_200, bootobject_500, file = "./Objs/KTSP/bootobjectKTSP_NotchAndMYC.rda")
+save(bootobject_50, bootobject_100, bootobject_200, bootobject_500, file = "./Objs/KTSP/bootobjectKTSP_AdhesionActivationO2response.rda")
 
-load("./Objs/KTSP/bootobjectKTSP_NotchAndMYC.rda")
+#load("./Objs/KTSP/bootobjectKTSP_AdhesionActivationO2response.rda")
 
 
 ##############################################################

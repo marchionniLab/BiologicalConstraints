@@ -1,16 +1,5 @@
-###################################################################################
-### Mohamed Omar
-### April 2, 2020
-### ### Goal: Creating the restricted pairs
-### Adhesion genes
-#################################################################################
 
-###### 
-# Clean Work space
 rm(list = ls())
-# Set work directory
-setwd("/Volumes/Macintosh/Dropbox (MechPred)/MechPred/User/Mohamed/MechanisticModels/Prostate")
-
 ############################################################################
 ### Load library
 require(switchBox)
@@ -33,15 +22,15 @@ load("./Objs/Correlation/RGenes.rda")
 
 ############################################################################
 ## Load the selected genes
-Genes1 <- read.delim("./geneset.txt")
+Genes1 <- read.delim("./objs/GO_Adhesion.txt")
 Genes1 <- as.matrix(Genes1)
 Genes1 <- Genes1[-1,]
 
-Genes2 <- read.delim("./geneset2.txt")
+Genes2 <- read.delim("./objs/GO_Activation.txt")
 Genes2 <- as.matrix(Genes2)
 Genes2 <- Genes2[-1,]
 
-Genes3 <- read.delim("./geneset3.txt")
+Genes3 <- read.delim("./objs/GO_O2Response.txt")
 Genes3 <- as.matrix(Genes3)
 Genes3 <- Genes3[-1,]
 
@@ -56,8 +45,6 @@ usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")[RGenes, ]
 
 ### Common genes
 keepGns <- intersect(as.vector(myTSPs), rownames(usedTrainMat))
-#keepGns_TF_MiR <- keepGns
-#save(keepGns_TF_MiR, file = "./Objs/KTSP/KeepGns_TF_MiR.rda")
 
 # restricted to the biological genes
 usedTrainMat <- usedTrainMat[keepGns, ]
@@ -81,7 +68,7 @@ featNo <- nrow(usedTrainMat)
 set.seed(333)
 
 ktspPredictorRes <- SWAP.Train.KTSP(
-  usedTrainMat, usedTrainGroup, krange=100,
+  usedTrainMat, usedTrainGroup, krange=453,
   FilterFunc = SWAP.Filter.Wilcoxon, featureNo=featNo, RestrictedPairs = myTSPs)
 
 ktspPredictorRes

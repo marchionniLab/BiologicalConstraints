@@ -20,13 +20,14 @@ library(boot)
 
 
 ## Load data
-load("./Objs/KTSP/TNBC_KTSP_STATs_Mechanistic_NotchAndMyc2_100.rda")
-load("./Objs/ChemoDataNew.rda")
+load("./Objs/KTSP/KTSP_STATs_Mechanistic_Combined.rda")
+load("./Objs/MetastasisDataGood.rda")
+load("./Objs/Correlation/RGenes.rda")
 
 
 ### Quantile normalize
-usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
-usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")
+usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")[RGenes, ]
+usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")[RGenes, ]
 
 ####
 usedTrainGroup <- mixTrainGroup
@@ -39,7 +40,7 @@ predictor_data_Test_Mech <- t(KTSP_STATs_Test_Mechanistic)
 DataMech_Train <- cbind(predictor_data_Train_Mech, usedTrainGroup)
 DataMech_Train <- as.data.frame(DataMech_Train)
 DataMech_Train$usedTrainGroup <- as.factor(DataMech_Train$usedTrainGroup)
-levels(DataMech_Train[, "usedTrainGroup"]) <- c("Sensitive", "Resistant")
+levels(DataMech_Train[, "usedTrainGroup"]) <- c("No_Mets", "Mets")
 
 names(DataMech_Train) <- make.names(names(DataMech_Train))
 
@@ -64,8 +65,8 @@ RF_Strap <- function(data, indices) {
   PredictorTrainData$usedTrainGroup <- NULL
   train_preds <- predict(RF, newdata = PredictorTrainData, type = "vote")
   test_preds <- predict(RF, newdata = predictor_data_Test_Mech, type = "vote")
-  ROCTrainMech <- roc(PhenoTrain, train_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
-  ROCTestMech <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTrainMech <- roc(PhenoTrain, train_preds[,2], plot = F, print.auc = TRUE, levels = c("No_Mets", "Mets"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTestMech <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("No_Mets", "Mets"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
   return(c(ROCTrainMech$auc, ROCTestMech$auc, N_ImportanVariables))
 }
 
@@ -81,11 +82,12 @@ colnames(AUCs_RF_Mech) <- c("AUC_Train", "AUC_Test", "N_ImportanVariables")
 
 
 ## Load the data
-load("./Objs/ChemoDataNew.rda")
+load("./Objs/MetastasisDataGood.rda")
+load("./Objs/Correlation/RGenes.rda")
 
 ### Quantile normalize
-usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
-usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")
+usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")[RGenes, ]
+usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")[RGenes, ]
 
 ####
 usedTrainGroup <- mixTrainGroup
@@ -111,7 +113,7 @@ predictor_data_Test_Agnostic <- t(usedTestMat)
 DataAgnostic_Train <- cbind(predictor_data_Train_Agnostic, usedTrainGroup)
 DataAgnostic_Train <- as.data.frame(DataAgnostic_Train)
 DataAgnostic_Train$usedTrainGroup <- as.factor(DataAgnostic_Train$usedTrainGroup)
-levels(DataAgnostic_Train[, "usedTrainGroup"]) <- c("Sensitive", "Resistant")
+levels(DataAgnostic_Train[, "usedTrainGroup"]) <- c("No_Mets", "Mets")
 
 #names(DataAgnostic_Train) <- make.names(names(DataAgnostic_Train))
 
@@ -138,8 +140,8 @@ RF_Strap <- function(data, indices) {
   PredictorTrainData$usedTrainGroup <- NULL
   train_preds <- predict(RF, newdata = PredictorTrainData, type = "vote")
   test_preds <- predict(RF, newdata = predictor_data_Test_Agnostic, type = "vote")
-  ROCTrainAgnostic <- roc(PhenoTrain, train_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
-  ROCTestAgnostic <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTrainAgnostic <- roc(PhenoTrain, train_preds[,2], plot = F, print.auc = TRUE, levels = c("No_Mets", "Mets"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTestAgnostic <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("No_Mets", "Mets"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
   return(c(ROCTrainAgnostic$auc, ROCTestAgnostic$auc, N_ImportanVariables))
 }
 
@@ -151,11 +153,12 @@ bootobjectAgnostic_50 <- boot(data= DataAgnostic_Train, statistic= RF_Strap, R= 
 # Agnostic top 100 DEGs
 
 ## Load the data
-load("./Objs/ChemoDataNew.rda")
+load("./Objs/MetastasisDataGood.rda")
+load("./Objs/Correlation/RGenes.rda")
 
 ### Quantile normalize
-usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
-usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")
+usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")[RGenes, ]
+usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")[RGenes, ]
 
 ####
 usedTrainGroup <- mixTrainGroup
@@ -181,7 +184,7 @@ predictor_data_Test_Agnostic <- t(usedTestMat)
 DataAgnostic_Train <- cbind(predictor_data_Train_Agnostic, usedTrainGroup)
 DataAgnostic_Train <- as.data.frame(DataAgnostic_Train)
 DataAgnostic_Train$usedTrainGroup <- as.factor(DataAgnostic_Train$usedTrainGroup)
-levels(DataAgnostic_Train[, "usedTrainGroup"]) <- c("Sensitive", "Resistant")
+levels(DataAgnostic_Train[, "usedTrainGroup"]) <- c("No_Mets", "Mets")
 
 #names(DataAgnostic_Train) <- make.names(names(DataAgnostic_Train))
 
@@ -208,8 +211,8 @@ RF_Strap <- function(data, indices) {
   PredictorTrainData$usedTrainGroup <- NULL
   train_preds <- predict(RF, newdata = PredictorTrainData, type = "vote")
   test_preds <- predict(RF, newdata = predictor_data_Test_Agnostic, type = "vote")
-  ROCTrainAgnostic <- roc(PhenoTrain, train_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
-  ROCTestAgnostic <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTrainAgnostic <- roc(PhenoTrain, train_preds[,2], plot = F, print.auc = TRUE, levels = c("No_Mets", "Mets"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTestAgnostic <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("No_Mets", "Mets"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
   return(c(ROCTrainAgnostic$auc, ROCTestAgnostic$auc, N_ImportanVariables))
 }
 
@@ -221,11 +224,12 @@ bootobjectAgnostic_100 <- boot(data= DataAgnostic_Train, statistic= RF_Strap, R=
 # Agnostic top 200 DEGs
 
 ## Load the data
-load("./Objs/ChemoDataNew.rda")
+load("./Objs/MetastasisDataGood.rda")
+load("./Objs/Correlation/RGenes.rda")
 
 ### Quantile normalize
-usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
-usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")
+usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")[RGenes, ]
+usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")[RGenes, ]
 
 ####
 usedTrainGroup <- mixTrainGroup
@@ -251,7 +255,7 @@ predictor_data_Test_Agnostic <- t(usedTestMat)
 DataAgnostic_Train <- cbind(predictor_data_Train_Agnostic, usedTrainGroup)
 DataAgnostic_Train <- as.data.frame(DataAgnostic_Train)
 DataAgnostic_Train$usedTrainGroup <- as.factor(DataAgnostic_Train$usedTrainGroup)
-levels(DataAgnostic_Train[, "usedTrainGroup"]) <- c("Sensitive", "Resistant")
+levels(DataAgnostic_Train[, "usedTrainGroup"]) <- c("No_Mets", "Mets")
 
 #names(DataAgnostic_Train) <- make.names(names(DataAgnostic_Train))
 
@@ -278,8 +282,8 @@ RF_Strap <- function(data, indices) {
   PredictorTrainData$usedTrainGroup <- NULL
   train_preds <- predict(RF, newdata = PredictorTrainData, type = "vote")
   test_preds <- predict(RF, newdata = predictor_data_Test_Agnostic, type = "vote")
-  ROCTrainAgnostic <- roc(PhenoTrain, train_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
-  ROCTestAgnostic <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTrainAgnostic <- roc(PhenoTrain, train_preds[,2], plot = F, print.auc = TRUE, levels = c("No_Mets", "Mets"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTestAgnostic <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("No_Mets", "Mets"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
   return(c(ROCTrainAgnostic$auc, ROCTestAgnostic$auc, N_ImportanVariables))
 }
 
@@ -292,11 +296,12 @@ bootobjectAgnostic_200 <- boot(data= DataAgnostic_Train, statistic= RF_Strap, R=
 # Agnostic top 500 DEGs
 
 ## Load the data
-load("./Objs/ChemoDataNew.rda")
+load("./Objs/MetastasisDataGood.rda")
+load("./Objs/Correlation/RGenes.rda")
 
 ### Quantile normalize
-usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
-usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")
+usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")[RGenes, ]
+usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")[RGenes, ]
 
 ####
 usedTrainGroup <- mixTrainGroup
@@ -322,7 +327,7 @@ predictor_data_Test_Agnostic <- t(usedTestMat)
 DataAgnostic_Train <- cbind(predictor_data_Train_Agnostic, usedTrainGroup)
 DataAgnostic_Train <- as.data.frame(DataAgnostic_Train)
 DataAgnostic_Train$usedTrainGroup <- as.factor(DataAgnostic_Train$usedTrainGroup)
-levels(DataAgnostic_Train[, "usedTrainGroup"]) <- c("Sensitive", "Resistant")
+levels(DataAgnostic_Train[, "usedTrainGroup"]) <- c("No_Mets", "Mets")
 
 #names(DataAgnostic_Train) <- make.names(names(DataAgnostic_Train))
 
@@ -349,8 +354,8 @@ RF_Strap <- function(data, indices) {
   PredictorTrainData$usedTrainGroup <- NULL
   train_preds <- predict(RF, newdata = PredictorTrainData, type = "vote")
   test_preds <- predict(RF, newdata = predictor_data_Test_Agnostic, type = "vote")
-  ROCTrainAgnostic <- roc(PhenoTrain, train_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
-  ROCTestAgnostic <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTrainAgnostic <- roc(PhenoTrain, train_preds[,2], plot = F, print.auc = TRUE, levels = c("No_Mets", "Mets"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTestAgnostic <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("No_Mets", "Mets"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
   return(c(ROCTrainAgnostic$auc, ROCTestAgnostic$auc, N_ImportanVariables))
 }
 
@@ -361,10 +366,10 @@ bootobjectAgnostic_500 <- boot(data= DataAgnostic_Train, statistic= RF_Strap, R=
 ################################################################################
 
 ## Save all bootobjects
-save(bootobjectMech, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_200, bootobjectAgnostic_500, file = "./Objs/RF/RFBootObjects_NotchAndMyc_mech100pairs.rda")
+save(bootobjectMech, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_200, bootobjectAgnostic_500, file = "./Objs/RF/RFBootObjects_AdhesionActivationO2response.rda")
 
 ## load
-load("./Objs/RF/RFBootObjects_NotchAndMyc_mech100pairs.rda")
+load("./Objs/RF/RFBootObjects_AdhesionActivationO2response.rda")
 
 ##################################################################################
 ##################################################################################
@@ -411,13 +416,13 @@ ModelCompareAUC_Test_50$data_type <- "Testing"
 ModelCompareAUC_Train_50$NofFeatAgn <- "50_Genes"
 ModelCompareAUC_Test_50$NofFeatAgn <- "50_Genes"
 
-save(ModelCompareAUC_Train_50, ModelCompareAUC_Test_50, file = "./Objs/RF/ModelCompareAUC_50_mech100pairs.rda")
+save(ModelCompareAUC_Train_50, ModelCompareAUC_Test_50, file = "./Objs/RF/ModelCompareAUC_50.rda")
 
 #############################################################################
 ## Save for the main figure
 ModelCompare_RF <- rbind(ModelCompareAUC_Train_50, ModelCompareAUC_Test_50)
 ModelCompare_RF$algorithm <- "RF"
-save(ModelCompare_RF, file = "./Objs/RF/ModelCompare_RF_mech100pairs.rda")
+save(ModelCompare_RF, file = "./Objs/RF/ModelCompare_RF.rda")
 
 ###################################################################################3
 ###################################################################################
@@ -462,7 +467,7 @@ ModelCompareAUC_Test_100$data_type <- "Testing"
 ModelCompareAUC_Train_100$NofFeatAgn <- "100_Genes"
 ModelCompareAUC_Test_100$NofFeatAgn <- "100_Genes"
 
-save(ModelCompareAUC_Train_100, ModelCompareAUC_Test_100, file = "./Objs/RF/ModelCompareAUC_100_mech100pairs.rda")
+save(ModelCompareAUC_Train_100, ModelCompareAUC_Test_100, file = "./Objs/RF/ModelCompareAUC_100.rda")
 
 #############################################################################
 ###################################################################################
@@ -497,7 +502,7 @@ ModelCompareAUC_Test_200$data_type <- "Testing"
 ModelCompareAUC_Train_200$NofFeatAgn <- "200_Genes"
 ModelCompareAUC_Test_200$NofFeatAgn <- "200_Genes"
 
-save(ModelCompareAUC_Train_200, ModelCompareAUC_Test_200, file = "./Objs/RF/ModelCompareAUC_200_mech100pairs.rda")
+save(ModelCompareAUC_Train_200, ModelCompareAUC_Test_200, file = "./Objs/RF/ModelCompareAUC_200.rda")
 
 ############
 ###################################################################################3
@@ -533,5 +538,5 @@ ModelCompareAUC_Test_500$data_type <- "Testing"
 ModelCompareAUC_Train_500$NofFeatAgn <- "500_Genes"
 ModelCompareAUC_Test_500$NofFeatAgn <- "500_Genes"
 
-save(ModelCompareAUC_Train_500, ModelCompareAUC_Test_500, file = "./Objs/RF/ModelCompareAUC_500_mech100pairs.rda")
+save(ModelCompareAUC_Train_500, ModelCompareAUC_Test_500, file = "./Objs/RF/ModelCompareAUC_500.rda")
 

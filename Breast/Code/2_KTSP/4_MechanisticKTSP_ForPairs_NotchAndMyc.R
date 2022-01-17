@@ -15,11 +15,8 @@ require(RColorBrewer)
 require(ggplot2)
 require(reshape)
 require(plotROC)
-library(enrichR)
 library(mltools)
 library(xtable)
-library(pdp)
-library(DiagrammeR)
 library(dplyr)
 library(Ckmeans.1d.dp)
 
@@ -63,34 +60,10 @@ featNo <- nrow(usedTrainMat)
 set.seed(333)
 
 ktspPredictorRes <- SWAP.Train.KTSP(
-  usedTrainMat, usedTrainGroup, krange=241, featureNo= featNo, 
+  usedTrainMat, usedTrainGroup, krange=100, featureNo= featNo, 
   FilterFunc = SWAP.Filter.Wilcoxon, RestrictedPairs = myTSPs)
 
 ktspPredictorRes
-
-#Mechanistic_KTSP <- cbind(ktspPredictorRes$TSPs, ktspPredictorRes$score)
-#colnames(Mechanistic_KTSP) <- c("gene1", "gene2", "score")
-
-#print(xtable(Mechanistic_KTSP, type = "latex"), file = "./Objs/KTSP/Mechanistic.tex")
-
-## Save the mechanistic Pairs
-#MechanisticKTSP_Pairs <- c("ZKSCAN1>ZW10", "HES1>NR3C1", "ZNF160>ZMIZ1", "KLHL9>PML", "NUDC>RELA", "SNCA>ZBTB7A", "ALDH7A1>NFIC", "SMC3>RNF44", "UBE2N>SUZ12", "ARL2>MAX", "EGR1>TSTA3")
-#save(MechanisticKTSP_Pairs, file = "./Objs/KTSP/MechanisticKTSP_Pairs.rda")
-
-
-###########################################################################
-### Check consistency with biology
-# keep <- ktspPredictorRes$TSPs[,1] %in% myTSPs[,1]
-# table(keep)
-# #
-# # ###Subset
-# ktspPredictorRes$name <- paste(sum(keep), "TSPs", sep="")
-# ktspPredictorRes$TSPs <- ktspPredictorRes$TSPs[ keep, ]
-# ktspPredictorRes$score <- ktspPredictorRes$score[ keep ]
-# #
-# # ### Visualize the classifier
-# ktspPredictorRes
-
 
 ############################################################################
 ### Compute the sum and find the best threshold: All training samples
@@ -113,5 +86,5 @@ KTSP_STATs_Test_Mechanistic[KTSP_STATs_Test_Mechanistic == FALSE] <- 0
 
 
 
-save(KTSP_STATs_Train_Mechanistic, KTSP_STATs_Test_Mechanistic, file = "./Objs/KTSP/TNBC_KTSP_STATs_Mechanistic_NotchAndMYC2.rda")
+save(KTSP_STATs_Train_Mechanistic, KTSP_STATs_Test_Mechanistic, file = "./Objs/KTSP/TNBC_KTSP_STATs_Mechanistic_NotchAndMYC2_100.rda")
 

@@ -1,6 +1,4 @@
-###################################################
-## RF
-# Mech
+
 
 rm(list = ls())
 
@@ -15,13 +13,14 @@ library(patchwork)
 library(boot)
 
 ## Load data
-load("./Objs/KTSP/TNBC_KTSP_STATs_Mechanistic_NotchAndMyc2_100.rda")
-load("./Objs/ChemoDataNew.rda")
+load("./Objs/KTSP/KTSP_STATs_Mechanistic_Combined.rda")
+load("./Objs/MetastasisDataGood.rda")
+load("./Objs/Correlation/RGenes.rda")
 
 
 ### Quantile normalize
-usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
-usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")
+usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")[RGenes, ]
+usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")[RGenes, ]
 
 ####
 usedTrainGroup <- mixTrainGroup
@@ -34,7 +33,7 @@ predictor_data_Test_Mech <- t(KTSP_STATs_Test_Mechanistic)
 DataMech_Train <- cbind(predictor_data_Train_Mech, usedTrainGroup)
 DataMech_Train <- as.data.frame(DataMech_Train)
 DataMech_Train$usedTrainGroup <- as.factor(DataMech_Train$usedTrainGroup)
-levels(DataMech_Train[, "usedTrainGroup"]) <- c("Sensitive", "Resistant")
+levels(DataMech_Train[, "usedTrainGroup"]) <- c("No_Mets", "Mets")
 
 names(DataMech_Train) <- make.names(names(DataMech_Train))
 
@@ -59,8 +58,8 @@ RF_Strap <- function(data, indices) {
   PredictorTrainData$usedTrainGroup <- NULL
   train_preds <- predict(RF, newdata = PredictorTrainData, type = "vote")
   test_preds <- predict(RF, newdata = predictor_data_Test_Mech, type = "vote")
-  ROCTrainMech <- roc(PhenoTrain, train_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
-  ROCTestMech <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTrainMech <- roc(PhenoTrain, train_preds[,2], plot = F, print.auc = TRUE, levels = c("No_Mets", "Mets"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTestMech <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("No_Mets", "Mets"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
   return(c(ROCTrainMech$auc, ROCTestMech$auc, N_ImportanVariables))
 }
 
@@ -97,7 +96,7 @@ predictor_data_Test_Agnostic <- t(KTSP_STATs_Test_Agnostic_25)
 DataAgnostic_Train <- cbind(predictor_data_Train_Agnostic, usedTrainGroup)
 DataAgnostic_Train <- as.data.frame(DataAgnostic_Train)
 DataAgnostic_Train$usedTrainGroup <- as.factor(DataAgnostic_Train$usedTrainGroup)
-levels(DataAgnostic_Train[, "usedTrainGroup"]) <- c("Sensitive", "Resistant")
+levels(DataAgnostic_Train[, "usedTrainGroup"]) <- c("No_Mets", "Mets")
 
 names(DataAgnostic_Train) <- make.names(names(DataAgnostic_Train))
 
@@ -122,8 +121,8 @@ RF_Strap <- function(data, indices) {
   PredictorTrainData$usedTrainGroup <- NULL
   train_preds <- predict(RF, newdata = PredictorTrainData, type = "vote")
   test_preds <- predict(RF, newdata = predictor_data_Test_Agnostic, type = "vote")
-  ROCTrainAgnostic <- roc(PhenoTrain, train_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
-  ROCTestAgnostic <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTrainAgnostic <- roc(PhenoTrain, train_preds[,2], plot = F, print.auc = TRUE, levels = c("No_Mets", "Mets"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTestAgnostic <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("No_Mets", "Mets"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
   return(c(ROCTrainAgnostic$auc, ROCTestAgnostic$auc, N_ImportanVariables))
 }
 
@@ -156,7 +155,7 @@ predictor_data_Test_Agnostic <- t(KTSP_STATs_Test_Agnostic_50)
 DataAgnostic_Train <- cbind(predictor_data_Train_Agnostic, usedTrainGroup)
 DataAgnostic_Train <- as.data.frame(DataAgnostic_Train)
 DataAgnostic_Train$usedTrainGroup <- as.factor(DataAgnostic_Train$usedTrainGroup)
-levels(DataAgnostic_Train[, "usedTrainGroup"]) <- c("Sensitive", "Resistant")
+levels(DataAgnostic_Train[, "usedTrainGroup"]) <- c("No_Mets", "Mets")
 
 names(DataAgnostic_Train) <- make.names(names(DataAgnostic_Train))
 
@@ -181,8 +180,8 @@ RF_Strap <- function(data, indices) {
   PredictorTrainData$usedTrainGroup <- NULL
   train_preds <- predict(RF, newdata = PredictorTrainData, type = "vote")
   test_preds <- predict(RF, newdata = predictor_data_Test_Agnostic, type = "vote")
-  ROCTrainAgnostic <- roc(PhenoTrain, train_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
-  ROCTestAgnostic <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTrainAgnostic <- roc(PhenoTrain, train_preds[,2], plot = F, print.auc = TRUE, levels = c("No_Mets", "Mets"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTestAgnostic <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("No_Mets", "Mets"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
   return(c(ROCTrainAgnostic$auc, ROCTestAgnostic$auc, N_ImportanVariables))
 }
 
@@ -214,7 +213,7 @@ predictor_data_Test_Agnostic <- t(KTSP_STATs_Test_Agnostic_100)
 DataAgnostic_Train <- cbind(predictor_data_Train_Agnostic, usedTrainGroup)
 DataAgnostic_Train <- as.data.frame(DataAgnostic_Train)
 DataAgnostic_Train$usedTrainGroup <- as.factor(DataAgnostic_Train$usedTrainGroup)
-levels(DataAgnostic_Train[, "usedTrainGroup"]) <- c("Sensitive", "Resistant")
+levels(DataAgnostic_Train[, "usedTrainGroup"]) <- c("No_Mets", "Mets")
 
 names(DataAgnostic_Train) <- make.names(names(DataAgnostic_Train))
 
@@ -239,8 +238,8 @@ RF_Strap <- function(data, indices) {
   PredictorTrainData$usedTrainGroup <- NULL
   train_preds <- predict(RF, newdata = PredictorTrainData, type = "vote")
   test_preds <- predict(RF, newdata = predictor_data_Test_Agnostic, type = "vote")
-  ROCTrainAgnostic <- roc(PhenoTrain, train_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
-  ROCTestAgnostic <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTrainAgnostic <- roc(PhenoTrain, train_preds[,2], plot = F, print.auc = TRUE, levels = c("No_Mets", "Mets"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTestAgnostic <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("No_Mets", "Mets"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
   return(c(ROCTrainAgnostic$auc, ROCTestAgnostic$auc, N_ImportanVariables))
 }
 
@@ -272,7 +271,7 @@ predictor_data_Test_Agnostic <- t(KTSP_STATs_Test_Agnostic_250)
 DataAgnostic_Train <- cbind(predictor_data_Train_Agnostic, usedTrainGroup)
 DataAgnostic_Train <- as.data.frame(DataAgnostic_Train)
 DataAgnostic_Train$usedTrainGroup <- as.factor(DataAgnostic_Train$usedTrainGroup)
-levels(DataAgnostic_Train[, "usedTrainGroup"]) <- c("Sensitive", "Resistant")
+levels(DataAgnostic_Train[, "usedTrainGroup"]) <- c("No_Mets", "Mets")
 
 names(DataAgnostic_Train) <- make.names(names(DataAgnostic_Train))
 
@@ -297,8 +296,8 @@ RF_Strap <- function(data, indices) {
   PredictorTrainData$usedTrainGroup <- NULL
   train_preds <- predict(RF, newdata = PredictorTrainData, type = "vote")
   test_preds <- predict(RF, newdata = predictor_data_Test_Agnostic, type = "vote")
-  ROCTrainAgnostic <- roc(PhenoTrain, train_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
-  ROCTestAgnostic <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTrainAgnostic <- roc(PhenoTrain, train_preds[,2], plot = F, print.auc = TRUE, levels = c("No_Mets", "Mets"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTestAgnostic <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("No_Mets", "Mets"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
   return(c(ROCTrainAgnostic$auc, ROCTestAgnostic$auc, N_ImportanVariables))
 }
 
