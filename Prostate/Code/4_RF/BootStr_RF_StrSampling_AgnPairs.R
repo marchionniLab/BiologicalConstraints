@@ -77,13 +77,14 @@ colnames(AUCs_RF_Mech) <- c("AUC_Train", "AUC_Test", "N_ImportanVariables")
 
 # 25 pairs
 
-load("./Objs/KTSP/TNBC_KTSP_STATs_Agnostic_25.rda")
-load("./Objs/ChemoDataNew.rda")
+load("./Objs/KTSP/KTSP_STATs_Agnostic_25.rda")
+load("./Objs/MetastasisDataGood.rda")
+load("./Objs/Correlation/RGenes.rda")
 
 
 ### Quantile normalize
-usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
-usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")
+usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")[RGenes, ]
+usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")[RGenes, ]
 
 ####
 usedTrainGroup <- mixTrainGroup
@@ -137,13 +138,14 @@ bootobjectAgnostic_25 <- boot(data= DataAgnostic_Train, statistic= RF_Strap, R= 
 
 # 50 pairs
 
-load("./Objs/KTSP/TNBC_KTSP_STATs_Agnostic_50.rda")
-load("./Objs/ChemoDataNew.rda")
+load("./Objs/KTSP/KTSP_STATs_Agnostic_50.rda")
+load("./Objs/MetastasisDataGood.rda")
+load("./Objs/Correlation/RGenes.rda")
 
 
 ### Quantile normalize
-usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
-usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")
+usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")[RGenes, ]
+usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")[RGenes, ]
 
 usedTrainGroup <- mixTrainGroup
 usedTestGroup <- mixTestGroup
@@ -196,12 +198,14 @@ bootobjectAgnostic_50 <- boot(data= DataAgnostic_Train, statistic= RF_Strap, R= 
 
 # 100 pairs
 
-load("./Objs/KTSP/TNBC_KTSP_STATs_Agnostic_100.rda")
-load("./Objs/ChemoDataNew.rda")
+load("./Objs/KTSP/KTSP_STATs_Agnostic_100.rda")
+load("./Objs/MetastasisDataGood.rda")
+load("./Objs/Correlation/RGenes.rda")
+
 
 ### Quantile normalize
-usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
-usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")
+usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")[RGenes, ]
+usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")[RGenes, ]
 
 usedTrainGroup <- mixTrainGroup
 usedTestGroup <- mixTestGroup
@@ -255,12 +259,14 @@ bootobjectAgnostic_100 <- boot(data= DataAgnostic_Train, statistic= RF_Strap, R=
 
 # 250 pairs
 
-load("./Objs/KTSP/TNBC_KTSP_STATs_Agnostic_250.rda")
-load("./Objs/ChemoDataNew.rda")
+load("./Objs/KTSP/KTSP_STATs_Agnostic_250.rda")
+load("./Objs/MetastasisDataGood.rda")
+load("./Objs/Correlation/RGenes.rda")
+
 
 ### Quantile normalize
-usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
-usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")
+usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")[RGenes, ]
+usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")[RGenes, ]
 
 usedTrainGroup <- mixTrainGroup
 usedTestGroup <- mixTestGroup
@@ -309,10 +315,10 @@ bootobjectAgnostic_250 <- boot(data= DataAgnostic_Train, statistic= RF_Strap, R=
 ################################################################################
 
 ## Save all bootobjects
-save(bootobjectMech, bootobjectAgnostic_25, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_250, file = "./Objs/RF/RFBootObjects_NotchAndMyc_AgnPairs_mech100pairs.rda")
+save(bootobjectMech, bootobjectAgnostic_25, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_250, file = "./Objs/RF/RFBootObjects_AdhesionActivationO2response_AgnPairs.rda")
 
 ## load
-#load("./Objs/RF/RFBootObjects_NotchAndMyc_AgnPairs_mech100pairs.rda")
+#load("./Objs/RF/RFBootObjects_AdhesionActivationO2response_AgnPairs.rda")
 
 ##################################################################################
 ################################################################################
@@ -364,12 +370,12 @@ ModelCompareAUC_Test_25$NofFeatAgn <- "25_Pairs"
 ## Save for the main figure
 ModelCompare_RF <- rbind(ModelCompareAUC_Train_25, ModelCompareAUC_Test_25)
 ModelCompare_RF$algorithm <- "RF"
-save(ModelCompare_RF, file = "./Objs/RF/ModelCompare_RF_AgnPairs_mech100pairs.rda")
+save(ModelCompare_RF, file = "./Objs/RF/ModelCompare_RF_AgnPairs.rda")
 
 #####################################################################
 ############################################################
 #Load the AUC comparisons from the indivdial genes and combine them with pairs
-load("./Objs/RF/ModelCompareAUC_50_mech100pairs.rda")
+load("./Objs/RF/ModelCompareAUC_50.rda")
 
 # Combine
 ModelCompareAUC_Train_25_50 <- rbind(ModelCompareAUC_Train_25, ModelCompareAUC_Train_50)
@@ -429,7 +435,7 @@ ModelCompareAUC_Test_50$NofFeatAgn <- "50_Pairs"
 #####################################################################
 ############################################################
 # Load the AUC comparisons from the indivdial genes and combine them with pairs
-load("./Objs/RF/ModelCompareAUC_100_mech100pairs.rda")
+load("./Objs/RF/ModelCompareAUC_100.rda")
 
 # Combine
 ModelCompareAUC_Train_50_100 <- rbind(ModelCompareAUC_Train_50, ModelCompareAUC_Train_100)
@@ -471,7 +477,7 @@ ModelCompareAUC_Test_100$NofFeatAgn <- "100_Pairs"
 #####################################################################
 ############################################################
 # Load the AUC comparisons from the indivdial genes and combine them with pairs
-load("./Objs/RF/ModelCompareAUC_200_mech100pairs.rda")
+load("./Objs/RF/ModelCompareAUC_200.rda")
 
 # Combine
 ModelCompareAUC_Train_100_200 <- rbind(ModelCompareAUC_Train_100, ModelCompareAUC_Train_200)
@@ -514,7 +520,7 @@ ModelCompareAUC_Test_250$NofFeatAgn <- "250_Pairs"
 #####################################################################
 ############################################################
 # Load the AUC comparisons from the indivdial genes and combine them with pairs
-load("./Objs/RF/ModelCompareAUC_500_mech100pairs.rda")
+load("./Objs/RF/ModelCompareAUC_500.rda")
 
 # Combine
 ModelCompareAUC_Train_250_500 <- rbind(ModelCompareAUC_Train_250, ModelCompareAUC_Train_500)
@@ -535,5 +541,5 @@ ModelCompare_RF_DiffNoFeat <- rbind(ModelCompareAUC_Train_25_50,
                                     ModelCompareAUC_Test_250_500
 )
 
-save(ModelCompare_RF_DiffNoFeat, file = "./Objs/RF/ModelCompare_RF_DiffNoFeat_mech100pairs.rda")
+save(ModelCompare_RF_DiffNoFeat, file = "./Objs/RF/ModelCompare_RF_DiffNoFeat.rda")
 
