@@ -26,4 +26,4 @@ Prostate/renv/
 *.user
 *.DS_Store
 .Rproj.user
-.gitignore
+*.gitignore
