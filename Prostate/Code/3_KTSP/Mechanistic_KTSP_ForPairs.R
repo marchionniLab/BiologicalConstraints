@@ -68,7 +68,7 @@ featNo <- nrow(usedTrainMat)
 set.seed(333)
 
 ktspPredictorRes <- SWAP.Train.KTSP(
-  usedTrainMat, usedTrainGroup, krange=453,
+  usedTrainMat, usedTrainGroup, krange=50,
   FilterFunc = SWAP.Filter.Wilcoxon, featureNo=featNo, RestrictedPairs = myTSPs)
 
 ktspPredictorRes
