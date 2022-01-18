@@ -52,7 +52,7 @@ names(Data_train_Mechanistic) <- make.names(names(Data_train_Mechanistic))
 colnames(Training) <- make.names(colnames(Training))
 colnames(Testing) <- make.names(colnames(Testing))
 
-Grid <- expand.grid(degree = 3, scale = 0.01, C = 0.25)
+Grid <- expand.grid(degree = 1, scale = 0.01, C = 0.25)
 
 # The function for bootstraping
 SVM_Strap <- function(data, indices) {
@@ -88,7 +88,7 @@ colnames(AUCs_SVM_Mech) <- c("AUC_Train", "AUC_Test", "N_ImportanVariables")
 # 25 pairs (from 50 DEGs)
 
 ## Load data
-load("./Objs/KTSP/TNBC_KTSP_STATs_Agnostic_25.rda")
+load("./Objs/KTSP/KTSP_STATs_Agnostic_25.rda")
 load("./Objs/MetastasisDataGood.rda")
 
 
@@ -156,7 +156,7 @@ bootobjectAgnostic_25 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, R
 # 50 pairs (from 100 DEGs)
 
 ## Load data
-load("./Objs/KTSP/TNBC_KTSP_STATs_Agnostic_50.rda")
+load("./Objs/KTSP/KTSP_STATs_Agnostic_50.rda")
 load("./Objs/MetastasisDataGood.rda")
 
 
@@ -224,7 +224,7 @@ bootobjectAgnostic_50 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, R
 # 100 pairs (from 200 DEGs)
 
 ## Load data
-load("./Objs/KTSP/TNBC_KTSP_STATs_Agnostic_100.rda")
+load("./Objs/KTSP/KTSP_STATs_Agnostic_100.rda")
 load("./Objs/MetastasisDataGood.rda")
 
 
@@ -292,7 +292,7 @@ bootobjectAgnostic_100 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, 
 # 250 pairs (from 500 DEGs)
 
 ## Load data
-load("./Objs/KTSP/TNBC_KTSP_STATs_Agnostic_250.rda")
+load("./Objs/KTSP/KTSP_STATs_Agnostic_250.rda")
 load("./Objs/MetastasisDataGood.rda")
 
 
