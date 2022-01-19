@@ -10,8 +10,8 @@ library(DMwR)
 library(randomForest)
 
 ## Agnostic
-load("./Objs/KTSP/LOO/KTSP_STATs_Agnostic_GSE41408Out.rda")
-load("./Objs/LOO/MetastasisData_GSE41408Out.rda")
+load("./Objs/KTSP/LOO/KTSP_STATs_Agnostic_GSE70769Out.rda")
+load("./Objs/LOO/MetastasisData_GSE70769Out.rda")
 
 usedTrainGroup <- trainGroup
 usedTestGroup <- testGroup
@@ -27,7 +27,7 @@ set.seed(333)
 tuneRF(x=predictor_data, y=usedTrainGroup, plot = TRUE, improve = 0.01, ntreeTry = 500, proximity = TRUE, sampsize = sampsizes)
 
 set.seed(333)
-RF_Agnostic_OnKTSP <- randomForest(x =predictor_data, y=usedTrainGroup, importance = TRUE, ntree = 500, mtry = 14 ,proximity=TRUE, na.action = na.omit, sampsize = sampsizes)
+RF_Agnostic_OnKTSP <- randomForest(x =predictor_data, y=usedTrainGroup, importance = TRUE, ntree = 500, mtry = 7 ,proximity=TRUE, na.action = na.omit, sampsize = sampsizes)
 RF_Agnostic_OnKTSP
 
 # Predictions in the training data
@@ -82,8 +82,8 @@ TestPerf[1:3, ] <- TestPerf[c(2,1,3), ]
 rownames(TestPerf) <- c("AUC", "AUC_CI_low", "AUC_CI_high", "Accuracy", "Bal.Accuracy", "Sensitivity", "Specificity", "MCC")
 
 ## Group the performance metrics of the classifier in one data frame
-GSE41408_Out_RF_AgnosticPerformance <- cbind(TrainPerf, TestPerf)
+GSE70769_Out_RF_AgnosticPerformance <- cbind(TrainPerf, TestPerf)
 
 # Save
-save(GSE41408_Out_RF_AgnosticPerformance, file = "./Objs/RF/GSE41408_Out_RF_AgnosticPerformance.rda")
+save(GSE70769_Out_RF_AgnosticPerformance, file = "./Objs/RF/GSE70769_Out_RF_AgnosticPerformance.rda")
 

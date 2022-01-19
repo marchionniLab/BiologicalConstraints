@@ -1,4 +1,3 @@
-
 # Clean the work space
 rm(list = ls())
 
@@ -11,7 +10,7 @@ library(limma)
 library(mltools)
 
 ## Load the data
-load("./Objs/LOO/MetastasisData_GSE116918Out.rda")
+load("./Objs/LOO/MetastasisData_JHUOut.rda")
 load("./Objs/Correlation/RGenes.rda")
 
 ### Normalization
@@ -27,7 +26,6 @@ all(names(usedTrainGroup) == colnames(usedTrainMat))
 
 names(usedTestGroup) <- colnames(usedTestMat)
 all(names(usedTestGroup) ==colnames(usedTestMat))
-
 
 ################################################################################
 ################################################################################
@@ -49,7 +47,7 @@ sampsizes <- rep(min_size,num_classes)
 
 ##############
 
-# Tunning RF model (to find the best mtry)
+# Tuning RF model (to find the best mtry)
 set.seed(333)
 tuneRF(x=predictor_data, y=target, plot = TRUE, improve = 0.01, ntreeTry = 1000, proximity = TRUE, sampsize = sampsizes, na.action = na.omit)
 
@@ -63,7 +61,6 @@ ROCTrain <- roc(usedTrainGroup, train_pred_votes_Agnostic[,2], plot = F, print.a
 ROCTrain
 
 ### Predict in the training data
-
 train_pred_Response_Agnostic <- predict(RF_Agnostic, newdata = predictor_data, type = "response")
 
 confusionTrain <- confusionMatrix(train_pred_Response_Agnostic, usedTrainGroup, positive = "Mets")
@@ -95,7 +92,6 @@ predictor_data2 <- predictor_data2[,RF_predictor_names]
 RF_predictions_responses_Agnostic <- predict(RF_Agnostic, predictor_data2, type="response")
 RF_predictions_votes_Agnostic <- predict(RF_Agnostic, predictor_data2, type="vote")
 
-
 ### Predict in the testing data
 confusionTest <- confusionMatrix(RF_predictions_responses_Agnostic, usedTestGroup, positive = "Mets")
 confusionTest
@@ -115,9 +111,9 @@ TestPerf[1:3, ] <- TestPerf[c(2,1,3), ]
 rownames(TestPerf) <- c("AUC", "AUC_CI_low", "AUC_CI_high", "Accuracy", "Bal.Accuracy", "Sensitivity", "Specificity", "MCC")
 
 ## Group the performance metrics of the classifier in one data frame
-GSE116918_Out_RF_IndvGenes_AgnosticPerformance <- cbind(TrainPerf, TestPerf)
+JHU_Out_RF_IndvGenes_AgnosticPerformance <- cbind(TrainPerf, TestPerf)
 
 # Save
-save(GSE116918_Out_RF_IndvGenes_AgnosticPerformance, file = "./Objs/RF/GSE116918_Out_RF_IndvGenes_AgnosticPerformance.rda")
+save(JHU_Out_RF_IndvGenes_AgnosticPerformance, file = "./Objs/RF/JHU_Out_RF_IndvGenes_AgnosticPerformance.rda")
 
 #########

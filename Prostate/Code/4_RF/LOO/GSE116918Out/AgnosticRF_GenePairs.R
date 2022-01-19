@@ -1,8 +1,6 @@
 ## Clean the work environment
 rm(list = ls())
 
-
-
 ## Load necessary packages
 library(caret)
 library(limma)

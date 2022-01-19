@@ -10,8 +10,8 @@ library(DMwR)
 library(randomForest)
 
 ## Agnostic
-load("./Objs/KTSP/LOO/KTSP_STATs_Agnostic_GSE41408Out.rda")
-load("./Objs/LOO/MetastasisData_GSE41408Out.rda")
+load("./Objs/KTSP/LOO/KTSP_STATs_Agnostic_GSE51066Out.rda")
+load("./Objs/LOO/MetastasisData_GSE51066Out.rda")
 
 usedTrainGroup <- trainGroup
 usedTestGroup <- testGroup
@@ -82,8 +82,8 @@ TestPerf[1:3, ] <- TestPerf[c(2,1,3), ]
 rownames(TestPerf) <- c("AUC", "AUC_CI_low", "AUC_CI_high", "Accuracy", "Bal.Accuracy", "Sensitivity", "Specificity", "MCC")
 
 ## Group the performance metrics of the classifier in one data frame
-GSE41408_Out_RF_AgnosticPerformance <- cbind(TrainPerf, TestPerf)
+GSE51066_Out_RF_AgnosticPerformance <- cbind(TrainPerf, TestPerf)
 
 # Save
-save(GSE41408_Out_RF_AgnosticPerformance, file = "./Objs/RF/GSE41408_Out_RF_AgnosticPerformance.rda")
+save(GSE51066_Out_RF_AgnosticPerformance, file = "./Objs/RF/GSE51066_Out_RF_AgnosticPerformance.rda")
 
