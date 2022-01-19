@@ -8,14 +8,23 @@ library(ggplot2)
 
 ## Agnostic RF Average performance
 
-# Load the agnostic models
-AgnosticGSE25055_Out <- load("./Objs/RF/GSE25055_Out_RF_AgnosticPerformance.rda")
-AgnosticGSE25065_Out <- load("./Objs/RF/GSE25065_Out_RF_AgnosticPerformance.rda")
-AgnosticGSE140494_Out <- load("./Objs/RF/GSE140494_Out_RF_AgnosticPerformance.rda")
-AgnosticGSE103668_Out <- load("./Objs/RF/GSE103668_Out_RF_AgnosticPerformance.rda")
-AgnosticGSE20194_Out <- load("./Objs/RF/GSE20194_Out_RF_AgnosticPerformance.rda")
-AgnosticGSE20271_Out <- load("./Objs/RF/GSE20271_Out_RF_AgnosticPerformance.rda")
-AgnosticGSE32646_Out <- load("./Objs/RF/GSE32646_Out_RF_AgnosticPerformance.rda")
+# Load the agnostic pairs models
+AgnosticGSE25055_Out_pairs <- load("./Objs/RF/GSE25055_Out_RF_AgnosticPerformance.rda")
+AgnosticGSE25065_Out_pairs <- load("./Objs/RF/GSE25065_Out_RF_AgnosticPerformance.rda")
+AgnosticGSE140494_Out_pairs <- load("./Objs/RF/GSE140494_Out_RF_AgnosticPerformance.rda")
+AgnosticGSE103668_Out_pairs <- load("./Objs/RF/GSE103668_Out_RF_AgnosticPerformance.rda")
+AgnosticGSE20194_Out_pairs <- load("./Objs/RF/GSE20194_Out_RF_AgnosticPerformance.rda")
+AgnosticGSE20271_Out_pairs <- load("./Objs/RF/GSE20271_Out_RF_AgnosticPerformance.rda")
+AgnosticGSE32646_Out_pairs <- load("./Objs/RF/GSE32646_Out_RF_AgnosticPerformance.rda")
+
+# Load the agnostic genes models
+AgnosticGSE25055_Out_indvGenes <- load("./Objs/RF/GSE25055_Out_RF_indvGenes_AgnosticPerformance.rda")
+AgnosticGSE25065_Out_indvGenes <- load("./Objs/RF/GSE25065_Out_RF_indvGenes_AgnosticPerformance.rda")
+AgnosticGSE140494_Out_indvGenes <- load("./Objs/RF/GSE140494_Out_RF_indvGenes_AgnosticPerformance.rda")
+AgnosticGSE103668_Out_indvGenes <- load("./Objs/RF/GSE103668_Out_RF_indvGenes_AgnosticPerformance.rda")
+AgnosticGSE20194_Out_indvGenes <- load("./Objs/RF/GSE20194_Out_RF_indvGenes_AgnosticPerformance.rda")
+AgnosticGSE20271_Out_indvGenes <- load("./Objs/RF/GSE20271_Out_RF_indvGenes_AgnosticPerformance.rda")
+AgnosticGSE32646_Out_indvGenes <- load("./Objs/RF/GSE32646_Out_RF_indvGenes_AgnosticPerformance.rda")
 
 # Load the Mech models
 MechGSE25055_Out <- load("./Objs/RF/GSE25055_Out_RF_MechPerformance.rda")
@@ -101,55 +110,82 @@ MechGSE32646_Out <- load("./Objs/RF/GSE32646_Out_RF_MechPerformance.rda")
 
 # GSE25055_out
 GSE25055_Out_RF_AgnosticPerformance$out_study <- rep("GSE25055", nrow(GSE25055_Out_RF_AgnosticPerformance))
+GSE25055_Out_RF_IndvGenes_AgnosticPerformance$out_study <- rep("GSE25055", nrow(GSE25055_Out_RF_IndvGenes_AgnosticPerformance))
 GSE25055_Out_RF_MechPerformance$out_study <- rep("GSE25055", nrow(GSE25055_Out_RF_MechPerformance))
-GSE25055_Out_RF_AgnosticPerformance$model_type <- rep("Agnostic", nrow(GSE25055_Out_RF_AgnosticPerformance))
+
+GSE25055_Out_RF_AgnosticPerformance$model_type <- rep("Agnostic_pairs", nrow(GSE25055_Out_RF_AgnosticPerformance))
+GSE25055_Out_RF_IndvGenes_AgnosticPerformance$model_type <- rep("Agnostic_genes", nrow(GSE25055_Out_RF_IndvGenes_AgnosticPerformance))
 GSE25055_Out_RF_MechPerformance$model_type <- rep("Mechanistic", nrow(GSE25055_Out_RF_MechPerformance))
 
+##############
 # GSE25065_out
 GSE25065_Out_RF_AgnosticPerformance$out_study <- rep("GSE25065", nrow(GSE25065_Out_RF_AgnosticPerformance))
+GSE25065_Out_RF_IndvGenes_AgnosticPerformance$out_study <- rep("GSE25065", nrow(GSE25065_Out_RF_IndvGenes_AgnosticPerformance))
 GSE25065_Out_RF_MechPerformance$out_study <- rep("GSE25065", nrow(GSE25065_Out_RF_MechPerformance))
-GSE25065_Out_RF_AgnosticPerformance$model_type <- rep("Agnostic", nrow(GSE25065_Out_RF_AgnosticPerformance))
+
+GSE25065_Out_RF_AgnosticPerformance$model_type <- rep("Agnostic_pairs", nrow(GSE25065_Out_RF_AgnosticPerformance))
+GSE25065_Out_RF_IndvGenes_AgnosticPerformance$model_type <- rep("Agnostic_genes", nrow(GSE25065_Out_RF_IndvGenes_AgnosticPerformance))
 GSE25065_Out_RF_MechPerformance$model_type <- rep("Mechanistic", nrow(GSE25065_Out_RF_MechPerformance))
 
+##############
 # GSE140494_out
 GSE140494_Out_RF_AgnosticPerformance$out_study <- rep("GSE140494", nrow(GSE140494_Out_RF_AgnosticPerformance))
+GSE140494_Out_RF_IndvGenes_AgnosticPerformance$out_study <- rep("GSE140494", nrow(GSE140494_Out_RF_IndvGenes_AgnosticPerformance))
 GSE140494_Out_RF_MechPerformance$out_study <- rep("GSE140494", nrow(GSE140494_Out_RF_MechPerformance))
-GSE140494_Out_RF_AgnosticPerformance$model_type <- rep("Agnostic", nrow(GSE140494_Out_RF_AgnosticPerformance))
+
+GSE140494_Out_RF_AgnosticPerformance$model_type <- rep("Agnostic_pairs", nrow(GSE140494_Out_RF_AgnosticPerformance))
+GSE140494_Out_RF_IndvGenes_AgnosticPerformance$model_type <- rep("Agnostic_genes", nrow(GSE140494_Out_RF_IndvGenes_AgnosticPerformance))
 GSE140494_Out_RF_MechPerformance$model_type <- rep("Mechanistic", nrow(GSE140494_Out_RF_MechPerformance))
 
+###############
 # GSE103668_out
 GSE103668_Out_RF_AgnosticPerformance$out_study <- rep("GSE103668", nrow(GSE103668_Out_RF_AgnosticPerformance))
+GSE103668_Out_RF_IndvGenes_AgnosticPerformance$out_study <- rep("GSE103668", nrow(GSE103668_Out_RF_IndvGenes_AgnosticPerformance))
 GSE103668_Out_RF_MechPerformance$out_study <- rep("GSE103668", nrow(GSE103668_Out_RF_MechPerformance))
-GSE103668_Out_RF_AgnosticPerformance$model_type <- rep("Agnostic", nrow(GSE103668_Out_RF_AgnosticPerformance))
+
+GSE103668_Out_RF_AgnosticPerformance$model_type <- rep("Agnostic_pairs", nrow(GSE103668_Out_RF_AgnosticPerformance))
+GSE103668_Out_RF_IndvGenes_AgnosticPerformance$model_type <- rep("Agnostic_genes", nrow(GSE103668_Out_RF_IndvGenes_AgnosticPerformance))
 GSE103668_Out_RF_MechPerformance$model_type <- rep("Mechanistic", nrow(GSE103668_Out_RF_MechPerformance))
 
+##############
 # GSE20194_out
 GSE20194_Out_RF_AgnosticPerformance$out_study <- rep("GSE20194", nrow(GSE20194_Out_RF_AgnosticPerformance))
+GSE20194_Out_RF_IndvGenes_AgnosticPerformance$out_study <- rep("GSE20194", nrow(GSE20194_Out_RF_IndvGenes_AgnosticPerformance))
 GSE20194_Out_RF_MechPerformance$out_study <- rep("GSE20194", nrow(GSE20194_Out_RF_MechPerformance))
-GSE20194_Out_RF_AgnosticPerformance$model_type <- rep("Agnostic", nrow(GSE20194_Out_RF_AgnosticPerformance))
+
+GSE20194_Out_RF_AgnosticPerformance$model_type <- rep("Agnostic_pairs", nrow(GSE20194_Out_RF_AgnosticPerformance))
+GSE20194_Out_RF_IndvGenes_AgnosticPerformance$model_type <- rep("Agnostic_genes", nrow(GSE20194_Out_RF_IndvGenes_AgnosticPerformance))
 GSE20194_Out_RF_MechPerformance$model_type <- rep("Mechanistic", nrow(GSE20194_Out_RF_MechPerformance))
 
+##############
 # GSE20271_out
 GSE20271_Out_RF_AgnosticPerformance$out_study <- rep("GSE20271", nrow(GSE20271_Out_RF_AgnosticPerformance))
+GSE20271_Out_RF_IndvGenes_AgnosticPerformance$out_study <- rep("GSE20271", nrow(GSE20271_Out_RF_IndvGenes_AgnosticPerformance))
 GSE20271_Out_RF_MechPerformance$out_study <- rep("GSE20271", nrow(GSE20271_Out_RF_MechPerformance))
-GSE20271_Out_RF_AgnosticPerformance$model_type <- rep("Agnostic", nrow(GSE20271_Out_RF_AgnosticPerformance))
+
+GSE20271_Out_RF_AgnosticPerformance$model_type <- rep("Agnostic_pairs", nrow(GSE20271_Out_RF_AgnosticPerformance))
+GSE20271_Out_RF_IndvGenes_AgnosticPerformance$model_type <- rep("Agnostic_genes", nrow(GSE20271_Out_RF_IndvGenes_AgnosticPerformance))
 GSE20271_Out_RF_MechPerformance$model_type <- rep("Mechanistic", nrow(GSE20271_Out_RF_MechPerformance))
 
+#############
 # GSE32646_out
 GSE32646_Out_RF_AgnosticPerformance$out_study <- rep("GSE32646", nrow(GSE32646_Out_RF_AgnosticPerformance))
+GSE32646_Out_RF_IndvGenes_AgnosticPerformance$out_study <- rep("GSE32646", nrow(GSE32646_Out_RF_IndvGenes_AgnosticPerformance))
 GSE32646_Out_RF_MechPerformance$out_study <- rep("GSE32646", nrow(GSE32646_Out_RF_MechPerformance))
-GSE32646_Out_RF_AgnosticPerformance$model_type <- rep("Agnostic", nrow(GSE32646_Out_RF_AgnosticPerformance))
+
+GSE32646_Out_RF_AgnosticPerformance$model_type <- rep("Agnostic_pairs", nrow(GSE32646_Out_RF_AgnosticPerformance))
+GSE32646_Out_RF_IndvGenes_AgnosticPerformance$model_type <- rep("Agnostic_genes", nrow(GSE32646_Out_RF_IndvGenes_AgnosticPerformance))
 GSE32646_Out_RF_MechPerformance$model_type <- rep("Mechanistic", nrow(GSE32646_Out_RF_MechPerformance))
 
 
-
-All_RF_CV <- rbind(GSE25055_Out_RF_AgnosticPerformance, GSE25055_Out_RF_MechPerformance,
-                     GSE25065_Out_RF_AgnosticPerformance, GSE25065_Out_RF_MechPerformance,
-                     GSE140494_Out_RF_AgnosticPerformance, GSE140494_Out_RF_MechPerformance, 
-                     GSE103668_Out_RF_AgnosticPerformance, GSE103668_Out_RF_MechPerformance, 
-                     GSE20194_Out_RF_AgnosticPerformance, GSE20194_Out_RF_MechPerformance,
-                     GSE20271_Out_RF_AgnosticPerformance, GSE20271_Out_RF_MechPerformance,
-                     GSE32646_Out_RF_AgnosticPerformance, GSE32646_Out_RF_MechPerformance)
+###############
+All_RF_CV <- rbind(GSE25055_Out_RF_AgnosticPerformance, GSE25055_Out_RF_IndvGenes_AgnosticPerformance, GSE25055_Out_RF_MechPerformance,
+                     GSE25065_Out_RF_AgnosticPerformance, GSE25065_Out_RF_IndvGenes_AgnosticPerformance, GSE25065_Out_RF_MechPerformance,
+                     GSE140494_Out_RF_AgnosticPerformance, GSE140494_Out_RF_IndvGenes_AgnosticPerformance, GSE140494_Out_RF_MechPerformance, 
+                     GSE103668_Out_RF_AgnosticPerformance, GSE103668_Out_RF_IndvGenes_AgnosticPerformance, GSE103668_Out_RF_MechPerformance, 
+                     GSE20194_Out_RF_AgnosticPerformance, GSE20194_Out_RF_IndvGenes_AgnosticPerformance, GSE20194_Out_RF_MechPerformance,
+                     GSE20271_Out_RF_AgnosticPerformance, GSE20271_Out_RF_IndvGenes_AgnosticPerformance, GSE20271_Out_RF_MechPerformance,
+                     GSE32646_Out_RF_AgnosticPerformance, GSE32646_Out_RF_IndvGenes_AgnosticPerformance, GSE32646_Out_RF_MechPerformance)
 
 All_RF_CV$metric <- rownames(All_RF_CV)
 All_RF_CV$metric <- gsub('[[:digit:]]+', '', All_RF_CV$metric )
@@ -160,99 +196,195 @@ All_RF_CV$metric <- gsub('[[:digit:]]+', '', All_RF_CV$metric )
 ## Calculate the average statistics (Across the 7 repeats)
 
 #####
-# average stats in the agnostic models
+# average stats in the agnostic pairs models
 
 ## AUC
 # Mean AUC in both the training and testing data
-MeanAUC_Agnostic <-  apply(All_RF_CV %>%
-                             filter(model_type == "Agnostic") %>%
+MeanAUC_Agnostic_pairs <-  apply(All_RF_CV %>%
+                             filter(model_type == "Agnostic_pairs") %>%
                              filter(metric == "AUC") %>%
                              select(c("Training", "Testing")), 2, mean)
 
 
 # AUC SD in both the training and testing data
-SD_AUC_Agnostic <-  apply(All_RF_CV %>%
-                            filter(model_type == "Agnostic") %>%
+SD_AUC_Agnostic_pairs <-  apply(All_RF_CV %>%
+                            filter(model_type == "Agnostic_pairs") %>%
                             filter(metric == "AUC") %>%
                             select(c("Training", "Testing")), 2, sd)
 
 ### Accuracy
 # Mean Accuracy in both the training and testing data
-MeanAccuracy_Agnostic <-  apply(All_RF_CV %>%
-                                  filter(model_type == "Agnostic") %>%
+MeanAccuracy_Agnostic_pairs <-  apply(All_RF_CV %>%
+                                  filter(model_type == "Agnostic_pairs") %>%
                                   filter(metric == "Accuracy") %>%
                                   select(c("Training", "Testing")), 2, mean)
 
 # Accuracy SD in both the training and testing data
-SD_Accuracy_Agnostic <-  apply(All_RF_CV %>%
-                                 filter(model_type == "Agnostic") %>%
+SD_Accuracy_Agnostic_pairs <-  apply(All_RF_CV %>%
+                                 filter(model_type == "Agnostic_pairs") %>%
                                  filter(metric == "Accuracy") %>%
                                  select(c("Training", "Testing")), 2, sd)
 
 ### Balanced Accuracy
 # Mean Balanced Accuracy in both the training and testing data
-MeanBalAccuracy_Agnostic <-  apply(All_RF_CV %>%
-                                     filter(model_type == "Agnostic") %>%
+MeanBalAccuracy_Agnostic_pairs <-  apply(All_RF_CV %>%
+                                     filter(model_type == "Agnostic_pairs") %>%
                                      filter(metric == "Bal.Accuracy") %>%
                                      select(c("Training", "Testing")), 2, mean)
 
 # Balanced Accuracy SD in both the training and testing data
-SD_BalAccuracy_Agnostic <-  apply(All_RF_CV %>%
-                                    filter(model_type == "Agnostic") %>%
+SD_BalAccuracy_Agnostic_pairs <-  apply(All_RF_CV %>%
+                                    filter(model_type == "Agnostic_pairs") %>%
                                     filter(metric == "Bal.Accuracy") %>%
                                     select(c("Training", "Testing")), 2, sd)
 
 ### Sensitivity
 # Mean Sensitivity in both the training and testing data
-MeanSensitivity_Agnostic <-  apply(All_RF_CV %>%
-                                     filter(model_type == "Agnostic") %>%
+MeanSensitivity_Agnostic_pairs <-  apply(All_RF_CV %>%
+                                     filter(model_type == "Agnostic_pairs") %>%
                                      filter(metric == "Sensitivity") %>%
                                      select(c("Training", "Testing")), 2, mean)
 
 # Sensitivity SD in both the training and testing data
-SD_Sensitivity_Agnostic <-  apply(All_RF_CV %>%
-                                    filter(model_type == "Agnostic") %>%
+SD_Sensitivity_Agnostic_pairs <-  apply(All_RF_CV %>%
+                                    filter(model_type == "Agnostic_pairs") %>%
                                     filter(metric == "Sensitivity") %>%
                                     select(c("Training", "Testing")), 2, sd)
 
 ### Specificity
 # Mean Specificity in both the training and testing data
-MeanSpecificity_Agnostic <-  apply(All_RF_CV %>%
-                                     filter(model_type == "Agnostic") %>%
+MeanSpecificity_Agnostic_pairs <-  apply(All_RF_CV %>%
+                                     filter(model_type == "Agnostic_pairs") %>%
                                      filter(metric == "Specificity") %>%
                                      select(c("Training", "Testing")), 2, mean)
 
 # Specificity SD in both the training and testing data
-SD_Specificity_Agnostic <-  apply(All_RF_CV %>%
-                                    filter(model_type == "Agnostic") %>%
+SD_Specificity_Agnostic_pairs <-  apply(All_RF_CV %>%
+                                    filter(model_type == "Agnostic_pairs") %>%
                                     filter(metric == "Specificity") %>%
                                     select(c("Training", "Testing")), 2, sd)
 
 
 ### MCC
 # Mean MCC in both the training and testing data
-MeanMCC_Agnostic <-  apply(All_RF_CV %>%
-                             filter(model_type == "Agnostic") %>%
+MeanMCC_Agnostic_pairs <-  apply(All_RF_CV %>%
+                             filter(model_type == "Agnostic_pairs") %>%
                              filter(metric == "MCC") %>%
                              select(c("Training", "Testing")), 2, mean)
 
 # MCC SD in both the training and testing data
-SD_MCC_Agnostic <-  apply(All_RF_CV %>%
-                            filter(model_type == "Agnostic") %>%
+SD_MCC_Agnostic_pairs <-  apply(All_RF_CV %>%
+                            filter(model_type == "Agnostic_pairs") %>%
                             filter(metric == "MCC") %>%
                             select(c("Training", "Testing")), 2, sd)
 
 
 
 ## Group them together
-MeansAgnostic <- rbind(MeanAUC_Agnostic, SD_AUC_Agnostic, 
-                       MeanAccuracy_Agnostic, SD_Accuracy_Agnostic, 
-                       MeanBalAccuracy_Agnostic, SD_BalAccuracy_Agnostic, 
-                       MeanSensitivity_Agnostic, SD_Sensitivity_Agnostic, 
-                       MeanSpecificity_Agnostic, SD_Specificity_Agnostic,
-                       MeanMCC_Agnostic, SD_MCC_Agnostic)
+MeansAgnostic_pairs <- rbind(MeanAUC_Agnostic_pairs, SD_AUC_Agnostic_pairs, 
+                       MeanAccuracy_Agnostic_pairs, SD_Accuracy_Agnostic_pairs, 
+                       MeanBalAccuracy_Agnostic_pairs, SD_BalAccuracy_Agnostic_pairs, 
+                       MeanSensitivity_Agnostic_pairs, SD_Sensitivity_Agnostic_pairs, 
+                       MeanSpecificity_Agnostic_pairs, SD_Specificity_Agnostic_pairs,
+                       MeanMCC_Agnostic_pairs, SD_MCC_Agnostic_pairs)
 # Round the Numbers
-MeansAgnostic <- apply(MeansAgnostic, 2, round, digits = 2) 
+MeansAgnostic_pairs <- apply(MeansAgnostic_pairs, 2, round, digits = 2) 
+
+##############################################
+# average stats in the agnostic genes models
+
+## AUC
+# Mean AUC in both the training and testing data
+MeanAUC_Agnostic_genes <-  apply(All_RF_CV %>%
+                                   filter(model_type == "Agnostic_genes") %>%
+                                   filter(metric == "AUC") %>%
+                                   select(c("Training", "Testing")), 2, mean)
+
+
+# AUC SD in both the training and testing data
+SD_AUC_Agnostic_genes <-  apply(All_RF_CV %>%
+                                  filter(model_type == "Agnostic_genes") %>%
+                                  filter(metric == "AUC") %>%
+                                  select(c("Training", "Testing")), 2, sd)
+
+### Accuracy
+# Mean Accuracy in both the training and testing data
+MeanAccuracy_Agnostic_genes <-  apply(All_RF_CV %>%
+                                        filter(model_type == "Agnostic_genes") %>%
+                                        filter(metric == "Accuracy") %>%
+                                        select(c("Training", "Testing")), 2, mean)
+
+# Accuracy SD in both the training and testing data
+SD_Accuracy_Agnostic_genes <-  apply(All_RF_CV %>%
+                                       filter(model_type == "Agnostic_genes") %>%
+                                       filter(metric == "Accuracy") %>%
+                                       select(c("Training", "Testing")), 2, sd)
+
+### Balanced Accuracy
+# Mean Balanced Accuracy in both the training and testing data
+MeanBalAccuracy_Agnostic_genes <-  apply(All_RF_CV %>%
+                                           filter(model_type == "Agnostic_genes") %>%
+                                           filter(metric == "Bal.Accuracy") %>%
+                                           select(c("Training", "Testing")), 2, mean)
+
+# Balanced Accuracy SD in both the training and testing data
+SD_BalAccuracy_Agnostic_genes <-  apply(All_RF_CV %>%
+                                          filter(model_type == "Agnostic_genes") %>%
+                                          filter(metric == "Bal.Accuracy") %>%
+                                          select(c("Training", "Testing")), 2, sd)
+
+### Sensitivity
+# Mean Sensitivity in both the training and testing data
+MeanSensitivity_Agnostic_genes <-  apply(All_RF_CV %>%
+                                           filter(model_type == "Agnostic_genes") %>%
+                                           filter(metric == "Sensitivity") %>%
+                                           select(c("Training", "Testing")), 2, mean)
+
+# Sensitivity SD in both the training and testing data
+SD_Sensitivity_Agnostic_genes <-  apply(All_RF_CV %>%
+                                          filter(model_type == "Agnostic_genes") %>%
+                                          filter(metric == "Sensitivity") %>%
+                                          select(c("Training", "Testing")), 2, sd)
+
+### Specificity
+# Mean Specificity in both the training and testing data
+MeanSpecificity_Agnostic_genes <-  apply(All_RF_CV %>%
+                                           filter(model_type == "Agnostic_genes") %>%
+                                           filter(metric == "Specificity") %>%
+                                           select(c("Training", "Testing")), 2, mean)
+
+# Specificity SD in both the training and testing data
+SD_Specificity_Agnostic_genes <-  apply(All_RF_CV %>%
+                                          filter(model_type == "Agnostic_genes") %>%
+                                          filter(metric == "Specificity") %>%
+                                          select(c("Training", "Testing")), 2, sd)
+
+
+### MCC
+# Mean MCC in both the training and testing data
+MeanMCC_Agnostic_genes <-  apply(All_RF_CV %>%
+                                   filter(model_type == "Agnostic_genes") %>%
+                                   filter(metric == "MCC") %>%
+                                   select(c("Training", "Testing")), 2, mean)
+
+# MCC SD in both the training and testing data
+SD_MCC_Agnostic_genes <-  apply(All_RF_CV %>%
+                                  filter(model_type == "Agnostic_genes") %>%
+                                  filter(metric == "MCC") %>%
+                                  select(c("Training", "Testing")), 2, sd)
+
+
+
+## Group them together
+MeansAgnostic_genes <- rbind(MeanAUC_Agnostic_genes, SD_AUC_Agnostic_genes, 
+                             MeanAccuracy_Agnostic_genes, SD_Accuracy_Agnostic_genes, 
+                             MeanBalAccuracy_Agnostic_genes, SD_BalAccuracy_Agnostic_genes, 
+                             MeanSensitivity_Agnostic_genes, SD_Sensitivity_Agnostic_genes, 
+                             MeanSpecificity_Agnostic_genes, SD_Specificity_Agnostic_genes,
+                             MeanMCC_Agnostic_genes, SD_MCC_Agnostic_genes)
+# Round the Numbers
+MeansAgnostic_genes <- apply(MeansAgnostic_genes, 2, round, digits = 2) 
+
 
 ################################################################
 ############################################
@@ -365,8 +497,11 @@ MeansMechanistic <- apply(MeansMechanistic, 2, round, digits = 2)
 #}
 
 
-MeansAgnostic <- data.frame(MeansAgnostic)
-MeansAgnostic$metric <- rownames(MeansAgnostic)
+MeansAgnostic_pairs <- data.frame(MeansAgnostic_pairs)
+MeansAgnostic_pairs$metric <- rownames(MeansAgnostic_pairs)
+
+MeansAgnostic_genes <- data.frame(MeansAgnostic_genes)
+MeansAgnostic_genes$metric <- rownames(MeansAgnostic_genes)
 
 MeansMechanistic <- data.frame(MeansMechanistic)
 MeansMechanistic$metric <- rownames(MeansMechanistic)
