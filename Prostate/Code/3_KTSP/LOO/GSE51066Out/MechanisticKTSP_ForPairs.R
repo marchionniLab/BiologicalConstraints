@@ -1,17 +1,6 @@
-###################################################################################
-### Mohamed Omar
-### 25/11/2019
-### ### Goal: Creating the restricted ktsp classifier.
-### TF-Target genes
-## Leaving 1 dataset out (GSE51066)
-#################################################################################
 
-###### 
 # Clean Work space
 rm(list = ls())
-# Set work directory
-setwd("/Volumes/Macintosh/Dropbox (MechPred)/MechPred/User/Mohamed/MechanisticModels/Prostate")
-
 ############################################################################
 ### Load library
 require(switchBox)
@@ -34,15 +23,15 @@ load("./Objs/Correlation/RGenes.rda")
 
 ############################################################################
 ## Load the selected genes
-Genes1 <- read.delim("./geneset.txt")
+Genes1 <- read.delim("./objs/GO_Adhesion.txt")
 Genes1 <- as.matrix(Genes1)
 Genes1 <- Genes1[-1,]
 
-Genes2 <- read.delim("./geneset2.txt")
+Genes2 <- read.delim("./objs/GO_Activation.txt")
 Genes2 <- as.matrix(Genes2)
 Genes2 <- Genes2[-1,]
 
-Genes3 <- read.delim("./geneset3.txt")
+Genes3 <- read.delim("./objs/GO_O2Response.txt")
 Genes3 <- as.matrix(Genes3)
 Genes3 <- Genes3[-1,]
 
@@ -80,7 +69,7 @@ featNo <- nrow(usedTrainMat)
 set.seed(333)
 
 ktspPredictorRes <- SWAP.Train.KTSP(
-  usedTrainMat, usedTrainGroup, krange=100,
+  usedTrainMat, usedTrainGroup, krange=50,
   FilterFunc = SWAP.Filter.Wilcoxon, featureNo=featNo, RestrictedPairs = myTSPs)
 
 ktspPredictorRes
@@ -101,10 +90,8 @@ KTSP_STATs_Train_Mechanistic[KTSP_STATs_Train_Mechanistic == FALSE] <- 0
 ktspStatsTestRes <- SWAP.KTSP.Statistics(inputMat = usedTestMat, classifier = ktspPredictorRes, CombineFunc = sum)
 summary(ktspStatsTestRes$statistics)
 
-
 KTSP_STATs_Test_Mechanistic <- t(ktspStatsTestRes$comparisons)
 KTSP_STATs_Test_Mechanistic[KTSP_STATs_Test_Mechanistic == FALSE] <- 0
 
 save(KTSP_STATs_Train_Mechanistic, KTSP_STATs_Test_Mechanistic, file = "./Objs/KTSP/LOO/KTSP_STATs_Mechanistic_GSE51066Out.rda")
-
 

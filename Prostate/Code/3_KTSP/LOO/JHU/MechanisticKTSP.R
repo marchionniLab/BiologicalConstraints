@@ -1,16 +1,6 @@
-###################################################################################
-### Mohamed Omar
-### 25/11/2019
-### ### Goal: Creating the restricted ktsp classifier.
-### TF_targets genes
-## Leaving 1 dataset out (JHU)
-#################################################################################
 
-###### 
 # Clean Work space
 rm(list = ls())
-# Set work directory
-setwd("/Volumes/Macintosh/Dropbox (MechPred)/MechPred/User/Mohamed/MechanisticModels/Prostate")
 
 ############################################################################
 ### Load library
@@ -23,7 +13,6 @@ require(RColorBrewer)
 require(ggplot2)
 require(reshape)
 require(plotROC)
-library(enrichR)
 library(mltools)
 library(xtable)
 
@@ -34,15 +23,15 @@ load("./Objs/Correlation/RGenes.rda")
 
 ############################################################################
 ## Load the selected genes
-Genes1 <- read.delim("./GO_Adhesion.txt")
+Genes1 <- read.delim("./objs/GO_Adhesion.txt")
 Genes1 <- as.matrix(Genes1)
 Genes1 <- Genes1[-1,]
 
-Genes2 <- read.delim("./GO_Activation.txt")
+Genes2 <- read.delim("./objs/GO_Activation.txt")
 Genes2 <- as.matrix(Genes2)
 Genes2 <- Genes2[-1,]
 
-Genes3 <- read.delim("./GO_O2Response.txt")
+Genes3 <- read.delim("./objs/GO_O2Response.txt")
 Genes3 <- as.matrix(Genes3)
 Genes3 <- Genes3[-1,]
 
@@ -76,7 +65,7 @@ myTSPs <- myTSPs[myTSPs[,1] %in% keepGns & myTSPs[,2] %in% keepGns , ]
 ###########################################################################
 
 ### Set Feature number and max k
-ktsp <- c(3:25) #15
+ktsp <- c(3:25)
 featNo <- nrow(usedTrainMat)
 
 ### Train a classifier using default filtering function based on Wilcoxon
@@ -152,87 +141,3 @@ JHU_Out_MechPerformance <- cbind(TrainPerf, TestPerf)
 
 # Save
 save(JHU_Out_MechPerformance, file = "./Objs/KTSP/JHU_Out_MechPerformance.rda")
-
-#########################################################################
-######################################################
-
-## GGPLOT to compare the two classifiers
-### Prepare the legend
-forLegend_KTSP <- apply(rbind(
-  ci(roc(usedTrainGroup, ktspStatsTrainRes$statistics, levels = c("No_Mets", "Mets"), direction = "<")),
-  ci(roc(usedTestGroup, ktspStatsTestRes$statistics, levels = c("No_Mets", "Mets"), direction = "<")),
-  ci(roc(usedTrainGroup, ktspStatsTrainUnRes$statistics, levels = c("No_Mets", "Mets"), direction = "<")),
-  ci(roc(usedTestGroup, ktspStatsTestUnRes$statistics, levels = c("No_Mets", "Mets"), direction = "<"))
-),  1, function(x) {
-  x <- format(round(x, digits=2), nsmall=2)
-  paste("AUC: ", x[[2]], ";", "95% CI: ", x[[1]], "-", x[[3]])
-})
-
-
-#################################################################
-### ROC curves Using ggplot2
-
-### Training
-datTrn_KTSP <- melt(data.frame(
-  ## Training Group
-  Training= usedTrainGroup,
-  ## Agnostic KTSP SUM: the lowest mus be for disease status
-  Agnostic.Training = ktspStatsTrainUnRes$statistics,
-  ## Mechanistic KTSP SUM training
-  Mechanistic.Training= ktspStatsTrainRes$statistics))
-### Change Colnames
-colnames(datTrn_KTSP) <- c("Status", "KTSP_type", "KTSP_sum")
-
-
-### Testing
-datTst_KTSP <- melt(data.frame(
-  ## Testing group
-  Testing= usedTestGroup,
-  ## Agnostic KTSP SUM: the lowest mus be for disease status
-  Agnostic.Testing=ktspStatsTestUnRes$statistics,
-  ## Mechanistic KTSP SUM training
-  Mechanistic.Testing=ktspStatsTestRes$statistics))
-### Change Colnames
-colnames(datTst_KTSP) <- c("Status", "KTSP_type", "KTSP_sum")
-
-### Combine
-dat_KTSP <- rbind(datTrn_KTSP, datTst_KTSP)
-dat_KTSP$Status <- as.numeric(dat_KTSP$Status)-1
-####
-### Replace levels
-levels(dat_KTSP$KTSP_type) <- gsub("\\.", "-", levels(dat_KTSP$KTSP_type))
-levels(dat_KTSP$KTSP_type) <- paste(levels(dat_KTSP$KTSP_type), forLegend_KTSP[c(3,1,4,2)])
-
-#################################################################
-### Plot Curve
-png("./Figs/KTSP/LOO/CompareAUCggplot_JHUOut.png",
-    width=3000, height=3000, res=360)
-### Color
-myCol <- brewer.pal(3, "Dark2")[c(2,1)]
-### Plot and legend titles
-plotTitle <- "AUC mechanistic (TFs_Targets) vs agnostic K-TSP"
-legendTitle <- paste("Mechanistic (", nrow(ktspPredictorRes$TSPs), " pairs)",
-                     " Agnostic (", nrow(ktspPredictorUnRes$TSPs), " pairs)",  sep="")
-### Plot
-basicplot_KTSP_JHUOut <- ggplot(dat_KTSP, aes(d=Status, m=KTSP_sum, color=KTSP_type,
-                                                   linetype = KTSP_type)) +
-  geom_roc(cutoffs.at = seq(1,20,2)) +
-  style_roc(theme = theme_grey) + ggtitle(plotTitle) +
-  theme(plot.title = element_text(face="bold", size=16, hjust = 0.5),
-        axis.text=element_text(face="plain", size = 11),
-        axis.title=element_text(face="bold", size = 13),
-        legend.justification=c(1,0),  legend.position=c(1,0),
-        legend.background=element_rect(fill="lightblue1"),
-        legend.text=element_text(face="plain", size = 10),
-        legend.title = element_text(face="bold", size=12)) +
-  scale_color_manual(legendTitle, values=rep(myCol, 2)) +
-  scale_linetype_manual(legendTitle, values=rep(c("solid", "dotted"), each=2)) +
-  guides(colour = guide_legend(override.aes = list(size=3)))
-### Plot
-basicplot_KTSP_JHUOut
-### Close device
-dev.off()
-
-save(basicplot_KTSP_JHUOut, file = "./Objs/KTSP/LOO/BasicPlot_KTSP_JHUOut.rda")
-
-##############################################################

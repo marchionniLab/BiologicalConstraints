@@ -1,13 +1,6 @@
-################################################################################
-### Mohamed Omar
-### 10/4/2019
-### Goal: Creating unrestricted K-TSP classifier
-### Cross-study validation : GSE70769 out
-###############################################################################
 
 rm(list = ls())
 
-setwd("/Volumes/Macintosh/Dropbox (MechPred)/MechPred/User/Mohamed/MechanisticModels/Prostate")
 
 ####################### 
 ##Load required packages
@@ -41,9 +34,8 @@ usedTestGroup <- testGroup
 ### TRAINING using all expressed genes
 
 ## Set Feature number and max K
-featN <- nrow(usedTrainMat) # the same as in the mechanistic classifier 
-ktsp <- c(3:25)  # the same as in the mechanistic classifier
-
+featN <- nrow(usedTrainMat)
+ktsp <- c(3:25)
 
 ###########
 ### Train a classifier using the default filter function
@@ -51,12 +43,6 @@ ktspPredictorUnRes <- SWAP.Train.KTSP(usedTrainMat, usedTrainGroup,
                                       krange = ktsp, 
                                       FilterFunc = SWAP.Filter.Wilcoxon, featureNo= featN)
 ktspPredictorUnRes
-
-#Agnostic_KTSP <- cbind(ktspPredictorUnRes$TSPs, ktspPredictorUnRes$score)
-#colnames(Agnostic_KTSP) <- c("gene1", "gene2", "score")
-
-#print(xtable(Agnostic_KTSP, type = "latex"), file = "./Objs/KTSP/Agnostic.tex")
-
 #####################################################################
 ## Compute the sum and find the best threshold: in the training samples
 ktspStatsTrainUnRes <- SWAP.KTSP.Statistics(inputMat = usedTrainMat, classifier = ktspPredictorUnRes, CombineFunc = sum)
@@ -89,9 +75,7 @@ TrainPerf <- data.frame("Training" = c(ROCTrain$ci, confusionTrain$overall["Accu
 TrainPerf[1:3, ] <- TrainPerf[c(2,1,3), ]
 rownames(TrainPerf) <- c("AUC", "AUC_CI_low", "AUC_CI_high", "Accuracy", "Bal.Accuracy", "Sensitivity", "Specificity", "MCC")
 
-#################################################################################
 ###############################################################################
-
 #### Testing
 
 # Compute the sum and find the best threshold
@@ -122,15 +106,3 @@ GSE70769_Out_AgnosticPerformance <- cbind(TrainPerf, TestPerf)
 
 # Save
 save(GSE70769_Out_AgnosticPerformance, file = "./Objs/KTSP/GSE70769_Out_AgnosticPerformance.rda")
-
-
-
-###########################################################################
-### Save
-#save(list=ls(pattern="^ktsp"), file="Objs/KTSP/agnostic.ktspPredictor.rda")
-
-##########
-## html report
-#rmarkdown::render(input = "./Code/2Agnostic_KTSP.R", output_dir = "./HTML", output_format = "html_document")
-
-

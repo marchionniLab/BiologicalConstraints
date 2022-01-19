@@ -1,13 +1,5 @@
-################################################################################
-### Mohamed Omar
-### 10/4/2019
-### Goal: Creating unrestricted K-TSP classifier
-### Cross-study validation : JHU Out 
-###############################################################################
 
 rm(list = ls())
-
-setwd("/Volumes/Macintosh/Dropbox (MechPred)/MechPred/User/Mohamed/MechanisticModels/Prostate")
 
 ####################### 
 ##Load required packages
@@ -43,22 +35,15 @@ usedTestGroup <- testGroup
 
 ## Set Feature number and max K
 featN <- nrow(usedTrainMat) # the same as in the mechanistic classifier 
-ktsp <- c(3:25)  # the same as in the mechanistic classifier
-
 
 ###########
 ### Train a classifier using the default filter function
 ktspPredictorUnRes <- SWAP.Train.KTSP(usedTrainMat, usedTrainGroup, 
-                                      krange = 100, 
+                                      krange = 50, 
                                       FilterFunc = SWAP.Filter.Wilcoxon, featureNo= featN)
 ktspPredictorUnRes
 
-#Agnostic_KTSP <- cbind(ktspPredictorUnRes$TSPs, ktspPredictorUnRes$score)
-#colnames(Agnostic_KTSP) <- c("gene1", "gene2", "score")
-
-#print(xtable(Agnostic_KTSP, type = "latex"), file = "./Objs/KTSP/Agnostic.tex")
-
-#####################################################################
+#####################################
 ## Compute the sum and find the best threshold: in the training samples
 ktspStatsTrainUnRes <- SWAP.KTSP.Statistics(inputMat = usedTrainMat, classifier = ktspPredictorUnRes, CombineFunc = sum)
 summary(ktspStatsTrainUnRes$statistics)
@@ -67,10 +52,8 @@ summary(ktspStatsTrainUnRes$statistics)
 KTSP_STATs_Train_Agnostic <- t(ktspStatsTrainUnRes$comparisons)
 KTSP_STATs_Train_Agnostic[KTSP_STATs_Train_Agnostic == FALSE] <- 0
 
-#################################################################################
-###############################################################################
-
-#### Testing
+#####################################
+# Testing
 
 # Compute the sum and find the best threshold
 ktspStatsTestUnRes <- SWAP.KTSP.Statistics(inputMat = usedTestMat, classifier = ktspPredictorUnRes, CombineFunc = sum)

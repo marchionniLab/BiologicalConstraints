@@ -1,16 +1,6 @@
-###################################################################################
-### Mohamed Omar
-### 25/11/2019
-### ### Goal: Creating the restricted ktsp classifier.
-### TF-Target genes
-## Leaving 1 dataset out (JHU)
-#################################################################################
 
-###### 
 # Clean Work space
 rm(list = ls())
-# Set work directory
-setwd("/Volumes/Macintosh/Dropbox (MechPred)/MechPred/User/Mohamed/MechanisticModels/Prostate")
 
 ############################################################################
 ### Load library
@@ -34,15 +24,15 @@ load("./Objs/Correlation/RGenes.rda")
 
 ############################################################################
 ## Load the selected genes
-Genes1 <- read.delim("./geneset.txt")
+Genes1 <- read.delim("./objs/GO_Adhesion.txt")
 Genes1 <- as.matrix(Genes1)
 Genes1 <- Genes1[-1,]
 
-Genes2 <- read.delim("./geneset2.txt")
+Genes2 <- read.delim("./objs/GO_Activation.txt")
 Genes2 <- as.matrix(Genes2)
 Genes2 <- Genes2[-1,]
 
-Genes3 <- read.delim("./geneset3.txt")
+Genes3 <- read.delim("./objs/GO_O2Response.txt")
 Genes3 <- as.matrix(Genes3)
 Genes3 <- Genes3[-1,]
 
@@ -74,14 +64,13 @@ myTSPs <- myTSPs[myTSPs[,1] %in% keepGns & myTSPs[,2] %in% keepGns , ]
 ###########################################################################
 
 ### Set Feature number and max k
-ktsp <- c(3:25) #57
 featNo <- nrow(usedTrainMat)
 
 ### Train a classifier using default filtering function based on Wilcoxon
 set.seed(333)
 
 ktspPredictorRes <- SWAP.Train.KTSP(
-  usedTrainMat, usedTrainGroup, krange=100,
+  usedTrainMat, usedTrainGroup, krange=50,
   FilterFunc = SWAP.Filter.Wilcoxon, featureNo=featNo, RestrictedPairs = myTSPs)
 
 ktspPredictorRes
