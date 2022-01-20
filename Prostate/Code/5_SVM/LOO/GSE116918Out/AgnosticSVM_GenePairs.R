@@ -1,16 +1,5 @@
-########################################################################### 
-## Mohamed Omar
-## 27/11/2019
-## Goal: SVM (Poly) for predicting prostate cancer metastasis
-## Agnostic (Using all gene pairs)
-## Cross study validation : GSE41408 out
-###########################################################################
-
 ## Clean the work environment
 rm(list = ls())
-
-## Set the working directory
-setwd("/Volumes/Macintosh/Dropbox (MechPred)/MechPred/User/Mohamed/MechanisticModels/Prostate")
 
 ## Load necessary packages
 library(caret)
@@ -19,20 +8,19 @@ library(pROC)
 library(genefilter)
 library(DMwR)
 library(mltools)
-library(reshape2)
+library(doParallel)
 
-#######################################################################
+cl <- makePSOCKcluster(12)
+registerDoParallel(cl)
 
-## Load data
-load("./Objs/KTSP/LOO/KTSP_STATs_Agnostic_GSE41408Out.rda")
-load("./Objs/LOO/MetastasisData_GSE41408Out.rda")
+## Agnostic
+load("./Objs/KTSP/LOO/KTSP_STATs_Agnostic_GSE116918Out.rda")
+load("./Objs/LOO/MetastasisData_GSE116918Out.rda")
 
 
-### Associated groups
 usedTrainGroup <- trainGroup
 usedTestGroup <- testGroup
 
-### Transpose usedTrainMat (making samples as rows instead of columns)
 Training <- t(KTSP_STATs_Train_Agnostic)
 
 ## Making sure that sample names are identical in both Training and usedTrainGroup
@@ -51,16 +39,8 @@ Testing <- t(KTSP_STATs_Test_Agnostic)
 names(usedTestGroup) <- rownames(Testing)
 all(rownames(Testing) == names(usedTestGroup))
 
-#################################################################
-## Oversampling of the training data set to compensate for the un-balanced classes
-# set.seed(333)
-# Data_train <- as.data.frame(Data_train)
-# Data_train[,332] <- as.factor(Data_train[,332])
-# Over_Train <- SMOTE(usedTrainGroup~., data = Data_train, perc.over = 300, perc.under = 134)
-# table(Over_Train[,332])
-
 ######
-control <- trainControl(method="repeatedcv", number=10, repeats=5, classProbs = TRUE, summaryFunction = twoClassSummary)
+control <- trainControl(method="repeatedcv", number=10, repeats=5, classProbs = TRUE, summaryFunction = twoClassSummary, allowParallel = T)
 
 ###########################################################################
 ###########################################################################
@@ -69,13 +49,13 @@ control <- trainControl(method="repeatedcv", number=10, repeats=5, classProbs = 
 
 ## 5-fold cross validation repeated 5 times (to find the best parameters)
 set.seed(333)
-fit.svmPoly <- train(usedTrainGroup~., data=Data_train, method="svmPoly", trControl=control, metric = c("ROC"))
+fit.svmPoly <- train(usedTrainGroup~., data=Data_train, method="svmPoly", trControl=control, tuneLength = 5, metric = "ROC")
 fit.svmPoly
 
 ## Training using all data (using the best parameters)
-Grid <- expand.grid(degree = 3, scale = 0.001, C = 0.5)
+Grid <- expand.grid(degree = 3, scale = 0.001, C = 1)
 set.seed(333)
-fit.svmPoly_agnostic_OnKTSP <- train(usedTrainGroup~., data=Data_train, method="svmPoly", trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), tuneGrid = Grid, metric = "ROC")
+fit.svmPoly_agnostic_OnKTSP <- train(usedTrainGroup~., data=Data_train, method="svmPoly", trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), tuneGrid = Grid, metric = c("ROC"))
 fit.svmPoly_agnostic_OnKTSP
 
 ##########################################################
@@ -83,7 +63,8 @@ fit.svmPoly_agnostic_OnKTSP
 
 ## ROC stat for the training data
 train_pred_prob_svmPoly_agnostic_OnKTSP <- predict(fit.svmPoly_agnostic_OnKTSP, Training, type = "prob")
-roc(usedTrainGroup, train_pred_prob_svmPoly_agnostic_OnKTSP[,2], plot = F, print.auc=TRUE, levels = c("No_Mets", "Mets"), direction = "<", col="blue", lwd=2, grid=TRUE, main = "ROC Test SVM Poly (Agnostic)")
+ROCTrain <- roc(usedTrainGroup, train_pred_prob_svmPoly_agnostic_OnKTSP[,2], plot = F, print.auc=TRUE, ci = T, levels = c("No_Mets", "Mets"), direction = "<", col="blue", lwd=2, grid=TRUE, main = "ROC Test SVM Poly (agnostic)")
+ROCTrain
 
 # The best threshold
 thr <- coords(roc(usedTrainGroup, train_pred_prob_svmPoly_agnostic_OnKTSP[,2], levels = c("No_Mets", "Mets"), direction = "<"), "best")["threshold"]
@@ -103,12 +84,18 @@ Confusion_train_svmPoly_OnKTSP
 MCC_Train <- mltools::mcc(pred = train_pred_classes_svmPoly_agnostic_OnKTSP, actuals = usedTrainGroup)
 MCC_Train
 
-#########################################################
-## Predict in the testing data
+# Put the performance metrics together
+TrainPerf <- data.frame("Training" = c(ROCTrain$ci, Confusion_train_svmPoly_OnKTSP$overall["Accuracy"], Confusion_train_svmPoly_OnKTSP$byClass["Balanced Accuracy"], Confusion_train_svmPoly_OnKTSP$byClass["Sensitivity"], Confusion_train_svmPoly_OnKTSP$byClass["Specificity"], MCC_Train))
+TrainPerf[1:3, ] <- TrainPerf[c(2,1,3), ]
+rownames(TrainPerf) <- c("AUC", "AUC_CI_low", "AUC_CI_high", "Accuracy", "Bal.Accuracy", "Sensitivity", "Specificity", "MCC")
+
+#############################################################
+## Predict in the testing data 
 
 ## ROC/AUC in the Testing set
 test_pred_prob_svmPoly_agnostic_OnKTSP <- predict(fit.svmPoly_agnostic_OnKTSP, Testing, type = "prob")
-roc(usedTestGroup, test_pred_prob_svmPoly_agnostic_OnKTSP[,2], plot = F, print.auc=TRUE, levels = c("No_Mets", "Mets"), direction = "<", col="blue", lwd=2, grid=TRUE, main = "ROC Test SVM Poly (Agnostic)")
+ROCTest <- roc(usedTestGroup, test_pred_prob_svmPoly_agnostic_OnKTSP[,2], plot = F, print.auc=TRUE, ci = T, levels = c("No_Mets", "Mets"), direction = "<", col="blue", lwd=2, grid=TRUE, main = "ROC Test SVM Poly (agnostic)")
+ROCTest
 
 # Predict classes according to the best threshold
 test_pred_classes_svmPoly_agnostic_OnKTSP <- ifelse(test_pred_prob_svmPoly_agnostic_OnKTSP[,2] > thr, "Mets", "No_Mets")
@@ -120,22 +107,18 @@ test_pred_classes_svmPoly_agnostic_OnKTSP <- factor(test_pred_classes_svmPoly_ag
 Confusion_test_svmPoly_OnKTSP <- confusionMatrix(test_pred_classes_svmPoly_agnostic_OnKTSP, usedTestGroup, positive = "Mets")
 Confusion_test_svmPoly_OnKTSP
 
-MCC_Test <- mltools::mcc(pred = test_pred_classes_svmPoly_agnostic_OnKTSP, actuals = usedTestGroup)
-MCC_Test
+MCC_agnostic <- mltools::mcc(pred = test_pred_classes_svmPoly_agnostic_OnKTSP, actuals = usedTestGroup)
+MCC_agnostic
 
+# Put the performance metrics together
+TestPerf <- data.frame("Testing" = c(ROCTest$ci, Confusion_test_svmPoly_OnKTSP$overall["Accuracy"], Confusion_test_svmPoly_OnKTSP$byClass["Balanced Accuracy"], Confusion_test_svmPoly_OnKTSP$byClass["Sensitivity"], Confusion_test_svmPoly_OnKTSP$byClass["Specificity"], MCC_agnostic))
+TestPerf[1:3, ] <- TestPerf[c(2,1,3), ]
+rownames(TestPerf) <- c("AUC", "AUC_CI_low", "AUC_CI_high", "Accuracy", "Bal.Accuracy", "Sensitivity", "Specificity", "MCC")
 
-## Top predictors
-#Importance_SVMPoly <- varImp(fit.svmPoly_agnostic_OnKTSP, scale = TRUE)
-# png("./Figs/SVM/SVM_varImp.png", width = 2000, height = 2000, res = 200)
-# plot(Importance_SVMPoly, top = 20, main = "Agnostic SVM top 20 genes")
-# dev.off()
-# 
-#Importance_SVMPoly <- Importance_SVMPoly$importance
-#Importance_SVMPoly <- Importance_SVMPoly[order(Importance_SVMPoly$Mets, decreasing = TRUE),]
-#Importance_SVMPoly <- Importance_SVMPoly[!(Importance_SVMPoly$Mets == 0), ]
-# genes_SVMPoly <- rownames(Importance_SVMPoly)[1:20]
-# save(Importance_SVMPoly, file = "./Objs/SVM/genes_SVMPloy_Agnostic.rdata")
+## Group the performance metrics of the classifier in one data frame
+GSE116918_Out_SVM_AgnosticPerformance <- cbind(TrainPerf, TestPerf)
 
-########################
+# Save
+save(GSE116918_Out_SVM_AgnosticPerformance, file = "./Objs/SVM/GSE116918_Out_SVM_AgnosticPerformance.rda")
 
-########################
+stopCluster(cl)

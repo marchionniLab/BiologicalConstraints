@@ -77,4 +77,3 @@ BS_AUC_ModelCompare <- ggplot(AllModelCompare_Breast_DiffNoFeat, aes(x = AUC, y 
                                                                          plot.background = element_rect(fill = "white")) +labs(fill = "N of features/pairs", alpha = "data type")
 BS_AUC_ModelCompare
 dev.off()
-

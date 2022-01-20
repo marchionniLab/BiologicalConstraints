@@ -386,7 +386,7 @@ fit.svmPoly_agnostic250pairs
 ###########################
 # Use the best parameters in the bootstrap
 
-Grid_agn250pairs <- expand.grid(degree = 1, scale = 1, C = 0.25)
+Grid_agn250pairs <- expand.grid(degree = 2, scale = 0.01, C = 0.25)
 
 # The function for bootstraping
 SVM_Strap <- function(data, indices) {
@@ -406,7 +406,6 @@ SVM_Strap <- function(data, indices) {
   ROCTestAgnostic <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
   return(c(ROCTrainAgnostic$auc, ROCTestAgnostic$auc, N_ImportanVariables))
 }
-
 
 set.seed(333)
 bootobjectAgnostic_250 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, R= 1000, parallel = "multicore", ncpus = 15) 

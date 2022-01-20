@@ -120,3 +120,5 @@ GSE103668_Out_SVM_AgnosticPerformance <- cbind(TrainPerf, TestPerf)
 
 # Save
 save(GSE103668_Out_SVM_AgnosticPerformance, file = "./Objs/SVM/GSE103668_Out_SVM_AgnosticPerformance.rda")
+
+stopCluster(cl)

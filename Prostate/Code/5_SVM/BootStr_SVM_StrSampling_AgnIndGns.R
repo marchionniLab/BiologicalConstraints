@@ -44,20 +44,30 @@ Testing <- t(KTSP_STATs_Test_Mechanistic)
 names(usedTestGroup) <- rownames(Testing)
 all(rownames(Testing) == names(usedTestGroup))
 
-######
-#control <- trainControl(method="repeatedcv", number=10, repeats=5, classProbs = TRUE, summaryFunction = twoClassSummary)
-
 names(Data_train_Mechanistic) <- make.names(names(Data_train_Mechanistic))
 
 colnames(Training) <- make.names(colnames(Training))
 colnames(Testing) <- make.names(colnames(Testing))
 
-Grid <- expand.grid(degree = 1, scale = 1, C = 0.25)
+###########################################################################
+## Get the best parameters
+
+control <- trainControl(method="repeatedcv", number=10, repeats=5, classProbs = TRUE, summaryFunction = twoClassSummary, allowParallel = T)
+
+# 5-fold cross validation repeated 5 times (to find the best parameters)
+set.seed(333)
+fit.svmPoly_mech <- train(usedTrainGroup~., data=Data_train_Mechanistic, method="svmPoly", trControl=control, tuneLength = 5, metric = "ROC")
+fit.svmPoly_mech
+
+################################################
+# Use the best parameters in the bootstrap
+
+Grid_mech <- expand.grid(degree = 1, scale = 0.01, C = 0.25)
 
 # The function for bootstraping
 SVM_Strap <- function(data, indices) {
   d <- data[indices, ] # allows boot to select sample
-  SVM <- train(usedTrainGroup~., data=d, method="svmPoly", trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), tuneGrid = Grid, metric = "ROC")
+  SVM <- train(usedTrainGroup~., data=d, method="svmPoly", trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), tuneGrid = Grid_mech, metric = "ROC")
   Importance_Mech <- varImp(SVM, scale = TRUE)
   Importance_Mech <- Importance_Mech$importance
   Importance_Mech <- Importance_Mech[order(Importance_Mech$Mets, decreasing = TRUE),]
@@ -79,6 +89,8 @@ bootobjectMech <- boot(data= Data_train_Mechanistic, statistic= SVM_Strap, R= 10
 
 AUCs_SVM_Mech <- bootobjectMech$t
 colnames(AUCs_SVM_Mech) <- c("AUC_Train", "AUC_Test", "N_ImportanVariables")
+
+save(bootobjectMech, file= "./Objs/SVM/SVM_MechBootObject_AdhesionActivationO2response.rda")
 
 ###################################################################################
 ### Agnostic
@@ -136,15 +148,25 @@ Testing <- t(usedTestMat)
 #names(usedTestGroup) <- rownames(Testing)
 all(rownames(Testing) == names(usedTestGroup))
 
-######
-#control <- trainControl(method="repeatedcv", number=10, repeats=5, classProbs = TRUE, summaryFunction = twoClassSummary)
 
-Grid <- expand.grid(degree = 1, scale = 1, C = 0.25)
+#########################
+## Get the best parameters
+
+control <- trainControl(method="repeatedcv", number=10, repeats=5, classProbs = TRUE, summaryFunction = twoClassSummary, allowParallel = T)
+
+# 5-fold cross validation repeated 5 times (to find the best parameters)
+set.seed(333)
+fit.svmPoly_agnostic50 <- train(usedTrainGroup~., data=Data_train_Agnostic, method="svmPoly", trControl=control, tuneLength = 5, metric = "ROC")
+fit.svmPoly_agnostic50
+
+###########################
+# Use the best parameters in the bootstrap
+Grid_agn50 <- expand.grid(degree = 3, scale = 0.01, C = 0.25)
 
 # The function for bootstraping
 SVM_Strap <- function(data, indices) {
   d <- data[indices, ] # allows boot to select sample
-  SVM <- train(usedTrainGroup~., data=d, method="svmPoly", trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), tuneGrid = Grid, metric = "ROC")
+  SVM <- train(usedTrainGroup~., data=d, method="svmPoly", trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), tuneGrid = Grid_agn50, metric = "ROC")
   Importance_Agnostic <- varImp(SVM, scale = TRUE)
   Importance_Agnostic <- Importance_Agnostic$importance
   Importance_Agnostic <- Importance_Agnostic[order(Importance_Agnostic$Mets, decreasing = TRUE),]
@@ -220,15 +242,24 @@ Testing <- t(usedTestMat)
 #names(usedTestGroup) <- rownames(Testing)
 all(rownames(Testing) == names(usedTestGroup))
 
-######
-#control <- trainControl(method="repeatedcv", number=10, repeats=5, classProbs = TRUE, summaryFunction = twoClassSummary)
+#########################
+## Get the best parameters
 
-Grid <- expand.grid(degree = 1, scale = 1, C = 0.25)
+control <- trainControl(method="repeatedcv", number=10, repeats=5, classProbs = TRUE, summaryFunction = twoClassSummary, allowParallel = T)
+
+# 5-fold cross validation repeated 5 times (to find the best parameters)
+set.seed(333)
+fit.svmPoly_agnostic100 <- train(usedTrainGroup~., data=Data_train_Agnostic, method="svmPoly", trControl=control, tuneLength = 5, metric = "ROC")
+fit.svmPoly_agnostic100
+
+###########################
+# Use the best parameters in the bootstrap
+Grid_agn100 <- expand.grid(degree = 3, scale = 0.01, C = 0.25)
 
 # The function for bootstraping
 SVM_Strap <- function(data, indices) {
   d <- data[indices, ] # allows boot to select sample
-  SVM <- train(usedTrainGroup~., data=d, method="svmPoly", trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), tuneGrid = Grid, metric = "ROC")
+  SVM <- train(usedTrainGroup~., data=d, method="svmPoly", trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), tuneGrid = Grid_agn100, metric = "ROC")
   Importance_Agnostic <- varImp(SVM, scale = TRUE)
   Importance_Agnostic <- Importance_Agnostic$importance
   Importance_Agnostic <- Importance_Agnostic[order(Importance_Agnostic$Mets, decreasing = TRUE),]
@@ -304,15 +335,24 @@ Testing <- t(usedTestMat)
 #names(usedTestGroup) <- rownames(Testing)
 all(rownames(Testing) == names(usedTestGroup))
 
-######
-#control <- trainControl(method="repeatedcv", number=10, repeats=5, classProbs = TRUE, summaryFunction = twoClassSummary)
+#########################
+## Get the best parameters
 
-Grid <- expand.grid(degree = 1, scale = 1, C = 0.25)
+control <- trainControl(method="repeatedcv", number=10, repeats=5, classProbs = TRUE, summaryFunction = twoClassSummary, allowParallel = T)
+
+# 5-fold cross validation repeated 5 times (to find the best parameters)
+set.seed(333)
+fit.svmPoly_agnostic200 <- train(usedTrainGroup~., data=Data_train_Agnostic, method="svmPoly", trControl=control, tuneLength = 5, metric = "ROC")
+fit.svmPoly_agnostic200
+
+###########################
+# Use the best parameters in the bootstrap
+Grid_agn200 <- expand.grid(degree = 2, scale = 0.01, C = 0.25)
 
 # The function for bootstraping
 SVM_Strap <- function(data, indices) {
   d <- data[indices, ] # allows boot to select sample
-  SVM <- train(usedTrainGroup~., data=d, method="svmPoly", trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), tuneGrid = Grid, metric = "ROC")
+  SVM <- train(usedTrainGroup~., data=d, method="svmPoly", trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), tuneGrid = Grid_agn200, metric = "ROC")
   Importance_Agnostic <- varImp(SVM, scale = TRUE)
   Importance_Agnostic <- Importance_Agnostic$importance
   Importance_Agnostic <- Importance_Agnostic[order(Importance_Agnostic$Mets, decreasing = TRUE),]
@@ -375,7 +415,6 @@ Training <- t(usedTrainMat)
 #names(usedTrainGroup) <- rownames(Training)
 all(rownames(Training) == names(usedTrainGroup))
 
-
 ## Combining the expression matrix and the phenotype in one data frame
 Training <- as.data.frame(Training)
 Data_train_Agnostic <- cbind(Training, usedTrainGroup)
@@ -388,15 +427,24 @@ Testing <- t(usedTestMat)
 #names(usedTestGroup) <- rownames(Testing)
 all(rownames(Testing) == names(usedTestGroup))
 
-######
-#control <- trainControl(method="repeatedcv", number=10, repeats=5, classProbs = TRUE, summaryFunction = twoClassSummary)
+#########################
+## Get the best parameters
 
-Grid <- expand.grid(degree = 1, scale = 1, C = 0.25)
+control <- trainControl(method="repeatedcv", number=10, repeats=5, classProbs = TRUE, summaryFunction = twoClassSummary, allowParallel = T)
+
+# 5-fold cross validation repeated 5 times (to find the best parameters)
+set.seed(333)
+fit.svmPoly_agnostic500 <- train(usedTrainGroup~., data=Data_train_Agnostic, method="svmPoly", trControl=control, tuneLength = 5, metric = "ROC")
+fit.svmPoly_agnostic500
+
+###########################
+# Use the best parameters in the bootstrap
+Grid_agn500 <- expand.grid(degree = 3, scale = 0.01, C = 0.25)
 
 # The function for bootstraping
 SVM_Strap <- function(data, indices) {
   d <- data[indices, ] # allows boot to select sample
-  SVM <- train(usedTrainGroup~., data=d, method="svmPoly", trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), tuneGrid = Grid, metric = "ROC")
+  SVM <- train(usedTrainGroup~., data=d, method="svmPoly", trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), tuneGrid = Grid_agn500, metric = "ROC")
   Importance_Agnostic <- varImp(SVM, scale = TRUE)
   Importance_Agnostic <- Importance_Agnostic$importance
   Importance_Agnostic <- Importance_Agnostic[order(Importance_Agnostic$Mets, decreasing = TRUE),]
