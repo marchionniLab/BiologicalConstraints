@@ -16,6 +16,11 @@ Prostate/Figs/
 Prostate/Objs/
 Prostate/renv/
 
+ICB_Response/Data/
+ICB_Response/Figs/
+ICB_Response/Objs/
+ICB_Response/renv/
+
 *.Rproj
 *.user
 *renv/

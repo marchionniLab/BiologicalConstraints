@@ -2,6 +2,8 @@ rm(list = ls())
 
 ## Load necessary packages
 library(xgboost)
+library(pdp)
+library(lime)
 library(preprocessCore)
 library(limma)
 library(pROC)
@@ -9,22 +11,28 @@ library(caret)
 library(ggplot2)
 library(dplyr)
 library(mltools)
-library(reshape2)
-library(RColorBrewer)
-library(ggpubr)
-library(plotROC)
 
 ## Load data
-load("./Objs/KTSP/LOO/KTSP_STATs_Mechanistic_GSE70769Out.rda")
-load("./Objs/LOO/MetastasisData_GSE70769Out.rda")
+load("./Objs/LOO/MetastasisData_GSE55935Out.rda")
+load("./Objs/Correlation/RGenes.rda")
 
 
-Training <- t(KTSP_STATs_Train_Mechanistic)
+### Quantile normalize
+usedTrainMat <- normalizeBetweenArrays(trainMat, method = "quantile")[RGenes, ]
+usedTestMat <- testMat[RGenes, ]
 
-
+### Associated groups
 usedTrainGroup <- trainGroup
 usedTestGroup <- testGroup
 
+names(usedTrainGroup) <- colnames(usedTrainMat)
+all(names(usedTrainGroup) == colnames(usedTrainMat))
+
+names(usedTestGroup) <- colnames(usedTestMat)
+all(names(usedTestGroup) ==colnames(usedTestMat))
+
+#########
+Training <- t(usedTrainMat)
 
 #####################
 ## Here, WE divide the training data into "actual training" and another validation
@@ -41,11 +49,14 @@ table(usedTrainGroup1)
 table(usedValGroup)
 
 
+
 ## Making sure that sample names are identical in both Training and usedTrainGroup
-names(usedTrainGroup1) <- rownames(Training1)
+#names(usedTrainGroup1) <- rownames(Training1)
 all(rownames(Training1) == names(usedTrainGroup1))
 
+#names(usedValGroup) <- rownames(Validation) 
 all(rownames(Validation) == names(usedValGroup))
+
 
 ## Combining the expression matrix and the phenotype in one data frame
 Training <- as.data.frame(Training1)
@@ -57,23 +68,21 @@ Validation <- as.data.frame(Validation)
 #usedTrainGroup <- as.data.frame(usedTrainGroup)
 Data_val <- cbind(Validation, usedValGroup)
 
-
 ########################################################
 # Transpose usedTestMat and make the sample names identical 
-Testing <- t(KTSP_STATs_Test_Mechanistic)
+Testing <- t(usedTestMat)
 
-names(usedTestGroup) <- rownames(Testing)
+#names(usedTestGroup) <- rownames(Testing)
 all(rownames(Testing) == names(usedTestGroup))
 
 ###########################################################
 ## Converting classes from Progression/NoProgression Format to 0-1 Format
 table(Data_train$usedTrainGroup1)  
 levels(Data_train$usedTrainGroup1) <- c(0,1) 
-Data_train$usedTrainGroup <- factor(Data_train$usedTrainGroup1, levels = c(0,1)) # 0=No,1= Yes 
+Data_train$usedTrainGroup1 <- factor(Data_train$usedTrainGroup1, levels = c(0,1)) # 0=No,1= Yes 
 Train_label <- Data_train$usedTrainGroup1
 Train_label <- as.vector(Train_label)
 table(Train_label)
-
 
 ## The same for validation
 table(Data_val$usedValGroup)  
@@ -82,6 +91,7 @@ Data_val$usedValGroup <- factor(Data_val$usedValGroup, levels = c(0,1)) # 0=No,1
 Val_label <- Data_val$usedValGroup
 Val_label <- as.vector(Val_label)
 table(Val_label)
+
 
 ## Combine both the Expression matrix and the phenotype into one matrix
 Testing <- as.data.frame(Testing)
@@ -115,53 +125,53 @@ set.seed(333)
 
 parameters <- list(
   # General Parameters
-  booster            = "gbtree",        
-  silent             = 1,                 
+  booster            = "gbtree",          # default = "gbtree"
+  silent             = 1,                 # default = 0
   # Booster Parameters
-  eta                = 0.001,           
-  gamma              = 0,           
-  max_depth          = 1,           
-  min_child_weight   = 1,          
-  subsample          = 0.5,          
-  colsample_bytree   = 1,         
-  colsample_bylevel  = 1,    
-  lambda             = 1,      
-  alpha              = 0,           
+  eta                = 0.1,           #0.1    # default = 0.3, range: [0,1]
+  gamma              = 0,             #0   # default = 0,   range: [0,∞]
+  max_depth          = 6,             # 6
+  min_child_weight   = 1,             #1    # default = 1,   range: [0,∞]
+  subsample          = 0.5,           #0.5      # default = 1,   range: (0,1]
+  colsample_bytree   = 1,           #0.4      # default = 1,   range: (0,1]
+  colsample_bylevel  = 1,              #1   # default = 1,   range: (0,1]
+  lambda             = 0.5,             # 0.5 # default = 1
+  alpha              = 0,           # 0    # default = 0
   # Task Parameters
-  objective          = "binary:logistic", 
+  objective          = "binary:logistic",   # default = "reg:linear"
   eval_metric        = "auc"
 )
 
-## Make the final model
-xgb.mechanistic_OnKTSP <- xgb.train(parameters, DataTrain, nrounds = 500, watchlist,  early_stopping_rounds = 50, scale_pos_weight = Resistant/Sensitive)
+## Make the final model  1411  507
+xgb.agnostic_OnKTSP <- xgb.train(parameters, DataTrain, nrounds = 500, watchlist,  early_stopping_rounds = 50, scale_pos_weight = Resistant/Sensitive)
 
 ################################################
 #################################################
 ## ROC curve and CM in the training data
-XGB_prob_Train_mechanistic_OnKTSP <- predict(xgb.mechanistic_OnKTSP, DataTrain)
-ROC_Train_mechanistic_OnKTSP <- roc(Train_label, XGB_prob_Train_mechanistic_OnKTSP, plot = FALSE, print.auc = TRUE, levels = c("0", "1"), direction = "<", col = "black", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE, main = "XGB ROC curve in the training cohort (Mechanistic)")
-ROC_Train_mechanistic_OnKTSP
+XGB_prob_Train_agnostic_OnKTSP <- predict(xgb.agnostic_OnKTSP, DataTrain)
+ROC_Train_agnostic_OnKTSP <- roc(Train_label, XGB_prob_Train_agnostic_OnKTSP, plot = FALSE, print.auc = TRUE, levels = c("0", "1"), direction = "<", col = "black", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE, main = "XGB ROC curve in the training cohort (Mechanistic)")
+ROC_Train_agnostic_OnKTSP
 
-thr_Train <- coords(roc(Train_label, XGB_prob_Train_mechanistic_OnKTSP, levels = c("0", "1"), direction = "<"), transpose = TRUE, "best")["threshold"]
+thr_Train <- coords(roc(Train_label, XGB_prob_Train_agnostic_OnKTSP, levels = c("0", "1"), direction = "<"), transpose = TRUE, "best")["threshold"]
 thr_Train
 
 ## Convert predicted probabilities to binary outcome
-prediction_Train_mechanistic_OnKTSP <- as.numeric(XGB_prob_Train_mechanistic_OnKTSP > thr_Train)
-print(head(prediction_Train_mechanistic_OnKTSP))
+prediction_Train_agnostic_OnKTSP <- as.numeric(XGB_prob_Train_agnostic_OnKTSP > thr_Train)
+print(head(prediction_Train_agnostic_OnKTSP))
 
 Train_label <- factor(Train_label, levels = c(0,1))
-prediction_Train_mechanistic_OnKTSP <- factor(prediction_Train_mechanistic_OnKTSP, levels = c(0,1))
+prediction_Train_agnostic_OnKTSP <- factor(prediction_Train_agnostic_OnKTSP, levels = c(0,1))
 
 # Confusion matrix in the training data
-CM_Train <- confusionMatrix(prediction_Train_mechanistic_OnKTSP, Train_label, positive = "1")
+CM_Train <- confusionMatrix(prediction_Train_agnostic_OnKTSP, Train_label, positive = "1")
 CM_Train
 
 # Calculate Matthews correlation coefficient
-MCC_Train <- mcc(preds = prediction_Train_mechanistic_OnKTSP, actuals = Train_label)
+MCC_Train <- mcc(preds = prediction_Train_agnostic_OnKTSP, actuals = Train_label)
 MCC_Train
 
 # Put the performance metrics together
-TrainPerf <- data.frame("Training" = c(ROC_Train_mechanistic_OnKTSP$ci, CM_Train$overall["Accuracy"], CM_Train$byClass["Balanced Accuracy"], CM_Train$byClass["Sensitivity"], CM_Train$byClass["Specificity"], MCC_Train))
+TrainPerf <- data.frame("Training" = c(ROC_Train_agnostic_OnKTSP$ci, CM_Train$overall["Accuracy"], CM_Train$byClass["Balanced Accuracy"], CM_Train$byClass["Sensitivity"], CM_Train$byClass["Specificity"], MCC_Train))
 TrainPerf[1:3, ] <- TrainPerf[c(2,1,3), ]
 rownames(TrainPerf) <- c("AUC", "AUC_CI_low", "AUC_CI_high", "Accuracy", "Bal.Accuracy", "Sensitivity", "Specificity", "MCC")
 
@@ -169,34 +179,37 @@ rownames(TrainPerf) <- c("AUC", "AUC_CI_low", "AUC_CI_high", "Accuracy", "Bal.Ac
 ######################################
 
 ## Predict in the Test data
-xgb_prob_test_mechanistic_OnKTSP <- predict(xgb.mechanistic_OnKTSP, DataTest)
+xgb_prob_test_agnostic_OnKTSP <- predict(xgb.agnostic_OnKTSP, DataTest)
 
 ## Convert predicted probabilities to binary outcome
-prediction_Test_mechanistic_OnKTSP <- as.numeric(xgb_prob_test_mechanistic_OnKTSP > thr_Train)
-print(head(prediction_Test_mechanistic_OnKTSP))
+prediction_Test_agnostic_OnKTSP <- as.numeric(xgb_prob_test_agnostic_OnKTSP > thr_Train)
+print(head(prediction_Test_agnostic_OnKTSP))
 
 Test_label <- factor(Test_label, levels = c(0,1))
-prediction_Test_mechanistic_OnKTSP <- factor(prediction_Test_mechanistic_OnKTSP, levels = c(0,1))
+prediction_Test_agnostic_OnKTSP <- factor(prediction_Test_agnostic_OnKTSP, levels = c(0,1))
 
 ## Confusion matrix
-CM_Test <- confusionMatrix(prediction_Test_mechanistic_OnKTSP, Test_label, positive = "1")
+CM_Test <- confusionMatrix(prediction_Test_agnostic_OnKTSP, Test_label, positive = "1")
 CM_Test
 
 # Calculate Matthews correlation coefficient
-MCC_Test <- mcc(preds = prediction_Test_mechanistic_OnKTSP, actuals = Test_label)
+MCC_Test <- mcc(preds = prediction_Test_agnostic_OnKTSP, actuals = Test_label)
 MCC_Test
 
 ## ROC curve and AUC
-ROCTest <- roc(Test_label, xgb_prob_test_mechanistic_OnKTSP, plot = F, print.auc = TRUE, levels = c("0", "1"), direction = "<", col = "black", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE, main = "XGB ROC curve in the testing cohort (Mechanistic)")
+ROCTest <- roc(Test_label, xgb_prob_test_agnostic_OnKTSP, plot = F, print.auc = TRUE, levels = c("0", "1"), direction = "<", col = "black", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE, main = "XGB ROC curve in the testing cohort (Agnostic)")
 ROCTest
 
-# Put the performance metrics together
+## Put the performance metrics together
 TestPerf <- data.frame("Testing" = c(ROCTest$ci, CM_Test$overall["Accuracy"], CM_Test$byClass["Balanced Accuracy"], CM_Test$byClass["Sensitivity"], CM_Test$byClass["Specificity"], MCC_Test))
 TestPerf[1:3, ] <- TestPerf[c(2,1,3), ]
 rownames(TestPerf) <- c("AUC", "AUC_CI_low", "AUC_CI_high", "Accuracy", "Bal.Accuracy", "Sensitivity", "Specificity", "MCC")
 
 ## Group the performance metrics of the classifier in one data frame
-GSE70769_Out_XGB_MechPerformance <- cbind(TrainPerf, TestPerf)
+GSE55935_Out_XGB_IndvGenes_AgnosticPerformance <- cbind(TrainPerf, TestPerf)
 
 # Save
-save(GSE70769_Out_XGB_MechPerformance, file = "./Objs/XGB/GSE70769_Out_XGB_MechPerformance.rda")
+save(GSE55935_Out_XGB_IndvGenes_AgnosticPerformance, file = "./Objs/XGB/GSE55935_Out_XGB_IndvGenes_AgnosticPerformance.rda")
+
+##############################################
+

@@ -1,25 +1,28 @@
+
 rm(list = ls())
+
 
 ## Load necessary packages
 library(xgboost)
+library(pdp)
+library(lime)
 library(preprocessCore)
 library(limma)
 library(pROC)
 library(caret)
 library(ggplot2)
 library(dplyr)
+library(Ckmeans.1d.dp)
 library(mltools)
 library(reshape2)
-library(RColorBrewer)
 library(ggpubr)
 library(plotROC)
 
-## Load data
-load("./Objs/KTSP/LOO/KTSP_STATs_Mechanistic_GSE70769Out.rda")
-load("./Objs/LOO/MetastasisData_GSE70769Out.rda")
+## Agnostic
+load("./Objs/KTSP/LOO/KTSP_STATs_Agnostic_GSE41408Out.rda")
+load("./Objs/LOO/MetastasisData_GSE41408Out.rda")
 
-
-Training <- t(KTSP_STATs_Train_Mechanistic)
+Training <- t(KTSP_STATs_Train_Agnostic)
 
 
 usedTrainGroup <- trainGroup
@@ -60,7 +63,7 @@ Data_val <- cbind(Validation, usedValGroup)
 
 ########################################################
 # Transpose usedTestMat and make the sample names identical 
-Testing <- t(KTSP_STATs_Test_Mechanistic)
+Testing <- t(KTSP_STATs_Test_Agnostic)
 
 names(usedTestGroup) <- rownames(Testing)
 all(rownames(Testing) == names(usedTestGroup))
@@ -115,53 +118,53 @@ set.seed(333)
 
 parameters <- list(
   # General Parameters
-  booster            = "gbtree",        
-  silent             = 1,                 
+  booster            = "gbtree",         
+  silent             = 1,             
   # Booster Parameters
-  eta                = 0.001,           
+  eta                = 0.1,           
   gamma              = 0,           
-  max_depth          = 1,           
+  max_depth          = 1,             
   min_child_weight   = 1,          
-  subsample          = 0.5,          
+  subsample          = 0.5,       
   colsample_bytree   = 1,         
-  colsample_bylevel  = 1,    
-  lambda             = 1,      
+  colsample_bylevel  = 1,  
+  lambda             = 1,  
   alpha              = 0,           
   # Task Parameters
-  objective          = "binary:logistic", 
+  objective          = "binary:logistic",   # default = "reg:linear"
   eval_metric        = "auc"
 )
 
 ## Make the final model
-xgb.mechanistic_OnKTSP <- xgb.train(parameters, DataTrain, nrounds = 500, watchlist,  early_stopping_rounds = 50, scale_pos_weight = Resistant/Sensitive)
+xgb.agnostic_OnKTSP <- xgb.train(parameters, DataTrain, nrounds = 500, watchlist,  early_stopping_rounds = 50, scale_pos_weight = Resistant/Sensitive)
 
 ################################################
 #################################################
 ## ROC curve and CM in the training data
-XGB_prob_Train_mechanistic_OnKTSP <- predict(xgb.mechanistic_OnKTSP, DataTrain)
-ROC_Train_mechanistic_OnKTSP <- roc(Train_label, XGB_prob_Train_mechanistic_OnKTSP, plot = FALSE, print.auc = TRUE, levels = c("0", "1"), direction = "<", col = "black", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE, main = "XGB ROC curve in the training cohort (Mechanistic)")
-ROC_Train_mechanistic_OnKTSP
+XGB_prob_Train_agnostic_OnKTSP <- predict(xgb.agnostic_OnKTSP, DataTrain)
+ROC_Train_agnostic_OnKTSP <- roc(Train_label, XGB_prob_Train_agnostic_OnKTSP, plot = FALSE, print.auc = TRUE, levels = c("0", "1"), direction = "<", col = "black", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE, main = "XGB ROC curve in the training cohort (Agnostic)")
+ROC_Train_agnostic_OnKTSP
 
-thr_Train <- coords(roc(Train_label, XGB_prob_Train_mechanistic_OnKTSP, levels = c("0", "1"), direction = "<"), transpose = TRUE, "best")["threshold"]
+thr_Train <- coords(roc(Train_label, XGB_prob_Train_agnostic_OnKTSP, levels = c("0", "1"), direction = "<"), transpose = TRUE, "best")["threshold"]
 thr_Train
 
 ## Convert predicted probabilities to binary outcome
-prediction_Train_mechanistic_OnKTSP <- as.numeric(XGB_prob_Train_mechanistic_OnKTSP > thr_Train)
-print(head(prediction_Train_mechanistic_OnKTSP))
+prediction_Train_agnostic_OnKTSP <- as.numeric(XGB_prob_Train_agnostic_OnKTSP > thr_Train)
+print(head(prediction_Train_agnostic_OnKTSP))
 
 Train_label <- factor(Train_label, levels = c(0,1))
-prediction_Train_mechanistic_OnKTSP <- factor(prediction_Train_mechanistic_OnKTSP, levels = c(0,1))
+prediction_Train_agnostic_OnKTSP <- factor(prediction_Train_agnostic_OnKTSP, levels = c(0,1))
 
 # Confusion matrix in the training data
-CM_Train <- confusionMatrix(prediction_Train_mechanistic_OnKTSP, Train_label, positive = "1")
+CM_Train <- confusionMatrix(prediction_Train_agnostic_OnKTSP, Train_label, positive = "1")
 CM_Train
 
 # Calculate Matthews correlation coefficient
-MCC_Train <- mcc(preds = prediction_Train_mechanistic_OnKTSP, actuals = Train_label)
+MCC_Train <- mcc(preds = prediction_Train_agnostic_OnKTSP, actuals = Train_label)
 MCC_Train
 
 # Put the performance metrics together
-TrainPerf <- data.frame("Training" = c(ROC_Train_mechanistic_OnKTSP$ci, CM_Train$overall["Accuracy"], CM_Train$byClass["Balanced Accuracy"], CM_Train$byClass["Sensitivity"], CM_Train$byClass["Specificity"], MCC_Train))
+TrainPerf <- data.frame("Training" = c(ROC_Train_agnostic_OnKTSP$ci, CM_Train$overall["Accuracy"], CM_Train$byClass["Balanced Accuracy"], CM_Train$byClass["Sensitivity"], CM_Train$byClass["Specificity"], MCC_Train))
 TrainPerf[1:3, ] <- TrainPerf[c(2,1,3), ]
 rownames(TrainPerf) <- c("AUC", "AUC_CI_low", "AUC_CI_high", "Accuracy", "Bal.Accuracy", "Sensitivity", "Specificity", "MCC")
 
@@ -169,25 +172,25 @@ rownames(TrainPerf) <- c("AUC", "AUC_CI_low", "AUC_CI_high", "Accuracy", "Bal.Ac
 ######################################
 
 ## Predict in the Test data
-xgb_prob_test_mechanistic_OnKTSP <- predict(xgb.mechanistic_OnKTSP, DataTest)
+xgb_prob_test_agnostic_OnKTSP <- predict(xgb.agnostic_OnKTSP, DataTest)
 
 ## Convert predicted probabilities to binary outcome
-prediction_Test_mechanistic_OnKTSP <- as.numeric(xgb_prob_test_mechanistic_OnKTSP > thr_Train)
-print(head(prediction_Test_mechanistic_OnKTSP))
+prediction_Test_agnostic_OnKTSP <- as.numeric(xgb_prob_test_agnostic_OnKTSP > thr_Train)
+print(head(prediction_Test_agnostic_OnKTSP))
 
 Test_label <- factor(Test_label, levels = c(0,1))
-prediction_Test_mechanistic_OnKTSP <- factor(prediction_Test_mechanistic_OnKTSP, levels = c(0,1))
+prediction_Test_agnostic_OnKTSP <- factor(prediction_Test_agnostic_OnKTSP, levels = c(0,1))
 
 ## Confusion matrix
-CM_Test <- confusionMatrix(prediction_Test_mechanistic_OnKTSP, Test_label, positive = "1")
+CM_Test <- confusionMatrix(prediction_Test_agnostic_OnKTSP, Test_label, positive = "1")
 CM_Test
 
 # Calculate Matthews correlation coefficient
-MCC_Test <- mcc(preds = prediction_Test_mechanistic_OnKTSP, actuals = Test_label)
+MCC_Test <- mcc(preds = prediction_Test_agnostic_OnKTSP, actuals = Test_label)
 MCC_Test
 
 ## ROC curve and AUC
-ROCTest <- roc(Test_label, xgb_prob_test_mechanistic_OnKTSP, plot = F, print.auc = TRUE, levels = c("0", "1"), direction = "<", col = "black", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE, main = "XGB ROC curve in the testing cohort (Mechanistic)")
+ROCTest <- roc(Test_label, xgb_prob_test_agnostic_OnKTSP, plot = F, print.auc = TRUE, levels = c("0", "1"), direction = "<", col = "black", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE, main = "XGB ROC curve in the testing cohort (Agnostic)")
 ROCTest
 
 # Put the performance metrics together
@@ -196,7 +199,10 @@ TestPerf[1:3, ] <- TestPerf[c(2,1,3), ]
 rownames(TestPerf) <- c("AUC", "AUC_CI_low", "AUC_CI_high", "Accuracy", "Bal.Accuracy", "Sensitivity", "Specificity", "MCC")
 
 ## Group the performance metrics of the classifier in one data frame
-GSE70769_Out_XGB_MechPerformance <- cbind(TrainPerf, TestPerf)
+GSE41408_Out_XGB_AgnosticPerformance <- cbind(TrainPerf, TestPerf)
 
 # Save
-save(GSE70769_Out_XGB_MechPerformance, file = "./Objs/XGB/GSE70769_Out_XGB_MechPerformance.rda")
+save(GSE41408_Out_XGB_AgnosticPerformance, file = "./Objs/XGB/GSE41408_Out_XGB_AgnosticPerformance.rda")
+
+
+##############################################

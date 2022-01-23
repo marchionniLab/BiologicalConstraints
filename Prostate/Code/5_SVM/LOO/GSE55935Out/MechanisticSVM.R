@@ -19,8 +19,8 @@ registerDoParallel(cl)
 #######################################################################
 
 ## Load data
-load("./Objs/KTSP/LOO/KTSP_STATs_Mechanistic_GSE116918Out.rda")
-load("./Objs/LOO/MetastasisData_GSE116918Out.rda")
+load("./Objs/KTSP/LOO/KTSP_STATs_Mechanistic_GSE55935Out.rda")
+load("./Objs/LOO/MetastasisData_GSE55935Out.rda")
 
 
 ### Associated groups
@@ -61,7 +61,7 @@ fit.svmPoly <- train(usedTrainGroup~., data=Data_train, method="svmPoly", trCont
 fit.svmPoly
 
 ## Training using all data (using the best parameters)
-Grid <- expand.grid(degree = 2, scale = 0.01, C = 0.5)
+Grid <- expand.grid(degree = 3, scale = 0.01, C = 0.25)
 set.seed(333)
 fit.svmPoly_mechanistic_OnKTSP <- train(usedTrainGroup~., data=Data_train, method="svmPoly", trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), tuneGrid = Grid, metric = c("ROC"))
 fit.svmPoly_mechanistic_OnKTSP
@@ -124,9 +124,9 @@ TestPerf[1:3, ] <- TestPerf[c(2,1,3), ]
 rownames(TestPerf) <- c("AUC", "AUC_CI_low", "AUC_CI_high", "Accuracy", "Bal.Accuracy", "Sensitivity", "Specificity", "MCC")
 
 ## Group the performance metrics of the classifier in one data frame
-GSE116918_Out_SVM_MechPerformance <- cbind(TrainPerf, TestPerf)
+GSE55935_Out_SVM_MechPerformance <- cbind(TrainPerf, TestPerf)
 
 # Save
-save(GSE116918_Out_SVM_MechPerformance, file = "./Objs/SVM/GSE116918_Out_SVM_MechPerformance.rda")
+save(GSE55935_Out_SVM_MechPerformance, file = "./Objs/SVM/GSE55935_Out_SVM_MechPerformance.rda")
 
 stopCluster(cl)

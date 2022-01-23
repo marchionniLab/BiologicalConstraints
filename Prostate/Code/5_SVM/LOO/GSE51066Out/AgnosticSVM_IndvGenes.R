@@ -18,7 +18,7 @@ registerDoParallel(cl)
 #######################################################################
 
 ## Load data
-load("./Objs/LOO/MetastasisData_GSE116918Out.rda")
+load("./Objs/LOO/MetastasisData_GSE51066Out.rda")
 load("./Objs/Correlation/RGenes.rda")
 
 ### Normalization
@@ -128,10 +128,10 @@ TestPerf[1:3, ] <- TestPerf[c(2,1,3), ]
 rownames(TestPerf) <- c("AUC", "AUC_CI_low", "AUC_CI_high", "Accuracy", "Bal.Accuracy", "Sensitivity", "Specificity", "MCC")
 
 ## Group the performance metrics of the classifier in one data frame
-GSE116918_Out_SVM_IndvGenes_AgnosticPerformance <- cbind(TrainPerf, TestPerf)
+GSE51066_Out_SVM_IndvGenes_AgnosticPerformance <- cbind(TrainPerf, TestPerf)
 
 # Save
-save(GSE116918_Out_SVM_IndvGenes_AgnosticPerformance, file = "./Objs/SVM/GSE116918_Out_SVM_IndvGenes_AgnosticPerformance.rda")
+save(GSE51066_Out_SVM_IndvGenes_AgnosticPerformance, file = "./Objs/SVM/GSE51066_Out_SVM_IndvGenes_AgnosticPerformance.rda")
 
 stopCluster(cl)
 
