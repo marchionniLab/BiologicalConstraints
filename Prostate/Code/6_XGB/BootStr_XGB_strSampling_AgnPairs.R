@@ -834,9 +834,9 @@ ModelCompareAUC_Test_25$NofFeatAgn <- "25_Pairs"
 
 ####################################################################
 ## For the main figure
-ModelCompare_XGB <- rbind(ModelCompareAUC_Train_25, ModelCompareAUC_Test_25)
-ModelCompare_XGB$algorithm <- "XGB"
-save(ModelCompare_XGB, file = "./Objs/XGB/ModelCompare_XGB_AgnPairs.rda")
+# ModelCompare_XGB <- rbind(ModelCompareAUC_Train_25, ModelCompareAUC_Test_25)
+# ModelCompare_XGB$algorithm <- "XGB"
+# save(ModelCompare_XGB, file = "./Objs/XGB/ModelCompare_XGB_AgnPairs.rda")
 
 ####################################
 # Load the AUC comparisons from the indivdial genes and combine them with pairs
@@ -894,9 +894,9 @@ ModelCompareAUC_Test_50$NofFeatAgn <- "50_Pairs"
 
 ####################################################################
 ## For the main figure
-# ModelCompare_XGB <- rbind(ModelCompareAUC_Train_50, ModelCompareAUC_Test_50)
-# ModelCompare_XGB$algorithm <- "XGB"
-# save(ModelCompare_XGB, file = "./Objs/XGB/ModelCompare_XGB_AgnPairs.rda")
+ModelCompare_XGB <- rbind(ModelCompareAUC_Train_50, ModelCompareAUC_Test_50)
+ModelCompare_XGB$algorithm <- "XGB"
+save(ModelCompare_XGB, file = "./Objs/XGB/ModelCompare_XGB_AgnPairs.rda")
 
 ####################################
 # Load the AUC comparisons from the indivdial genes and combine them with pairs

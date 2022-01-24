@@ -361,10 +361,10 @@ bootobjectAgnostic_500 <- boot(data= DataAgnostic_Train, statistic= RF_Strap, R=
 ################################################################################
 
 ## Save all bootobjects
-save(bootobjectMech, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_200, bootobjectAgnostic_500, file = "./Objs/RF/RFBootObjects_NotchAndMyc_mech100pairs.rda")
+save(bootobjectMech, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_200, bootobjectAgnostic_500, file = "./Objs/RF/RFBootObjects_NotchAndMyc.rda")
 
 ## load
-load("./Objs/RF/RFBootObjects_NotchAndMyc_mech100pairs.rda")
+load("./Objs/RF/RFBootObjects_NotchAndMyc.rda")
 
 ##################################################################################
 ##################################################################################
@@ -411,13 +411,13 @@ ModelCompareAUC_Test_50$data_type <- "Testing"
 ModelCompareAUC_Train_50$NofFeatAgn <- "50_Genes"
 ModelCompareAUC_Test_50$NofFeatAgn <- "50_Genes"
 
-save(ModelCompareAUC_Train_50, ModelCompareAUC_Test_50, file = "./Objs/RF/ModelCompareAUC_50_mech100pairs.rda")
+save(ModelCompareAUC_Train_50, ModelCompareAUC_Test_50, file = "./Objs/RF/ModelCompareAUC_50.rda")
 
 #############################################################################
-## Save for the main figure
-ModelCompare_RF <- rbind(ModelCompareAUC_Train_50, ModelCompareAUC_Test_50)
-ModelCompare_RF$algorithm <- "RF"
-save(ModelCompare_RF, file = "./Objs/RF/ModelCompare_RF_mech100pairs.rda")
+# ## Save for the main figure
+# ModelCompare_RF <- rbind(ModelCompareAUC_Train_50, ModelCompareAUC_Test_50)
+# ModelCompare_RF$algorithm <- "RF"
+# save(ModelCompare_RF, file = "./Objs/RF/ModelCompare_RF.rda")
 
 ###################################################################################3
 ###################################################################################
@@ -462,7 +462,7 @@ ModelCompareAUC_Test_100$data_type <- "Testing"
 ModelCompareAUC_Train_100$NofFeatAgn <- "100_Genes"
 ModelCompareAUC_Test_100$NofFeatAgn <- "100_Genes"
 
-save(ModelCompareAUC_Train_100, ModelCompareAUC_Test_100, file = "./Objs/RF/ModelCompareAUC_100_mech100pairs.rda")
+save(ModelCompareAUC_Train_100, ModelCompareAUC_Test_100, file = "./Objs/RF/ModelCompareAUC_100.rda")
 
 #############################################################################
 ###################################################################################
@@ -497,7 +497,7 @@ ModelCompareAUC_Test_200$data_type <- "Testing"
 ModelCompareAUC_Train_200$NofFeatAgn <- "200_Genes"
 ModelCompareAUC_Test_200$NofFeatAgn <- "200_Genes"
 
-save(ModelCompareAUC_Train_200, ModelCompareAUC_Test_200, file = "./Objs/RF/ModelCompareAUC_200_mech100pairs.rda")
+save(ModelCompareAUC_Train_200, ModelCompareAUC_Test_200, file = "./Objs/RF/ModelCompareAUC_200.rda")
 
 ############
 ###################################################################################3
@@ -533,5 +533,12 @@ ModelCompareAUC_Test_500$data_type <- "Testing"
 ModelCompareAUC_Train_500$NofFeatAgn <- "500_Genes"
 ModelCompareAUC_Test_500$NofFeatAgn <- "500_Genes"
 
-save(ModelCompareAUC_Train_500, ModelCompareAUC_Test_500, file = "./Objs/RF/ModelCompareAUC_500_mech100pairs.rda")
+## Save for the main figure
+ModelCompare_RF <- rbind(ModelCompareAUC_Train_500, ModelCompareAUC_Test_500)
+ModelCompare_RF$algorithm <- "RF"
+save(ModelCompare_RF, file = "./Objs/RF/ModelCompare_RF.rda")
+
+#####################
+## Save all
+save(ModelCompareAUC_Train_500, ModelCompareAUC_Test_500, file = "./Objs/RF/ModelCompareAUC_500.rda")
 

@@ -522,9 +522,9 @@ save(ModelCompareAUCTrain_50, ModelCompareAUCTest_50, file = "./Objs/SVM/ModelCo
 
 # ###########################################################################3
 # ## Save for the main figure
-ModelCompare_SVM <- rbind(ModelCompareAUCTrain_50, ModelCompareAUCTest_50)
-ModelCompare_SVM$algorithm <- "SVM"
-save(ModelCompare_SVM, file = "./Objs/SVM/ModelCompare_SVM_50.rda")
+# ModelCompare_SVM <- rbind(ModelCompareAUCTrain_50, ModelCompareAUCTest_50)
+# ModelCompare_SVM$algorithm <- "SVM"
+# save(ModelCompare_SVM, file = "./Objs/SVM/ModelCompare_SVM.rda")
 
 ########################################################################################
 ########################################################################################
@@ -574,9 +574,9 @@ save(ModelCompareAUCTrain_100, ModelCompareAUCTest_100, file = "./Objs/SVM/Model
 
 ###########################################################################3
 ## Save for the main figure
-#ModelCompare_SVM <- rbind(ModelCompareAUCTrain_100, ModelCompareAUCTest_100)
-#ModelCompare_SVM$algorithm <- "SVM"
-#save(ModelCompare_SVM, file = "./Objs/SVM/ModelCompare_SVM.rda")
+ModelCompare_SVM <- rbind(ModelCompareAUCTrain_100, ModelCompareAUCTest_100)
+ModelCompare_SVM$algorithm <- "SVM"
+save(ModelCompare_SVM, file = "./Objs/SVM/ModelCompare_SVM.rda")
 
 ########################################################################################
 ########################################################################################

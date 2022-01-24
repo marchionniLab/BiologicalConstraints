@@ -893,9 +893,9 @@ save(ModelCompareAUC_Train_50, ModelCompareAUC_Test_50, file = "./Objs/XGB/Model
 
 ######################
 ## Save for the main figure
-ModelCompare_XGB <- rbind(ModelCompareAUC_Train_50, ModelCompareAUC_Test_50)
-ModelCompare_XGB$algorithm <- "XGB"
-save(ModelCompare_XGB, file = "./Objs/XGB/ModelCompare_XGB.rda")
+# ModelCompare_XGB <- rbind(ModelCompareAUC_Train_50, ModelCompareAUC_Test_50)
+# ModelCompare_XGB$algorithm <- "XGB"
+# save(ModelCompare_XGB, file = "./Objs/XGB/ModelCompare_XGB.rda")
 
 ################################################################################################
 ################################################################################################
@@ -948,9 +948,9 @@ save(ModelCompareAUC_Train_100, ModelCompareAUC_Test_100, file = "./Objs/XGB/Mod
 
 ######################
 ## Save for the main figure
-# ModelCompare_XGB <- rbind(ModelCompareAUC_Train_100, ModelCompareAUC_Test_100)
-# ModelCompare_XGB$algorithm <- "XGB"
-# save(ModelCompare_XGB, file = "./Objs/XGB/ModelCompare_XGB.rda")
+ModelCompare_XGB <- rbind(ModelCompareAUC_Train_100, ModelCompareAUC_Test_100)
+ModelCompare_XGB$algorithm <- "XGB"
+save(ModelCompare_XGB, file = "./Objs/XGB/ModelCompare_XGB.rda")
 
 ################################################################################################
 ################################################################################################

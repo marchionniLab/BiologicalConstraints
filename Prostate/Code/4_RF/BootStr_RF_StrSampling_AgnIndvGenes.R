@@ -419,10 +419,10 @@ ModelCompareAUC_Test_50$NofFeatAgn <- "50_Genes"
 save(ModelCompareAUC_Train_50, ModelCompareAUC_Test_50, file = "./Objs/RF/ModelCompareAUC_50.rda")
 
 #############################################################################
-## Save for the main figure
-ModelCompare_RF <- rbind(ModelCompareAUC_Train_50, ModelCompareAUC_Test_50)
-ModelCompare_RF$algorithm <- "RF"
-save(ModelCompare_RF, file = "./Objs/RF/ModelCompare_RF.rda")
+# ## Save for the main figure
+# ModelCompare_RF <- rbind(ModelCompareAUC_Train_50, ModelCompareAUC_Test_50)
+# ModelCompare_RF$algorithm <- "RF"
+# save(ModelCompare_RF, file = "./Objs/RF/ModelCompare_RF.rda")
 
 ###################################################################################3
 ###################################################################################
@@ -468,6 +468,12 @@ ModelCompareAUC_Train_100$NofFeatAgn <- "100_Genes"
 ModelCompareAUC_Test_100$NofFeatAgn <- "100_Genes"
 
 save(ModelCompareAUC_Train_100, ModelCompareAUC_Test_100, file = "./Objs/RF/ModelCompareAUC_100.rda")
+
+###########################################################################
+## Save for the main figure
+ModelCompare_RF <- rbind(ModelCompareAUC_Train_100, ModelCompareAUC_Test_100)
+ModelCompare_RF$algorithm <- "RF"
+save(ModelCompare_RF, file = "./Objs/RF/ModelCompare_RF.rda")
 
 #############################################################################
 ###################################################################################

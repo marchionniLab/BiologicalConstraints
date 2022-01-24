@@ -449,10 +449,10 @@ ModelCompareAUCTrain_25$NofFeatAgn <- "25_Pairs"
 ModelCompareAUCTest_25$NofFeatAgn <- "25_Pairs"
 
 #############################################################################
-## Save for the main figure
-ModelCompare_SVM <- rbind(ModelCompareAUCTrain_25, ModelCompareAUCTest_25)
-ModelCompare_SVM$algorithm <- "SVM"
-save(ModelCompare_SVM, file = "./Objs/SVM/ModelCompare_SVM_AgnPairs.rda")
+# ## Save for the main figure
+# ModelCompare_SVM <- rbind(ModelCompareAUCTrain_25, ModelCompareAUCTest_25)
+# ModelCompare_SVM$algorithm <- "SVM"
+# save(ModelCompare_SVM, file = "./Objs/SVM/ModelCompare_SVM_AgnPairs.rda")
 
 # #########################################################################
 # ############################################################
@@ -509,9 +509,9 @@ ModelCompareAUCTest_50$NofFeatAgn <- "50_Pairs"
 
 #############################################################################
 ## Save for the main figure
-#ModelCompare_SVM <- rbind(ModelCompareAUCTrain_50, ModelCompareAUCTest_50)
-#ModelCompare_SVM$algorithm <- "SVM"
-#save(ModelCompare_SVM, file = "./Objs/SVM/ModelCompare_SVM_AgnPairs.rda")
+ModelCompare_SVM <- rbind(ModelCompareAUCTrain_50, ModelCompareAUCTest_50)
+ModelCompare_SVM$algorithm <- "SVM"
+save(ModelCompare_SVM, file = "./Objs/SVM/ModelCompare_SVM_AgnPairs.rda")
 
 #########################################################################
 ############################################################

@@ -416,7 +416,7 @@ bootobjectAgnostic_250 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, 
 save(bootobjectMech, bootobjectAgnostic_25, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_250, file= "./Objs/SVM/SVMBootObjects_NotchAndMyc_AgnPairs.rda")
 
 ## Load
-#load("./Objs/SVM/SVMBootObjects_NotchAndMyc_AgnPairs.rda")
+load("./Objs/SVM/SVMBootObjects_NotchAndMyc_AgnPairs.rda")
 
 ########################################################################################
 ########################################################################################
@@ -466,9 +466,9 @@ ModelCompareAUCTest_25$NofFeatAgn <- "25_Pairs"
 
 #############################################################################
 ## Save for the main figure
-ModelCompare_SVM <- rbind(ModelCompareAUCTrain_25, ModelCompareAUCTest_25)
-ModelCompare_SVM$algorithm <- "SVM"
-save(ModelCompare_SVM, file = "./Objs/SVM/ModelCompare_SVM_AgnPairs.rda")
+# ModelCompare_SVM <- rbind(ModelCompareAUCTrain_25, ModelCompareAUCTest_25)
+# ModelCompare_SVM$algorithm <- "SVM"
+# save(ModelCompare_SVM, file = "./Objs/SVM/ModelCompare_SVM_AgnPairs.rda")
  
 # #########################################################################
 # ############################################################
@@ -616,6 +616,12 @@ ModelCompareAUCTest_250$data_type <- "Testing"
 
 ModelCompareAUCTrain_250$NofFeatAgn <- "250_Pairs"
 ModelCompareAUCTest_250$NofFeatAgn <- "250_Pairs"
+
+#############################################################################
+## Save for the main figure
+ModelCompare_SVM <- rbind(ModelCompareAUCTrain_250, ModelCompareAUCTest_250)
+ModelCompare_SVM$algorithm <- "SVM"
+save(ModelCompare_SVM, file = "./Objs/SVM/ModelCompare_SVM_AgnPairs.rda")
 
 #########################################################################
 ############################################################

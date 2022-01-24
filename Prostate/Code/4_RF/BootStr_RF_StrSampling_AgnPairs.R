@@ -366,12 +366,12 @@ ModelCompareAUC_Train_25$NofFeatAgn <- "25_Pairs"
 ModelCompareAUC_Test_25$NofFeatAgn <- "25_Pairs"
 
 
-#############################################################################
-## Save for the main figure
-ModelCompare_RF <- rbind(ModelCompareAUC_Train_25, ModelCompareAUC_Test_25)
-ModelCompare_RF$algorithm <- "RF"
-save(ModelCompare_RF, file = "./Objs/RF/ModelCompare_RF_AgnPairs.rda")
-
+# #############################################################################
+# ## Save for the main figure
+# ModelCompare_RF <- rbind(ModelCompareAUC_Train_25, ModelCompareAUC_Test_25)
+# ModelCompare_RF$algorithm <- "RF"
+# save(ModelCompare_RF, file = "./Objs/RF/ModelCompare_RF_AgnPairs.rda")
+# 
 #####################################################################
 ############################################################
 #Load the AUC comparisons from the indivdial genes and combine them with pairs
@@ -428,9 +428,9 @@ ModelCompareAUC_Test_50$NofFeatAgn <- "50_Pairs"
 
 ##############################################################################
 ## Save for the main figure
-# ModelCompare_RF <- rbind(ModelCompareAUC_Train_50, ModelCompareAUC_Test_50)
-# ModelCompare_RF$algorithm <- "RF"
-# save(ModelCompare_RF, file = "./Objs/RF/ModelCompare_RF_AgnPairs.rda")
+ModelCompare_RF <- rbind(ModelCompareAUC_Train_50, ModelCompareAUC_Test_50)
+ModelCompare_RF$algorithm <- "RF"
+save(ModelCompare_RF, file = "./Objs/RF/ModelCompare_RF_AgnPairs.rda")
 
 #####################################################################
 ############################################################
