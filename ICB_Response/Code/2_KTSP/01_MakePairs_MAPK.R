@@ -10,12 +10,12 @@ load("./Data/geneSetCollectionSet.MSigDBv6.1.rda")
 
 #########################################################################
 #### Package
-require(GSEABase)
+library(GSEABase)
 
 
 #########################################################################
 #### Retrieve the Lists Needed
-nms <- lapply(geneSetCollectionSet.msigdb, function(x) grep('NOTCH', names(x), value=TRUE))
+nms <- lapply(geneSetCollectionSet.msigdb, function(x) grep('MAPK', names(x), value=TRUE))
 nms <- nms[sapply(nms,  length) > 0]
 
 
@@ -31,7 +31,10 @@ names(GeneList) <- gsub(".+\\.",  "",  names(GeneList))
 
 ######################################################
 #### Pro Notch
-ProImmune <- GeneList[c(
+ProImmune <- GeneList[c('RAMJAUN_APOPTOSIS_BY_TGFB1_VIA_MAPK1_UP',
+                        'GO_POSITIVE_REGULATION_OF_MAPK_CASCADE',
+                        'GO_POSITIVE_REGULATION_OF_P38MAPK_CASCADE',
+                        'GO_ACTIVATION_OF_MAPK_ACTIVITY'
 )]
 
 
@@ -50,10 +53,10 @@ length(ConsensusPI)
 
 ######################################################
 #### Anti Notch
-AntiImmune <- GeneList[c("NGUYEN_NOTCH1_TARGETS_DN", 
-                        "VILIMAS_NOTCH1_TARGETS_DN",
-                        "GO_NEGATIVE_REGULATION_OF_NOTCH_SIGNALING_PATHWAY"
-)]
+AntiImmune <- GeneList[c("RAMJAUN_APOPTOSIS_BY_TGFB1_VIA_MAPK1_DN", 
+                         "GO_NEGATIVE_REGULATION_OF_MAPK_CASCADE",
+                         "GO_INACTIVATION_OF_MAPK_ACTIVITY"
+                         )]
 
 
 #### Generate Consensus
@@ -96,15 +99,15 @@ Pairs <- expand.grid(ImmuneList)
 colnames(Pairs) <- c("ProImmune","AntiImmune")
 
 ### Make into a matrix
-NotchPairs <- as.matrix(Pairs)
+ImmunePairs2 <- as.matrix(Pairs)
 
-NotchPairs[,1] <- gsub("\\-", "", NotchPairs[,1])
-NotchPairs[,2] <- gsub("\\-", "", NotchPairs[,2])
+# ImmunePairs[,1] <- gsub("\\-", "", ImmunePairs[,1])
+# ImmunePairs[,2] <- gsub("\\-", "", ImmunePairs[,2])
 
 ######################################################################
 ####Save Results
 save(ImmuneList, file="./Objs/ImmuneListConsensus.v6.1.rda")
-save(NotchPairs,file="./Objs/ImmunePairs.rda")
+save(ImmunePairs2,file="./Objs/ImmunePairs2.rda")
 
 
 #####################################################################

@@ -66,10 +66,6 @@ table(keep)
 
 Expr_GSE78220 <- Expr_GSE78220[keep,]
 
-# Log2-transform
-range(Expr_GSE78220)
-Expr_GSE78220 <- log2(Expr_GSE78220 + 1)
-
 # Modify the column names to be consistent with the sample names in the phenotype
 colnames(Expr_GSE78220) <- gsub("\\..+", "", colnames(Expr_GSE78220))
 
@@ -83,6 +79,17 @@ Expr_GSE78220 <- Expr_GSE78220[sel, ]
 Expr_GSE78220 <- Expr_GSE78220[!is.na(rownames(Expr_GSE78220)),]
 Expr_GSE78220 <- Expr_GSE78220[!(rownames(Expr_GSE78220) == ""), ] 
 dim(Expr_GSE78220)
+
+# Normalize
+# Expr_GSE78220 <- DGEList(Expr_GSE78220)
+# Expr_GSE78220 <- calcNormFactors(Expr_GSE78220, method = c("TMM"))
+# Expr_GSE78220 <- cpm(Expr_GSE78220, log = TRUE, prior.count = 1, normalized.lib.sizes = TRUE)
+
+# Log2-transform
+range(Expr_GSE78220)
+Expr_GSE78220 <- log2(Expr_GSE78220 + 1)
+
+Expr_GSE78220 <- t(scale(t(Expr_GSE78220), center = TRUE, scale = TRUE))
 
 ################
 # Process Expr_GSE91061
@@ -113,8 +120,16 @@ Expr_GSE91061 <- Expr_GSE91061[!is.na(rownames(Expr_GSE91061)), ]
 Expr_GSE91061 <- Expr_GSE91061[!(rownames(Expr_GSE91061) == ""), ] 
 dim(Expr_GSE91061)
 
+# Normalize
+# Expr_GSE91061 <- DGEList(Expr_GSE91061)
+# Expr_GSE91061 <- calcNormFactors(Expr_GSE91061, method = c("TMM"))
+# Expr_GSE91061 <- cpm(Expr_GSE91061, log = TRUE, prior.count = 1, normalized.lib.sizes = TRUE)
+
 # Log2_transform
+range(Expr_GSE91061)
 Expr_GSE91061 <- log2(Expr_GSE91061 + 1)
+
+Expr_GSE91061 <- t(scale(t(Expr_GSE91061), center = TRUE, scale = TRUE))
 
 ################
 # Process Expr_GSE115821
@@ -129,11 +144,13 @@ Expr_GSE115821 <- Expr_GSE115821[-miR, ]
 
 # Normalize
 Expr_GSE115821 <- DGEList(Expr_GSE115821)
-
 Expr_GSE115821 <- calcNormFactors(Expr_GSE115821, method = c("TMM"))
-
 Expr_GSE115821 <- cpm(Expr_GSE115821, log = TRUE, prior.count = 1, normalized.lib.sizes = TRUE)
-boxplot(Expr_GSE115821)
+
+# z-score
+Expr_GSE115821 <- t(scale(t(Expr_GSE115821), center = TRUE, scale = TRUE))
+
+#boxplot(Expr_GSE115821)
 
 ## MAke the sample names consistent 
 colnames(Expr_GSE115821) <- gsub("X", "", colnames(Expr_GSE115821))
@@ -164,8 +181,16 @@ Expr_TCGA$GeneSymbol <- NULL
 H19 <- grep("^H19", rownames(Expr_TCGA))
 Expr_TCGA <- Expr_TCGA[-H19, ]
 
+# Normalize
+# Expr_TCGA <- DGEList(Expr_TCGA)
+# Expr_TCGA <- calcNormFactors(Expr_TCGA, method = c("TMM"))
+# Expr_TCGA <- cpm(Expr_TCGA, log = TRUE, prior.count = 1, normalized.lib.sizes = TRUE)
+
 # Log2transform
+range(Expr_TCGA)
 Expr_TCGA <- log2(Expr_TCGA+1)
+
+Expr_TCGA <- t(scale(t(Expr_TCGA), center = TRUE, scale = TRUE))
 
 #######################
 ## Process Expr_VanAllen
@@ -199,9 +224,16 @@ table(keep)
 Expr_VanAllen <- Expr_VanAllen[keep,]
 dim(Expr_VanAllen)
 
+# Normalize
+# Expr_VanAllen <- DGEList(Expr_VanAllen)
+# Expr_VanAllen <- calcNormFactors(Expr_VanAllen, method = c("TMM"))
+# Expr_VanAllen <- cpm(Expr_VanAllen, log = TRUE, prior.count = 1, normalized.lib.sizes = TRUE)
+
 # Log2transform
+range(Expr_VanAllen)
 Expr_VanAllen <- log2(Expr_VanAllen + 1)
 
+Expr_VanAllen <- t(scale(t(Expr_VanAllen), center = TRUE, scale = TRUE))
 
 ###########################################
 ### Modify the phenotypes
@@ -214,7 +246,7 @@ rownames(Pheno_GSE78220) <- Pheno_GSE78220$title
 all(rownames(Pheno_GSE78220) == colnames(Expr_GSE78220))
 
 # Keep only pre-treatment samples
-Pheno_GSE78220 <- Pheno_GSE78220[Pheno_GSE78220$`biopsy time:ch1` == 'pre-treatment', ]
+#Pheno_GSE78220 <- Pheno_GSE78220[Pheno_GSE78220$`biopsy time:ch1` == 'pre-treatment', ]
 
 # Get the response variable and convert to factor
 Pheno_GSE78220$Response <- as.factor(Pheno_GSE78220$`anti-pd-1 response:ch1`)
@@ -238,7 +270,7 @@ Pheno_GSE91061 <- Pheno_GSE91061[!(Pheno_GSE91061$geo_accession == 'GSM2420320')
 rownames(Pheno_GSE91061) <- Pheno_GSE91061$title
 
 # Keep only pre-treatment samples
-Pheno_GSE91061 <- Pheno_GSE91061[Pheno_GSE91061$`visit (pre or on treatment):ch1` == 'Pre', ]
+#Pheno_GSE91061 <- Pheno_GSE91061[Pheno_GSE91061$`visit (pre or on treatment):ch1` == 'Pre', ]
 
 # remove samples with unknown response
 Pheno_GSE91061 <- Pheno_GSE91061[!(Pheno_GSE91061$`response:ch1` == 'UNK'), ]
@@ -274,7 +306,7 @@ Pheno_GSE115821 <- Pheno_GSE115821[order(rownames(Pheno_GSE115821)), ]
 all(rownames(Pheno_GSE115821) == colnames(Expr_GSE115821))
 
 # Keep only pre-treatment samples
-Pheno_GSE115821 <- Pheno_GSE115821[Pheno_GSE115821$`treatment state:ch1` %in% c('PRE Immune Checkpoint Blockade Therapy', 'PRE Immune Checkpoint Blockade Therapy (On dabrafenib+trametinib)'), ]
+#Pheno_GSE115821 <- Pheno_GSE115821[Pheno_GSE115821$`treatment state:ch1` %in% c('PRE Immune Checkpoint Blockade Therapy', 'PRE Immune Checkpoint Blockade Therapy (On dabrafenib+trametinib)'), ]
 
 # Remove duplicate samples
 Pheno_GSE115821 <- Pheno_GSE115821[!(Pheno_GSE115821$geo_accession %in% c('GSM3190470', 'GSM3190484', 'GSM3190485', 'GSM3190487', 'GSM3190494', 'GSM3190495')), ]
@@ -289,7 +321,6 @@ Expr_GSE115821 <- Expr_GSE115821[, colnames(Expr_GSE115821) %in% rownames(Pheno_
 
 # Check for consistency
 all(rownames(Pheno_GSE115821) == colnames(Expr_GSE115821))
-
 
 #####################
 ## Modify Pheno_TCGA
@@ -492,6 +523,33 @@ all(colnames(allMat) == names(allGroup))
 ### Covariates for stratified sampling
 
 #############################################################
+### Pre or on
+
+allPheno$GSE115821$BiopsyTiming <- as.factor(allPheno$GSE115821$`treatment state:ch1`)
+levels(allPheno$GSE115821$BiopsyTiming) <- c('on', 'pre', 'pre')
+
+allPheno$GSE91061$BiopsyTiming <- as.factor(allPheno$GSE91061$`visit (pre or on treatment):ch1`)
+levels(allPheno$GSE91061$BiopsyTiming) <- c('on', 'pre')
+
+allPheno$GSE78220$BiopsyTiming <- as.factor(allPheno$GSE78220$`biopsy time:ch1`)
+levels(allPheno$GSE78220$BiopsyTiming) <- c('on', 'pre')
+
+allPheno$TCGA$BiopsyTiming <- as.factor(allPheno$TCGA$Biopsy.Time)
+levels(allPheno$TCGA$BiopsyTiming) <- c('pre')
+
+allPheno$VanAllen$BiopsyTiming <- as.factor(rep('pre', nrow(allPheno$VanAllen)))
+
+### Covariates of relevance select complete cases: GRADE
+allBioposyTiming <- lapply(allPheno, function(x) {
+  i <- grep("BiopsyTiming", colnames(x))
+  if (length(i) == 0) out <- factor(rep("NA", nrow(x)))
+  else x <- factor(x[, i  ])
+})
+
+allBioposyTiming <- factor(unlist(allBioposyTiming))
+table(allBioposyTiming)
+
+#############################################################
 ### gender
 
 # Pheno_GSE91061: no gender info
@@ -543,7 +601,8 @@ summary(allAGE)
 
 ### Assemble in one data.frame and turn numeric
 covs <- data.frame(STUDIES=allStudies,
-                   GENDER=allGender, 
+                   GENDER=allGender,
+                   BiopsyTiming= allBioposyTiming,
                    AGE=allAGE)
 
 ### Prepare vocs for sampling
@@ -556,7 +615,7 @@ covs <- sapply(covs , function(x) as.numeric(factor(paste(x))) )
 set.seed(333)
 trainingOrTesting <- balancedstratification(
   covs[ , , drop=FALSE], strata=1*(allGroup == "R"),
-  pik=inclusionprobabilities(1:nrow(covs), nrow(covs) * 0.25),
+  pik=inclusionprobabilities(1:nrow(covs), nrow(covs) * 0.2),
   comment=TRUE, method=1)
 
 ### Show
