@@ -63,7 +63,7 @@ fit.svmPoly_mech
 ################################################
 # Use the best parameters in the bootstrap
 
-Grid_mech <- expand.grid(degree = 2, scale = 0.01, C = 0.5)
+Grid_mech <- expand.grid(degree = 2, scale = 0.01, C = 1)
 
 # The function for bootstraping
 SVM_Strap <- function(data, indices) {
@@ -370,6 +370,97 @@ bootobjectAgnostic_200 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, 
 ########################################################################################
 ### Agnostic
 
+### top 238 DEGs
+
+## Load data
+load("./Objs/ChemoDataNew.rda")
+
+
+### Quantile normalize
+usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
+usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")
+
+####
+usedTrainGroup <- mixTrainGroup
+usedTestGroup <- mixTestGroup
+
+
+#names(usedTrainGroup) <- colnames(usedTrainMat)
+all(names(usedTrainGroup) == colnames(usedTrainMat))
+
+#names(usedTestGroup) <- colnames(usedTestMat)
+all(names(usedTestGroup) ==colnames(usedTestMat))
+
+#########
+## Detect Top DE genes
+TopDEgenes <- SWAP.Filter.Wilcoxon(phenoGroup = usedTrainGroup, inputMat = usedTrainMat, featureNo = 238)
+
+## Subset the expression matrix to the top DE genes only
+usedTrainMat <- usedTrainMat[TopDEgenes, ]
+usedTestMat <- usedTestMat[TopDEgenes, ]
+#################################################################
+### Transpose usedTrainMat (making samples as rows instead of columns)
+Training <- t(usedTrainMat)
+#names_train <- c(as.vector(rownames(usedTrainMat)))
+#colnames(Training) <- names_train
+
+## Making sure that sample names are identical in both Training and usedTrainGroup
+#names(usedTrainGroup) <- rownames(Training)
+all(rownames(Training) == names(usedTrainGroup))
+
+
+## Combining the expression matrix and the phenotype in one data frame
+Training <- as.data.frame(Training)
+Data_train_Agnostic <- cbind(Training, usedTrainGroup)
+
+########################################################
+# Transpose usedTestMat and make the sample names identical 
+Testing <- t(usedTestMat)
+#names_Test <- c(as.vector(rownames(usedTestMat)))
+#colnames(Testing) <- names_Test
+#names(usedTestGroup) <- rownames(Testing)
+all(rownames(Testing) == names(usedTestGroup))
+
+#########################
+## Get the best parameters
+
+control <- trainControl(method="repeatedcv", number=10, repeats=5, classProbs = TRUE, summaryFunction = twoClassSummary, allowParallel = T)
+
+# 5-fold cross validation repeated 5 times (to find the best parameters)
+set.seed(333)
+fit.svmPoly_agnostic238 <- train(usedTrainGroup~., data=Data_train_Agnostic, method="svmPoly", trControl=control, tuneLength = 5, metric = "ROC")
+fit.svmPoly_agnostic238
+
+###########################
+# Use the best parameters in the bootstrap
+Grid_agn238 <- expand.grid(degree = 1, scale = 0.1, C = 0.5)
+
+# The function for bootstraping
+SVM_Strap <- function(data, indices) {
+  d <- data[indices, ] # allows boot to select sample
+  SVM <- train(usedTrainGroup~., data=d, method="svmPoly", trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), tuneGrid = Grid_agn238, metric = "ROC")
+  Importance_Agnostic <- varImp(SVM, scale = TRUE)
+  Importance_Agnostic <- Importance_Agnostic$importance
+  Importance_Agnostic <- Importance_Agnostic[order(Importance_Agnostic$Resistant, decreasing = TRUE),]
+  Importance_Agnostic <- Importance_Agnostic[Importance_Agnostic$Resistant > 0, ]
+  N_ImportanVariables <- nrow(Importance_Agnostic)
+  Training <- d
+  PhenoTrain <- d$usedTrainGroup
+  Training$usedTrainGroup <- NULL
+  train_preds <- predict(SVM, newdata = Training, type = "prob")
+  test_preds <- predict(SVM, newdata = Testing, type = "prob")
+  ROCTrainAgnostic <- roc(PhenoTrain, train_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTestAgnostic <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  return(c(ROCTrainAgnostic$auc, ROCTestAgnostic$auc, N_ImportanVariables))
+}
+
+set.seed(333)
+bootobjectAgnostic_238 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, R= 1000, parallel = "multicore", ncpus = 15) 
+
+
+########################################################################################
+### Agnostic
+
 ### top 500 DEGs
 
 ## Load data
@@ -461,7 +552,7 @@ bootobjectAgnostic_500 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, 
 ########################################################################################
 ########################################################################################
 ## Save all Objects
-save(bootobjectMech, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_200, bootobjectAgnostic_500, file= "./Objs/SVM/SVMBootObjects_NotchAndMyc.rda")
+save(bootobjectMech, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_200, bootobjectAgnostic_238, bootobjectAgnostic_500, file= "./Objs/SVM/SVMBootObjects_NotchAndMyc.rda")
 
 ## Load
 load("./Objs/SVM/SVMBootObjects_NotchAndMyc.rda")
@@ -612,6 +703,49 @@ save(ModelCompareAUCTrain_200, ModelCompareAUCTest_200, file = "./Objs/SVM/Model
 ########################################################################################
 ########################################################################################
 
+## Work with Agnostic bootobject 238 vs mechanistic
+
+AUCs_SVM_Agnostic_238 <- bootobjectAgnostic_238$t
+colnames(AUCs_SVM_Agnostic_238) <- c("AUC_Train", "AUC_Test", "N_ImportanVariables")
+
+# Calculate the difference and the CI of the difference in the training data
+DiffAgnostic_238 <- AUCs_SVM_Agnostic_238[, "AUC_Train"] - AUCs_SVM_Agnostic_238[, "AUC_Test"]
+quantile(DiffAgnostic_238, c(0.025, 0.975))
+#colnames(Diff) <- "Diff"
+
+
+## Plot the distributions of the AUCs from both methods in the training data
+AgnosticAUCTrain_238 <- data.frame(AUC = AUCs_SVM_Agnostic_238[, "AUC_Train"])
+
+AgnosticAUCTrain_238$modelType <- "Agnostic_DEGs"
+
+ModelCompareAUCTrain_238 <- rbind(MechanisticAUCTrain, AgnosticAUCTrain_238)
+
+## Plot the distributions of the AUCs from both methods in the testing data
+AgnosticAUCTest_238 <- data.frame(AUC = AUCs_SVM_Agnostic_238[, "AUC_Test"])
+
+AgnosticAUCTest_238$modelType <- "Agnostic_DEGs"
+
+ModelCompareAUCTest_238 <- rbind(MechanisticAUCTest, AgnosticAUCTest_238)
+
+## Save the AUCs in the training and testing data
+ModelCompareAUCTrain_238$data_type <- "Training"
+ModelCompareAUCTest_238$data_type <- "Testing"
+
+ModelCompareAUCTrain_238$NofFeatAgn <- "238_Genes"
+ModelCompareAUCTest_238$NofFeatAgn <- "238_Genes"
+
+save(ModelCompareAUCTrain_238, ModelCompareAUCTest_238, file = "./Objs/SVM/ModelCompareAUC_238.rda")
+
+# #############################
+# ## Save for the main figure
+ModelCompare_SVM <- rbind(ModelCompareAUCTrain_238, ModelCompareAUCTest_238)
+ModelCompare_SVM$algorithm <- "SVM"
+save(ModelCompare_SVM, file = "./Objs/SVM/ModelCompare_SVM.rda")
+
+########################################################################################
+########################################################################################
+
 ## Work with Agnostic bootobject 500 vs mechanistic
 
 AUCs_SVM_Agnostic_500 <- bootobjectAgnostic_500$t
@@ -644,13 +778,6 @@ ModelCompareAUCTest_500$data_type <- "Testing"
 ModelCompareAUCTrain_500$NofFeatAgn <- "500_Genes"
 ModelCompareAUCTest_500$NofFeatAgn <- "500_Genes"
 
-# ###########################################################################3
-# ## Save for the main figure
-ModelCompare_SVM <- rbind(ModelCompareAUCTrain_500, ModelCompareAUCTest_500)
-ModelCompare_SVM$algorithm <- "SVM"
-save(ModelCompare_SVM, file = "./Objs/SVM/ModelCompare_SVM.rda")
 
-#####################
-## save all
 save(ModelCompareAUCTrain_500, ModelCompareAUCTest_500, file = "./Objs/SVM/ModelCompareAUC_500.rda")
 

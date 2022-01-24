@@ -1,6 +1,5 @@
 rm(list = ls())
 
-#setwd("/Volumes/Macintosh/Dropbox (MechPred)/MechPred/User/Mohamed/MechanisticModels/BreastChemo")
 
 ### Load library
 require(switchBox)
@@ -128,6 +127,39 @@ KTSP_STATs_Test_Agnostic_100 <- t(ktspStatsTestUnRes_100$comparisons)
 KTSP_STATs_Test_Agnostic_100[KTSP_STATs_Test_Agnostic_100 == FALSE] <- 0
 
 save(KTSP_STATs_Train_Agnostic_100, KTSP_STATs_Test_Agnostic_100, file = "./Objs/KTSP/TNBC_KTSP_STATs_Agnostic_100.rda")
+
+#############################################################################
+###############################################################################
+
+### Train a classifier using the top 238 features > 119 pairs
+ktspPredictorUnRes_119 <- SWAP.Train.KTSP(usedTrainMat, usedTrainGroup, 
+                                          krange = 119, 
+                                          FilterFunc = SWAP.Filter.Wilcoxon, featureNo= 238)
+ktspPredictorUnRes_119
+
+
+#############################
+## Compute the sum and find the best threshold: in the training samples
+ktspStatsTrainUnRes_119 <- SWAP.KTSP.Statistics(inputMat = usedTrainMat, classifier = ktspPredictorUnRes_119, CombineFunc = sum)
+summary(ktspStatsTrainUnRes_119$statistics)
+
+
+KTSP_STATs_Train_Agnostic_119 <- t(ktspStatsTrainUnRes_119$comparisons)
+KTSP_STATs_Train_Agnostic_119[KTSP_STATs_Train_Agnostic_119 == FALSE] <- 0
+
+
+################################
+#### Testing
+
+# Compute the sum and find the best threshold
+ktspStatsTestUnRes_119 <- SWAP.KTSP.Statistics(inputMat = usedTestMat, classifier = ktspPredictorUnRes_119, CombineFunc = sum)
+summary(ktspStatsTestUnRes_119$statistics)
+
+KTSP_STATs_Test_Agnostic_119 <- t(ktspStatsTestUnRes_119$comparisons)
+KTSP_STATs_Test_Agnostic_119[KTSP_STATs_Test_Agnostic_119 == FALSE] <- 0
+
+save(KTSP_STATs_Train_Agnostic_119, KTSP_STATs_Test_Agnostic_119, file = "./Objs/KTSP/TNBC_KTSP_STATs_Agnostic_119.rda")
+
 
 
 #############################################################################

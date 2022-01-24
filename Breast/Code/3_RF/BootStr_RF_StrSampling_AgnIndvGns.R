@@ -20,7 +20,7 @@ library(boot)
 
 
 ## Load data
-load("./Objs/KTSP/TNBC_KTSP_STATs_Mechanistic_NotchAndMyc2_100.rda")
+load("./Objs/KTSP/TNBC_KTSP_STATs_Mechanistic_NotchAndMyc2.rda")
 load("./Objs/ChemoDataNew.rda")
 
 
@@ -74,6 +74,8 @@ bootobjectMech <- boot(data= DataMech_Train, statistic= RF_Strap, R= 1000, paral
 
 AUCs_RF_Mech <- bootobjectMech$t
 colnames(AUCs_RF_Mech) <- c("AUC_Train", "AUC_Test", "N_ImportanVariables")
+
+save(bootobjectMech, file = './objs/RF/RF_MechBootObject.rda')
 
 ###################################################
 ## RF
@@ -287,6 +289,75 @@ RF_Strap <- function(data, indices) {
 set.seed(333)
 bootobjectAgnostic_200 <- boot(data= DataAgnostic_Train, statistic= RF_Strap, R= 1000, parallel = "multicore", ncpus = 15) 
 
+################################################################################
+# Agnostic top 238 DEGs
+
+## Load the data
+load("./Objs/ChemoDataNew.rda")
+
+### Quantile normalize
+usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
+usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")
+
+####
+usedTrainGroup <- mixTrainGroup
+usedTestGroup <- mixTestGroup
+
+all(names(usedTrainGroup) == colnames(usedTrainMat))
+
+all(names(usedTestGroup) ==colnames(usedTestMat))
+
+#########
+## Detect Top DE genes
+TopDEgenes <- SWAP.Filter.Wilcoxon(phenoGroup = usedTrainGroup, inputMat = usedTrainMat, featureNo = 238)
+
+## Subset the expression matrix to the top DE genes only
+usedTrainMat <- usedTrainMat[TopDEgenes, ]
+usedTestMat <- usedTestMat[TopDEgenes, ]
+########################
+
+
+predictor_data_Train_Agnostic <- t(usedTrainMat)
+predictor_data_Test_Agnostic <- t(usedTestMat)
+
+DataAgnostic_Train <- cbind(predictor_data_Train_Agnostic, usedTrainGroup)
+DataAgnostic_Train <- as.data.frame(DataAgnostic_Train)
+DataAgnostic_Train$usedTrainGroup <- as.factor(DataAgnostic_Train$usedTrainGroup)
+levels(DataAgnostic_Train[, "usedTrainGroup"]) <- c("Sensitive", "Resistant")
+
+#names(DataAgnostic_Train) <- make.names(names(DataAgnostic_Train))
+
+#colnames(predictor_data_Train_Agnostic) <- make.names(colnames(predictor_data_Train_Agnostic))
+#colnames(predictor_data_Test_Agnostic) <- make.names(colnames(predictor_data_Test_Agnostic))
+
+## Finally we run the RF algorithm. 
+
+# The function for bootstraping
+RF_Strap <- function(data, indices) {
+  d <- data[indices, ] # allows boot to select sample
+  # Select the minimum sample size
+  tmp <- as.vector(table(d$usedTrainGroup))
+  num_classes <- length(tmp)
+  min_size <- tmp[order(tmp,decreasing=FALSE)[1]]
+  sampsizes <- rep(min_size,num_classes)
+  RF <- tuneRF(x = d[,!colnames(d) == "usedTrainGroup"], y = d$usedTrainGroup, mtryStart = 1, ntreeTry=500, stepFactor = 1, improve=0.05, trace=F, plot=F, doBest=T, sampsize = sampsizes)
+  Importance_Agnostic <- randomForest::importance(RF, scale=FALSE, type = 2)
+  Importance_Agnostic <- Importance_Agnostic[order(Importance_Agnostic, decreasing = TRUE), ]
+  Importance_Agnostic <- Importance_Agnostic[Importance_Agnostic > 0]
+  N_ImportanVariables <- length(Importance_Agnostic)
+  PhenoTrain <- d$usedTrainGroup
+  PredictorTrainData <- d
+  PredictorTrainData$usedTrainGroup <- NULL
+  train_preds <- predict(RF, newdata = PredictorTrainData, type = "vote")
+  test_preds <- predict(RF, newdata = predictor_data_Test_Agnostic, type = "vote")
+  ROCTrainAgnostic <- roc(PhenoTrain, train_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTestAgnostic <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  return(c(ROCTrainAgnostic$auc, ROCTestAgnostic$auc, N_ImportanVariables))
+}
+
+
+set.seed(333)
+bootobjectAgnostic_238 <- boot(data= DataAgnostic_Train, statistic= RF_Strap, R= 1000, parallel = "multicore", ncpus = 15) 
 
 ################################################################################
 # Agnostic top 500 DEGs
@@ -361,7 +432,7 @@ bootobjectAgnostic_500 <- boot(data= DataAgnostic_Train, statistic= RF_Strap, R=
 ################################################################################
 
 ## Save all bootobjects
-save(bootobjectMech, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_200, bootobjectAgnostic_500, file = "./Objs/RF/RFBootObjects_NotchAndMyc.rda")
+save(bootobjectMech, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_200, bootobjectAgnostic_238, bootobjectAgnostic_500, file = "./Objs/RF/RFBootObjects_NotchAndMyc.rda")
 
 ## load
 load("./Objs/RF/RFBootObjects_NotchAndMyc.rda")
@@ -499,6 +570,46 @@ ModelCompareAUC_Test_200$NofFeatAgn <- "200_Genes"
 
 save(ModelCompareAUC_Train_200, ModelCompareAUC_Test_200, file = "./Objs/RF/ModelCompareAUC_200.rda")
 
+#############################################################################
+###################################################################################
+## Work with Agnostic bootobject 238 vs mechanistic
+
+AUCs_RF_Agnostic_238 <- bootobjectAgnostic_238$t
+colnames(AUCs_RF_Agnostic_238) <- c("AUC_Train", "AUC_Test", "N_ImportanVariables")
+
+
+## Calculate the difference and CI of the difference between agnostic training and agnostic testing
+DiffAgnostic_238 <- AUCs_RF_Agnostic_238[, "AUC_Train"] - AUCs_RF_Agnostic_238[, "AUC_Test"]
+quantile(DiffAgnostic_238, c(0.025, 0.975))
+
+## Plot the distributions of the AUCs from both methods in the training data
+AgnosticAUC_Train_238 <- data.frame(AUC = AUCs_RF_Agnostic_238[, "AUC_Train"])
+
+AgnosticAUC_Train_238$modelType <- "Agnostic_DEGs"
+
+ModelCompareAUC_Train_238 <- rbind(MechanisticAUC_Train, AgnosticAUC_Train_238)
+
+## Plot the distributions of the AUCs from both methods in the testing data
+AgnosticAUC_Test_238 <- data.frame(AUC = AUCs_RF_Agnostic_238[, "AUC_Test"])
+
+AgnosticAUC_Test_238$modelType <- "Agnostic_DEGs"
+
+ModelCompareAUC_Test_238 <- rbind(MechanisticAUC_Test, AgnosticAUC_Test_238)
+
+## Save the AUCs in the training and testing data
+ModelCompareAUC_Train_238$data_type <- "Training"
+ModelCompareAUC_Test_238$data_type <- "Testing"
+
+ModelCompareAUC_Train_238$NofFeatAgn <- "238_Genes"
+ModelCompareAUC_Test_238$NofFeatAgn <- "238_Genes"
+
+save(ModelCompareAUC_Train_238, ModelCompareAUC_Test_238, file = "./Objs/RF/ModelCompareAUC_238.rda")
+
+## Save for the main figure
+ModelCompare_RF <- rbind(ModelCompareAUC_Train_238, ModelCompareAUC_Test_238)
+ModelCompare_RF$algorithm <- "RF"
+save(ModelCompare_RF, file = "./Objs/RF/ModelCompare_RF.rda")
+
 ############
 ###################################################################################3
 ###################################################################################
@@ -533,12 +644,6 @@ ModelCompareAUC_Test_500$data_type <- "Testing"
 ModelCompareAUC_Train_500$NofFeatAgn <- "500_Genes"
 ModelCompareAUC_Test_500$NofFeatAgn <- "500_Genes"
 
-## Save for the main figure
-ModelCompare_RF <- rbind(ModelCompareAUC_Train_500, ModelCompareAUC_Test_500)
-ModelCompare_RF$algorithm <- "RF"
-save(ModelCompare_RF, file = "./Objs/RF/ModelCompare_RF.rda")
-
-#####################
-## Save all
 save(ModelCompareAUC_Train_500, ModelCompareAUC_Test_500, file = "./Objs/RF/ModelCompareAUC_500.rda")
+
 

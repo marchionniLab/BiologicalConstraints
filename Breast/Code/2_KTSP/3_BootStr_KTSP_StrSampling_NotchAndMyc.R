@@ -18,7 +18,6 @@ require(RColorBrewer)
 require(ggplot2)
 require(reshape)
 require(plotROC)
-library(enrichR)
 library(mltools)
 library(xtable)
 library(boot)
@@ -76,6 +75,15 @@ SWAP.Train.KTSPStrap <- function(data, indices) {
   # Finally the function
   KTSP_Train_Agnostic <- SWAP.Train.KTSP(inputMat=ExprMat, phenoGroup = Pheno, krange=ktsp, FilterFunc = SWAP.Filter.Wilcoxon, featureNo=50)
   KTSP_Train_Mech <- SWAP.Train.KTSP(inputMat=ExprMat, phenoGroup = Pheno, krange=ktsp, FilterFunc = SWAP.Filter.Wilcoxon, featureNo=featNo, RestrictedPairs = myTSPs)
+  
+  # # Filter the mechanistic KTSP based on biology
+  # mech_keep <- KTSP_Train_Mech$TSPs[,1] %in% unique(myTSPs[,"BadGene"]) & KTSP_Train_Mech$TSPs[,2] %in% unique(myTSPs[,"GoodGene"])
+  # ### Subset
+  # KTSP_Train_Mech$score <- KTSP_Train_Mech$score[mech_keep]
+  # KTSP_Train_Mech$TSPs <- KTSP_Train_Mech$TSPs[mech_keep, ]
+  # KTSP_Train_Mech$tieVote <- droplevels(KTSP_Train_Mech$tieVote[mech_keep])
+  
+  # get the number of pairs in each classifier
   N_Pairs_Agnostic <- nrow(KTSP_Train_Agnostic$TSPs)
   N_Pairs_Mech <- nrow(KTSP_Train_Mech$TSPs)
   ktspStatsTrainAgnostic <- SWAP.KTSP.Statistics(inputMat = ExprMat, classifier = KTSP_Train_Agnostic, CombineFunc = sum)
@@ -109,6 +117,14 @@ SWAP.Train.KTSPStrap <- function(data, indices) {
   # Finally the function
   KTSP_Train_Agnostic <- SWAP.Train.KTSP(inputMat=ExprMat, phenoGroup = Pheno, krange=ktsp, FilterFunc = SWAP.Filter.Wilcoxon, featureNo=100)
   KTSP_Train_Mech <- SWAP.Train.KTSP(inputMat=ExprMat, phenoGroup = Pheno, krange=ktsp, FilterFunc = SWAP.Filter.Wilcoxon, featureNo=featNo, RestrictedPairs = myTSPs)  
+  
+  # # Filter the mechanistic KTSP based on biology
+  # mech_keep <- KTSP_Train_Mech$TSPs[,1] %in% unique(myTSPs[,"BadGene"]) & KTSP_Train_Mech$TSPs[,2] %in% unique(myTSPs[,"GoodGene"])
+  # ### Subset
+  # KTSP_Train_Mech$score <- KTSP_Train_Mech$score[mech_keep]
+  # KTSP_Train_Mech$TSPs <- KTSP_Train_Mech$TSPs[mech_keep, ]
+  # KTSP_Train_Mech$tieVote <- droplevels(KTSP_Train_Mech$tieVote[mech_keep])
+  
   N_Pairs_Agnostic <- nrow(KTSP_Train_Agnostic$TSPs)
   N_Pairs_Mech <- nrow(KTSP_Train_Mech$TSPs)
   ktspStatsTrainAgnostic <- SWAP.KTSP.Statistics(inputMat = ExprMat, classifier = KTSP_Train_Agnostic, CombineFunc = sum)
@@ -143,6 +159,14 @@ SWAP.Train.KTSPStrap <- function(data, indices) {
   # Finally the function
   KTSP_Train_Agnostic <- SWAP.Train.KTSP(inputMat=ExprMat, phenoGroup = Pheno, krange=ktsp, FilterFunc = SWAP.Filter.Wilcoxon, featureNo=200)
   KTSP_Train_Mech <- SWAP.Train.KTSP(inputMat=ExprMat, phenoGroup = Pheno, krange=ktsp, FilterFunc = SWAP.Filter.Wilcoxon, featureNo=featNo, RestrictedPairs = myTSPs)  
+  
+  # # Filter the mechanistic KTSP based on biology
+  # mech_keep <- KTSP_Train_Mech$TSPs[,1] %in% unique(myTSPs[,"BadGene"]) & KTSP_Train_Mech$TSPs[,2] %in% unique(myTSPs[,"GoodGene"])
+  # ### Subset
+  # KTSP_Train_Mech$score <- KTSP_Train_Mech$score[mech_keep]
+  # KTSP_Train_Mech$TSPs <- KTSP_Train_Mech$TSPs[mech_keep, ]
+  # KTSP_Train_Mech$tieVote <- droplevels(KTSP_Train_Mech$tieVote[mech_keep])
+  
   N_Pairs_Agnostic <- nrow(KTSP_Train_Agnostic$TSPs)
   N_Pairs_Mech <- nrow(KTSP_Train_Mech$TSPs)
   ktspStatsTrainAgnostic <- SWAP.KTSP.Statistics(inputMat = ExprMat, classifier = KTSP_Train_Agnostic, CombineFunc = sum)
@@ -177,6 +201,14 @@ SWAP.Train.KTSPStrap <- function(data, indices) {
   # Finally the function
   KTSP_Train_Agnostic <- SWAP.Train.KTSP(inputMat=ExprMat, phenoGroup = Pheno, krange=ktsp, FilterFunc = SWAP.Filter.Wilcoxon, featureNo=500)
   KTSP_Train_Mech <- SWAP.Train.KTSP(inputMat=ExprMat, phenoGroup = Pheno, krange=ktsp, FilterFunc = SWAP.Filter.Wilcoxon, featureNo=featNo, RestrictedPairs = myTSPs)  
+  
+  # # Filter the mechanistic KTSP based on biology
+  # mech_keep <- KTSP_Train_Mech$TSPs[,1] %in% unique(myTSPs[,"BadGene"]) & KTSP_Train_Mech$TSPs[,2] %in% unique(myTSPs[,"GoodGene"])
+  # ### Subset
+  # KTSP_Train_Mech$score <- KTSP_Train_Mech$score[mech_keep]
+  # KTSP_Train_Mech$TSPs <- KTSP_Train_Mech$TSPs[mech_keep, ]
+  # KTSP_Train_Mech$tieVote <- droplevels(KTSP_Train_Mech$tieVote[mech_keep])
+  
   N_Pairs_Agnostic <- nrow(KTSP_Train_Agnostic$TSPs)
   N_Pairs_Mech <- nrow(KTSP_Train_Mech$TSPs)
   ktspStatsTrainAgnostic <- SWAP.KTSP.Statistics(inputMat = ExprMat, classifier = KTSP_Train_Agnostic, CombineFunc = sum)

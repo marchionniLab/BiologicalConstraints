@@ -337,6 +337,84 @@ bootobjectAgnostic_100 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, 
 
 # Agnostic
 
+# 119 pairs (from 238 top DEGs)
+
+## Load data
+load("./Objs/KTSP/TNBC_KTSP_STATs_Agnostic_119.rda")
+load("./Objs/ChemoDataNew.rda")
+
+
+### Associated groups
+usedTrainGroup <- mixTrainGroup
+usedTestGroup <- mixTestGroup
+
+
+### Transpose usedTrainMat (making samples as rows instead of columns)
+Training <- t(KTSP_STATs_Train_Agnostic_119)
+
+## Making sure that sample names are identical in both Training and usedTrainGroup
+names(usedTrainGroup) <- rownames(Training)
+all(rownames(Training) == names(usedTrainGroup))
+
+
+## Combining the expression matrix and the phenotype in one data frame
+Training <- as.data.frame(Training)
+Data_train_Agnostic <- cbind(Training, usedTrainGroup)
+
+########################################################
+# Transpose usedTestMat and make the sample names identical 
+Testing <- t(KTSP_STATs_Test_Agnostic_119)
+
+names(usedTestGroup) <- rownames(Testing)
+all(rownames(Testing) == names(usedTestGroup))
+
+names(Data_train_Agnostic) <- make.names(names(Data_train_Agnostic))
+
+colnames(Training) <- make.names(colnames(Training))
+colnames(Testing) <- make.names(colnames(Testing))
+
+#########################
+## Get the best parameters
+
+control <- trainControl(method="repeatedcv", number=10, repeats=5, classProbs = TRUE, summaryFunction = twoClassSummary, allowParallel = T)
+
+# 5-fold cross validation repeated 5 times (to find the best parameters)
+set.seed(333)
+fit.svmPoly_agnostic119pairs <- train(usedTrainGroup~., data=Data_train_Agnostic, method="svmPoly", trControl=control, tuneLength = 5, metric = "ROC")
+fit.svmPoly_agnostic119pairs
+
+###########################
+# Use the best parameters in the bootstrap
+
+Grid_agn119pairs <- expand.grid(degree = 3, scale = 0.1, C = 0.25)
+
+# The function for bootstraping
+SVM_Strap <- function(data, indices) {
+  d <- data[indices, ] # allows boot to select sample
+  SVM <- train(usedTrainGroup~., data=d, method="svmPoly", trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), tuneGrid = Grid_agn119pairs, metric = "ROC")
+  Importance_Agnostic <- varImp(SVM, scale = TRUE)
+  Importance_Agnostic <- Importance_Agnostic$importance
+  Importance_Agnostic <- Importance_Agnostic[order(Importance_Agnostic$Resistant, decreasing = TRUE),]
+  Importance_Agnostic <- Importance_Agnostic[Importance_Agnostic$Resistant > 0, ]
+  N_ImportanVariables <- nrow(Importance_Agnostic)
+  Training <- d
+  PhenoTrain <- d$usedTrainGroup
+  Training$usedTrainGroup <- NULL
+  train_preds <- predict(SVM, newdata = Training, type = "prob")
+  test_preds <- predict(SVM, newdata = Testing, type = "prob")
+  ROCTrainAgnostic <- roc(PhenoTrain, train_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTestAgnostic <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  return(c(ROCTrainAgnostic$auc, ROCTestAgnostic$auc, N_ImportanVariables))
+}
+
+set.seed(333)
+bootobjectAgnostic_119 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, R= 1000, parallel = "multicore", ncpus = 15) 
+
+#########################################################################################
+#########################################################################################
+
+# Agnostic
+
 # 250 pairs (from 500 DEGs)
 
 ## Load data
@@ -413,7 +491,7 @@ bootobjectAgnostic_250 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, 
 ########################################################################################
 ########################################################################################
 ## Save all Objects
-save(bootobjectMech, bootobjectAgnostic_25, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_250, file= "./Objs/SVM/SVMBootObjects_NotchAndMyc_AgnPairs.rda")
+save(bootobjectMech, bootobjectAgnostic_25, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_119, bootobjectAgnostic_250, file= "./Objs/SVM/SVMBootObjects_NotchAndMyc_AgnPairs.rda")
 
 ## Load
 load("./Objs/SVM/SVMBootObjects_NotchAndMyc_AgnPairs.rda")
@@ -585,7 +663,58 @@ ModelCompareAUC_Test_100_200 <- rbind(ModelCompareAUCTest_100, ModelCompareAUCTe
 ########################################################################################
 ########################################################################################
 
-## Work with Agnostic bootobject 500 vs mechanistic
+## Work with Agnostic bootobject 119 vs mechanistic
+
+AUCs_SVM_Agnostic_119 <- bootobjectAgnostic_119$t
+colnames(AUCs_SVM_Agnostic_119) <- c("AUC_Train", "AUC_Test", "N_ImportanVariables")
+
+# Calculate the difference and the CI of the difference in the training data
+DiffAgnostic_119 <- AUCs_SVM_Agnostic_119[, "AUC_Train"] - AUCs_SVM_Agnostic_119[, "AUC_Test"]
+quantile(DiffAgnostic_119, c(0.025, 0.975))
+#colnames(Diff) <- "Diff"
+
+
+## Plot the distributions of the AUCs from both methods in the training data
+AgnosticAUCTrain_119 <- data.frame(AUC = AUCs_SVM_Agnostic_119[, "AUC_Train"])
+
+AgnosticAUCTrain_119$modelType <- "Agnostic_Pairs"
+
+ModelCompareAUCTrain_119 <- rbind(MechanisticAUCTrain, AgnosticAUCTrain_119)
+
+## Plot the distributions of the AUCs from both methods in the testing data
+AgnosticAUCTest_119 <- data.frame(AUC = AUCs_SVM_Agnostic_119[, "AUC_Test"])
+
+AgnosticAUCTest_119$modelType <- "Agnostic_Pairs"
+
+ModelCompareAUCTest_119 <- rbind(MechanisticAUCTest, AgnosticAUCTest_119)
+
+## Save the AUCs in the training and testing data
+ModelCompareAUCTrain_119$data_type <- "Training"
+ModelCompareAUCTest_119$data_type <- "Testing"
+
+ModelCompareAUCTrain_119$NofFeatAgn <- "119_Pairs"
+ModelCompareAUCTest_119$NofFeatAgn <- "119_Pairs"
+
+#########################################################################
+############################################################
+# Load the AUC comparisons from the indivdial genes and combine them with pairs
+load("./Objs/SVM/ModelCompareAUC_238.rda")
+
+# Combine
+ModelCompareAUC_Train_119_238 <- rbind(ModelCompareAUCTrain_119, ModelCompareAUCTrain_238)
+ModelCompareAUC_Test_119_238 <- rbind(ModelCompareAUCTest_119, ModelCompareAUCTest_238)
+
+#####################################
+## Save for the main figure
+ModelCompare_SVM <- rbind(ModelCompareAUCTrain_119, ModelCompareAUCTest_119)
+ModelCompare_SVM$algorithm <- "SVM"
+save(ModelCompare_SVM, file = "./Objs/SVM/ModelCompare_SVM_AgnPairs.rda")
+
+
+########################################################################################
+########################################################################################
+
+## Work with Agnostic bootobject 250 vs mechanistic
 
 AUCs_SVM_Agnostic_250 <- bootobjectAgnostic_250$t
 colnames(AUCs_SVM_Agnostic_250) <- c("AUC_Train", "AUC_Test", "N_ImportanVariables")
@@ -617,12 +746,6 @@ ModelCompareAUCTest_250$data_type <- "Testing"
 ModelCompareAUCTrain_250$NofFeatAgn <- "250_Pairs"
 ModelCompareAUCTest_250$NofFeatAgn <- "250_Pairs"
 
-#############################################################################
-## Save for the main figure
-ModelCompare_SVM <- rbind(ModelCompareAUCTrain_250, ModelCompareAUCTest_250)
-ModelCompare_SVM$algorithm <- "SVM"
-save(ModelCompare_SVM, file = "./Objs/SVM/ModelCompare_SVM_AgnPairs.rda")
-
 #########################################################################
 ############################################################
 # Load the AUC comparisons from the indivdial genes and combine them with pairs
@@ -643,6 +766,8 @@ ModelCompare_SVM_DiffNoFeat <- rbind(ModelCompareAUC_Train_25_50,
                                      ModelCompareAUC_Test_50_100,
                                      ModelCompareAUC_Train_100_200,
                                      ModelCompareAUC_Test_100_200,
+                                     ModelCompareAUC_Train_119_238,
+                                     ModelCompareAUC_Test_119_238,
                                      ModelCompareAUC_Train_250_500,
                                      ModelCompareAUC_Test_250_500
 )
