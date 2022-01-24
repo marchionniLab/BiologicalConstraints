@@ -296,7 +296,7 @@ parameters <- list(
   # Booster Parameters
   eta                = 0.1,           #0.3    # default = 0.3, range: [0,1]
   gamma              = 0,             #0   # default = 0,   range: [0,∞]
-  max_depth          = 1,             # 2
+  max_depth          = 3,             # 2
   min_child_weight   = 1,             #1    # default = 1,   range: [0,∞]
   subsample          = 0.4,             #0.5  # default = 1,   range: (0,1]
   colsample_bytree   = 1,             #1    # default = 1,   range: (0,1]
@@ -463,7 +463,7 @@ parameters <- list(
   # Booster Parameters
   eta                = 0.1,           #0.3    # default = 0.3, range: [0,1]
   gamma              = 0,             #0   # default = 0,   range: [0,∞]
-  max_depth          = 1,             # 2
+  max_depth          = 3,             # 2
   min_child_weight   = 1,             #1    # default = 1,   range: [0,∞]
   subsample          = 0.4,             #0.5  # default = 1,   range: (0,1]
   colsample_bytree   = 1,             #1    # default = 1,   range: (0,1]
@@ -630,7 +630,7 @@ parameters <- list(
   # Booster Parameters
   eta                = 0.1,           #0.3    # default = 0.3, range: [0,1]
   gamma              = 0,             #0   # default = 0,   range: [0,∞]
-  max_depth          = 1,             # 2
+  max_depth          = 3,             # 2
   min_child_weight   = 1,             #1    # default = 1,   range: [0,∞]
   subsample          = 0.4,             #0.5  # default = 1,   range: (0,1]
   colsample_bytree   = 1,             #1    # default = 1,   range: (0,1]
@@ -796,9 +796,9 @@ parameters <- list(
   # Booster Parameters
   eta                = 0.1,           #0.3    # default = 0.3, range: [0,1]
   gamma              = 0,             #0   # default = 0,   range: [0,∞]
-  max_depth          = 1,             # 2
+  max_depth          = 3,             # 2
   min_child_weight   = 1,             #1    # default = 1,   range: [0,∞]
-  subsample          = 0.4,             #0.5  # default = 1,   range: (0,1]
+  subsample          = 0.5,             #0.5  # default = 1,   range: (0,1]
   colsample_bytree   = 1,             #1    # default = 1,   range: (0,1]
   colsample_bylevel  = 1,             #1    # default = 1,   range: (0,1]
   lambda             = 0,             # 0  # default = 1

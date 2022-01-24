@@ -125,11 +125,11 @@ parameters <- list(
   booster            = "gbtree",          # default = "gbtree"
   silent             = 1,                 # default = 0
   # Booster Parameters
-  eta                = 0.01,           #0.3  # default = 0.3, range: [0,1]
+  eta                = 0.001,           #0.3  # default = 0.3, range: [0,1]
   gamma              = 0,             #0   # default = 0,   range: [0,∞]
-  max_depth          = 1,             # 2 
+  max_depth          = 2,             # 2 
   min_child_weight   = 1,             #1    # default = 1,   range: [0,∞]
-  subsample          = 0.5,             #0.4  # default = 1,   range: (0,1]
+  subsample          = 0.6,             #0.4  # default = 1,   range: (0,1]
   colsample_bytree   = 1,             # 1   # default = 1,   range: (0,1]
   colsample_bylevel  = 1,             #1    # default = 1,   range: (0,1]
   lambda             = 0,             #    # default = 1
@@ -282,8 +282,8 @@ parameters <- list(
   eta                = 0.1,           #0.3    # default = 0.3, range: [0,1]
   gamma              = 0,             #0   # default = 0,   range: [0,∞]
   max_depth          = 1,             # 2
-  min_child_weight   = 1,             #1    # default = 1,   range: [0,∞]
-  subsample          = 0.4,             #0.5  # default = 1,   range: (0,1]
+  min_child_weight   = 2,             #1    # default = 1,   range: [0,∞]
+  subsample          = 0.5,             #0.5  # default = 1,   range: (0,1]
   colsample_bytree   = 1,             #1    # default = 1,   range: (0,1]
   colsample_bylevel  = 1,             #1    # default = 1,   range: (0,1]
   lambda             = 0,             # 0  # default = 1
@@ -434,9 +434,9 @@ parameters <- list(
   # Booster Parameters
   eta                = 0.1,           #0.3    # default = 0.3, range: [0,1]
   gamma              = 0,             #0   # default = 0,   range: [0,∞]
-  max_depth          = 1,             # 2
+  max_depth          = 2,             # 2
   min_child_weight   = 1,             #1    # default = 1,   range: [0,∞]
-  subsample          = 0.4,             #0.5  # default = 1,   range: (0,1]
+  subsample          = 0.5,             #0.5  # default = 1,   range: (0,1]
   colsample_bytree   = 1,             #1    # default = 1,   range: (0,1]
   colsample_bylevel  = 1,             #1    # default = 1,   range: (0,1]
   lambda             = 0,             # 0  # default = 1
@@ -586,9 +586,9 @@ parameters <- list(
   # Booster Parameters
   eta                = 0.1,           #0.3    # default = 0.3, range: [0,1]
   gamma              = 0,             #0   # default = 0,   range: [0,∞]
-  max_depth          = 1,             # 2
+  max_depth          = 2,             # 2
   min_child_weight   = 1,             #1    # default = 1,   range: [0,∞]
-  subsample          = 0.4,             #0.5  # default = 1,   range: (0,1]
+  subsample          = 0.5,             #0.5  # default = 1,   range: (0,1]
   colsample_bytree   = 1,             #1    # default = 1,   range: (0,1]
   colsample_bylevel  = 1,             #1    # default = 1,   range: (0,1]
   lambda             = 0,             # 0  # default = 1
@@ -738,9 +738,9 @@ parameters <- list(
   # Booster Parameters
   eta                = 0.1,           #0.3    # default = 0.3, range: [0,1]
   gamma              = 0,             #0   # default = 0,   range: [0,∞]
-  max_depth          = 1,             # 2
+  max_depth          = 3,             # 2
   min_child_weight   = 1,             #1    # default = 1,   range: [0,∞]
-  subsample          = 0.4,             #0.5  # default = 1,   range: (0,1]
+  subsample          = 0.5,             #0.5  # default = 1,   range: (0,1]
   colsample_bytree   = 1,             #1    # default = 1,   range: (0,1]
   colsample_bylevel  = 1,             #1    # default = 1,   range: (0,1]
   lambda             = 0,             # 0  # default = 1
