@@ -1,38 +1,36 @@
 rm(list = ls())
 
 library(ggplot2)
-library(hrbrthemes)
 library(viridis)
 library(ggridges)
 library(ggsci)
-library(wesanderson)
 
 ## Load model comparisons: mechanistic vs agnostic (as genes) 
 load("./Objs/KTSP/ModelCompare_KTSP.rda")
-load("./Objs/RF/ModelCompare_RF.rda")
-load("./Objs/SVM/ModelCompare_SVM.rda")
-load("./Objs/XGB/ModelCompare_XGB.rda")
+load("./Objs/RF/ModelCompare_RF_new.rda")
+load("./Objs/SVM/ModelCompare_SVM_new.rda")
+load("./Objs/XGB/ModelCompare_XGB_new.rda")
 
 
 ## Bind the 4 together in one data frame
 AllModelCompare_Bladder_AgnIndGenes <- rbind(ModelCompare_KTSP, ModelCompare_RF, ModelCompare_SVM, ModelCompare_XGB)
 AllModelCompare_Bladder_AgnIndGenes$data_type <- factor(AllModelCompare_Bladder_AgnIndGenes$data_type, levels = c("Training", "Testing"))
-AllModelCompare_Bladder_AgnIndGenes$modelType <- factor(AllModelCompare_Bladder_AgnIndGenes$modelType, levels = c("Agnostic", "Mech"))
+AllModelCompare_Bladder_AgnIndGenes$modelType <- factor(AllModelCompare_Bladder_AgnIndGenes$modelType, levels = c("Agnostic_DEGs", "Mechanistic"))
 levels(AllModelCompare_Bladder_AgnIndGenes$modelType) <- c("Agnostic (top 74 DEGs)", "Mechanistic (37 FFLs)")
 
 ############################################################################
 
 ## Load model comparisons: mechanistic vs agnostic (as pairs) 
 load("./Objs/KTSP/ModelCompare_KTSP.rda") # K-TSPs is the same
-load("./Objs/RF/ModelCompare_RF_AgnPairs.rda")
-load("./Objs/SVM/ModelCompare_SVM_AgnPairs.rda")
-load("./Objs/XGB/ModelCompare_XGB_AgnPairs.rda")
+load("./Objs/RF/ModelCompare_RF_AgnPairs_new.rda")
+load("./Objs/SVM/ModelCompare_SVM_AgnPairs_new.rda")
+load("./Objs/XGB/ModelCompare_XGB_AgnPairs_new.rda")
 
 ## Bind the 4 together in one data frame
 AllModelCompare_Bladder_AgnPairs <- rbind(ModelCompare_KTSP, ModelCompare_RF, ModelCompare_SVM, ModelCompare_XGB)
 AllModelCompare_Bladder_AgnPairs$data_type <- factor(AllModelCompare_Bladder_AgnPairs$data_type, levels = c("Training", "Testing"))
-AllModelCompare_Bladder_AgnPairs$modelType <- factor(AllModelCompare_Bladder_AgnPairs$modelType, levels = c("Agnostic", "Mech"))
-levels(AllModelCompare_Bladder_AgnPairs$modelType) <- c("Agnostic (37 pairs)", "Mechanistic (37 FFLs)")
+AllModelCompare_Bladder_AgnPairs$modelType <- factor(AllModelCompare_Bladder_AgnPairs$modelType, levels = c("Agnostic_DEGs", "Agnostic_Pairs", "Mechanistic"))
+levels(AllModelCompare_Bladder_AgnPairs$modelType) <- c("Agnostic (top 74 DEGs)", "Agnostic (37 pairs)", "Mechanistic (37 FFLs)")
 
 
 ###########################
@@ -56,7 +54,7 @@ My_Theme = theme(
 
 
 ## Density plot
-png(filename = "./Figs/Bladder_BS_AllModels_Density.png", width = 3000, height = 1500, res = 200)
+png(filename = "./Figs/Bladder_BS_AllModels_Density_new.png", width = 3000, height = 1500, res = 200)
 BS_AUC_ModelCompare <- ggplot(AllModelCompare_Bladder, aes(x = AUC, y = modelType, fill = modelType, alpha = data_type, height = ..ndensity..)) + 
   geom_density_ridges(stat = "density", bw = 0.8, adjust= 0.01, scale=1.2) +
   scale_x_continuous(limits = c(0.5, 1.02), breaks = seq(0.5, 1, by = 0.1), expand = c(0, 0)) +

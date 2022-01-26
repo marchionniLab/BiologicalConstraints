@@ -13,7 +13,6 @@ require(RColorBrewer)
 require(ggplot2)
 require(reshape)
 require(plotROC)
-library(enrichR)
 library(mltools)
 library(xtable)
 

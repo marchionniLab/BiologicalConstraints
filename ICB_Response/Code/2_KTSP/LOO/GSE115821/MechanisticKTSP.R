@@ -13,13 +13,12 @@ require(RColorBrewer)
 require(ggplot2)
 require(reshape)
 require(plotROC)
-library(enrichR)
 library(mltools)
 library(xtable)
 
 ###########################################################################
 ### Load expression and phenotype data
-load("./Objs/icbData_GSE91061Out.rda")
+load("./Objs/icbData_GSE115821Out.rda")
 
 ############################################################################
 ### Load the selected genes
@@ -125,7 +124,7 @@ TestPerf[1:3, ] <- TestPerf[c(2,1,3), ]
 rownames(TestPerf) <- c("AUC", "AUC_CI_low", "AUC_CI_high", "Accuracy", "Bal.Accuracy", "Sensitivity", "Specificity", "MCC")
 
 ## Group the performance metrics of the classifier in one data frame
-GSE91061_Out_MechPerformance <- cbind(TrainPerf, TestPerf)
+GSE115821_Out_MechPerformance <- cbind(TrainPerf, TestPerf)
 
 # Save
-save(GSE91061_Out_MechPerformance, file = "./Objs/KTSP/GSE91061_Out_MechPerformance.rda")
+save(GSE115821_Out_MechPerformance, file = "./Objs/KTSP/GSE115821_Out_MechPerformance.rda")

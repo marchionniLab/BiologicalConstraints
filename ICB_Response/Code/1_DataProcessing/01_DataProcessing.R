@@ -80,6 +80,12 @@ Expr_GSE78220 <- Expr_GSE78220[!is.na(rownames(Expr_GSE78220)),]
 Expr_GSE78220 <- Expr_GSE78220[!(rownames(Expr_GSE78220) == ""), ] 
 dim(Expr_GSE78220)
 
+## Filtering
+# X <- Expr_GSE78220
+# Filt <- genefilter(2^X, ffun)
+# Expr_GSE78220 <- Expr_GSE78220[Filt, ]
+# dim(Expr_GSE78220)
+
 # Normalize
 # Expr_GSE78220 <- DGEList(Expr_GSE78220)
 # Expr_GSE78220 <- calcNormFactors(Expr_GSE78220, method = c("TMM"))
@@ -120,6 +126,12 @@ Expr_GSE91061 <- Expr_GSE91061[!is.na(rownames(Expr_GSE91061)), ]
 Expr_GSE91061 <- Expr_GSE91061[!(rownames(Expr_GSE91061) == ""), ] 
 dim(Expr_GSE91061)
 
+## Filtering
+# X <- Expr_GSE91061
+# Filt <- genefilter(2^X, ffun)
+# Expr_GSE91061 <- Expr_GSE91061[Filt, ]
+# dim(Expr_GSE91061)
+
 # Normalize
 # Expr_GSE91061 <- DGEList(Expr_GSE91061)
 # Expr_GSE91061 <- calcNormFactors(Expr_GSE91061, method = c("TMM"))
@@ -146,6 +158,12 @@ Expr_GSE115821 <- Expr_GSE115821[-miR, ]
 Expr_GSE115821 <- DGEList(Expr_GSE115821)
 Expr_GSE115821 <- calcNormFactors(Expr_GSE115821, method = c("TMM"))
 Expr_GSE115821 <- cpm(Expr_GSE115821, log = TRUE, prior.count = 1, normalized.lib.sizes = TRUE)
+
+## Filtering
+# X <- Expr_GSE115821
+# Filt <- genefilter(2^X, ffun)
+# Expr_GSE115821 <- Expr_GSE115821[Filt, ]
+# dim(Expr_GSE115821)
 
 # z-score
 Expr_GSE115821 <- t(scale(t(Expr_GSE115821), center = TRUE, scale = TRUE))
@@ -190,6 +208,12 @@ Expr_TCGA <- Expr_TCGA[-H19, ]
 range(Expr_TCGA)
 Expr_TCGA <- log2(Expr_TCGA+1)
 
+## Filtering
+# X <- Expr_TCGA
+# Filt <- genefilter(2^X, ffun)
+# Expr_TCGA <- Expr_TCGA[Filt, ]
+# dim(Expr_TCGA)
+
 Expr_TCGA <- t(scale(t(Expr_TCGA), center = TRUE, scale = TRUE))
 
 #######################
@@ -232,6 +256,12 @@ dim(Expr_VanAllen)
 # Log2transform
 range(Expr_VanAllen)
 Expr_VanAllen <- log2(Expr_VanAllen + 1)
+
+## Filtering
+# X <- Expr_VanAllen
+# Filt <- genefilter(2^X, ffun)
+# Expr_VanAllen <- Expr_VanAllen[Filt, ]
+# dim(Expr_VanAllen)
 
 Expr_VanAllen <- t(scale(t(Expr_VanAllen), center = TRUE, scale = TRUE))
 

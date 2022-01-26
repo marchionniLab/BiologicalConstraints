@@ -17,7 +17,7 @@ library(mltools)
 
 #####################################################################
 ### Load data
-load("./Objs/icbData_GSE78220Out.rda")
+load("./Objs/icbData_GSE91061Out.rda")
 
 ##########################################################
 ## Quantile normalize the datasets
@@ -64,5 +64,5 @@ summary(ktspStatsTestUnRes$statistics)
 KTSP_STATs_Test_Agnostic <- t(ktspStatsTestUnRes$comparisons)
 KTSP_STATs_Test_Agnostic[KTSP_STATs_Test_Agnostic == FALSE] <- 0
 
-save(KTSP_STATs_Train_Agnostic, KTSP_STATs_Test_Agnostic, file = "./Objs/KTSP/KTSP_STATs_Agnostic_GSE78220Out.rda")
+save(KTSP_STATs_Train_Agnostic, KTSP_STATs_Test_Agnostic, file = "./Objs/KTSP/KTSP_STATs_Agnostic_GSE91061Out.rda")
 

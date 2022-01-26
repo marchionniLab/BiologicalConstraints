@@ -44,19 +44,30 @@ Testing <- t(KTSP_STATs_Test_Mechanistic)
 names(usedTestGroup) <- rownames(Testing)
 all(rownames(Testing) == names(usedTestGroup))
 
-######
-#control <- trainControl(method="repeatedcv", number=10, repeats=5, classProbs = TRUE, summaryFunction = twoClassSummary)
-
 names(Data_train_Mechanistic) <- make.names(names(Data_train_Mechanistic))
 
 colnames(Training) <- make.names(colnames(Training))
 colnames(Testing) <- make.names(colnames(Testing))
 
-Grid <- expand.grid(degree = 3, scale = 0.01, C = 0.25)
+###########################################################################
+## Get the best parameters
+
+control <- trainControl(method="repeatedcv", number=10, repeats=5, classProbs = TRUE, summaryFunction = twoClassSummary, allowParallel = T)
+
+# 5-fold cross validation repeated 5 times (to find the best parameters)
+set.seed(333)
+fit.svmPoly_mech <- train(usedTrainGroup~., data=Data_train_Mechanistic, method="svmPoly", trControl=control, tuneLength = 5, metric = "ROC")
+fit.svmPoly_mech
+
+################################################
+# Use the best parameters in the bootstrap
+
+Grid_mech <- expand.grid(degree = 3, scale = 0.01, C = 0.25)
+
 # The function for bootstraping
 SVM_Strap <- function(data, indices) {
   d <- data[indices, ] # allows boot to select sample
-  SVM <- train(usedTrainGroup~., data=d, method="svmPoly", trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), tuneGrid = Grid, metric = "ROC")
+  SVM <- train(usedTrainGroup~., data=d, method="svmPoly", trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), tuneGrid = Grid_mech, metric = "ROC")
   Importance_Mech <- varImp(SVM, scale = TRUE)
   Importance_Mech <- Importance_Mech$importance
   Importance_Mech <- Importance_Mech[order(Importance_Mech$Progression, decreasing = TRUE),]
@@ -78,6 +89,8 @@ bootobjectMech <- boot(data= Data_train_Mechanistic, statistic= SVM_Strap, R= 10
 
 AUCs_SVM_Mech <- bootobjectMech$t
 colnames(AUCs_SVM_Mech) <- c("AUC_Train", "AUC_Test", "N_ImportanVariables")
+
+save(bootobjectMech, file= "./Objs/SVM/SVM_MechBootObject.rda")
 
 ###################################################################################
 ### Agnostic
@@ -108,11 +121,14 @@ all(names(usedTestGroup) ==colnames(usedTestMat))
 TopDEgenes <- SWAP.Filter.Wilcoxon(phenoGroup = usedTrainGroup, inputMat = usedTrainMat, featureNo = 74)
 
 ## Subset the expression matrix to the top DE genes only
-usedTrainMat <- usedTrainMat[TopDEgenes, ]
-usedTestMat <- usedTestMat[TopDEgenes, ]
+usedTrainMat_tmp <- usedTrainMat[TopDEgenes, ]
+usedTestMat_tmp <- usedTestMat[TopDEgenes, ]
+
 #################################################################
 ### Transpose usedTrainMat (making samples as rows instead of columns)
 Training <- t(usedTrainMat)
+Training_tmp <- t(usedTrainMat_tmp)
+
 #names_train <- c(as.vector(rownames(usedTrainMat)))
 #colnames(Training) <- names_train
 
@@ -123,7 +139,10 @@ all(rownames(Training) == names(usedTrainGroup))
 
 ## Combining the expression matrix and the phenotype in one data frame
 Training <- as.data.frame(Training)
+Training_tmp <- as.data.frame(Training_tmp)
+
 Data_train_Agnostic <- cbind(Training, usedTrainGroup)
+Data_train_Agnostic_tmp <- cbind(Training_tmp, usedTrainGroup)
 
 ########################################################
 # Transpose usedTestMat and make the sample names identical 
@@ -133,15 +152,31 @@ Testing <- t(usedTestMat)
 #names(usedTestGroup) <- rownames(Testing)
 all(rownames(Testing) == names(usedTestGroup))
 
-######
-#control <- trainControl(method="repeatedcv", number=10, repeats=5, classProbs = TRUE, summaryFunction = twoClassSummary)
+#########################
+## Get the best parameters
 
-Grid <- expand.grid(degree = 3, scale = 0.1, C = 0.25)
+control <- trainControl(method="repeatedcv", number=10, repeats=5, classProbs = TRUE, summaryFunction = twoClassSummary, allowParallel = T)
+
+# 5-fold cross validation repeated 5 times (to find the best parameters)
+set.seed(333)
+fit.svmPoly_agnostic74 <- train(usedTrainGroup~., data=Data_train_Agnostic_tmp, method="svmPoly", trControl=control, tuneLength = 5, metric = "ROC")
+fit.svmPoly_agnostic74
+
+###########################
+# Use the best parameters in the bootstrap
+Grid_agn74 <- expand.grid(degree = 3, scale = 10, C = 0.25)
 
 # The function for bootstraping
 SVM_Strap <- function(data, indices) {
   d <- data[indices, ] # allows boot to select sample
-  SVM <- train(usedTrainGroup~., data=d, method="svmPoly", trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), tuneGrid = Grid, metric = "ROC")
+  
+  # get the top 74 DEGs
+  Top74genes <- SWAP.Filter.Wilcoxon(phenoGroup = d[,"usedTrainGroup"], inputMat = as.matrix(t(d[,!colnames(d) == "usedTrainGroup"])), featureNo = 74)
+  
+  # subset the data to those top genes
+  d <- d[, c(Top74genes, 'usedTrainGroup')]
+  
+  SVM <- train(usedTrainGroup~., data=d, method="svmPoly", trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), tuneGrid = Grid_agn74, metric = "ROC")
   Importance_Agnostic <- varImp(SVM, scale = TRUE)
   Importance_Agnostic <- Importance_Agnostic$importance
   Importance_Agnostic <- Importance_Agnostic[order(Importance_Agnostic$Progression, decreasing = TRUE),]
@@ -168,8 +203,8 @@ bootobjectAgnostic_74 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, R
 
 load("./Objs/ProgressionDataGood2.rda")
 load("./Objs/Correlation/RGenes.rda")
-
-
+ 
+ 
 ### Normalization
 usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")[RGenes, ]
 usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")[RGenes, ]
@@ -189,40 +224,57 @@ all(names(usedTestGroup) ==colnames(usedTestMat))
 TopDEgenes <- SWAP.Filter.Wilcoxon(phenoGroup = usedTrainGroup, inputMat = usedTrainMat, featureNo = 100)
 
 ## Subset the expression matrix to the top DE genes only
-usedTrainMat <- usedTrainMat[TopDEgenes, ]
-usedTestMat <- usedTestMat[TopDEgenes, ]
+usedTrainMat_tmp <- usedTrainMat[TopDEgenes, ]
+usedTestMat_tmp <- usedTestMat[TopDEgenes, ]
+
 #################################################################
 ### Transpose usedTrainMat (making samples as rows instead of columns)
-Training <- t(usedTrainMat)
-#names_train <- c(as.vector(rownames(usedTrainMat)))
-#colnames(Training) <- names_train
+#Training <- t(usedTrainMat) # we already have this from above
+
+Training_tmp <- t(usedTrainMat_tmp)
+
 
 ## Making sure that sample names are identical in both Training and usedTrainGroup
-#names(usedTrainGroup) <- rownames(Training)
-all(rownames(Training) == names(usedTrainGroup))
+#all(rownames(Training) == names(usedTrainGroup))
 
 
 ## Combining the expression matrix and the phenotype in one data frame
-Training <- as.data.frame(Training)
-Data_train_Agnostic <- cbind(Training, usedTrainGroup)
+#Training <- as.data.frame(Training)
+Training_tmp <- as.data.frame(Training_tmp)
+
+#Data_train_Agnostic <- cbind(Training, usedTrainGroup)
+Data_train_Agnostic_tmp <- cbind(Training_tmp, usedTrainGroup)
 
 ########################################################
 # Transpose usedTestMat and make the sample names identical 
 Testing <- t(usedTestMat)
-#names_Test <- c(as.vector(rownames(usedTestMat)))
-#colnames(Testing) <- names_Test
-#names(usedTestGroup) <- rownames(Testing)
 all(rownames(Testing) == names(usedTestGroup))
 
-######
-#control <- trainControl(method="repeatedcv", number=10, repeats=5, classProbs = TRUE, summaryFunction = twoClassSummary)
+#########################
+## Get the best parameters
 
-Grid <- expand.grid(degree = 3, scale = 0.1, C = 0.25)
+control <- trainControl(method="repeatedcv", number=10, repeats=5, classProbs = TRUE, summaryFunction = twoClassSummary, allowParallel = T)
+
+# 5-fold cross validation repeated 5 times (to find the best parameters)
+set.seed(333)
+fit.svmPoly_agnostic100 <- train(usedTrainGroup~., data=Data_train_Agnostic_tmp, method="svmPoly", trControl=control, tuneLength = 5, metric = "ROC")
+fit.svmPoly_agnostic100
+
+###########################
+# Use the best parameters in the bootstrap
+Grid_agn100 <- expand.grid(degree = 3, scale = 0.1, C = 0.25)
 
 # The function for bootstraping
 SVM_Strap <- function(data, indices) {
   d <- data[indices, ] # allows boot to select sample
-  SVM <- train(usedTrainGroup~., data=d, method="svmPoly", trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), tuneGrid = Grid, metric = "ROC")
+  
+  # get the top 100 DEGs
+  Top100genes <- SWAP.Filter.Wilcoxon(phenoGroup = d[,"usedTrainGroup"], inputMat = as.matrix(t(d[,!colnames(d) == "usedTrainGroup"])), featureNo = 100)
+  
+  # subset the data to those top genes
+  d <- d[, c(Top100genes, 'usedTrainGroup')]
+  
+  SVM <- train(usedTrainGroup~., data=d, method="svmPoly", trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), tuneGrid = Grid_agn100, metric = "ROC")
   Importance_Agnostic <- varImp(SVM, scale = TRUE)
   Importance_Agnostic <- Importance_Agnostic$importance
   Importance_Agnostic <- Importance_Agnostic[order(Importance_Agnostic$Progression, decreasing = TRUE),]
@@ -255,55 +307,46 @@ load("./Objs/Correlation/RGenes.rda")
 usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")[RGenes, ]
 usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")[RGenes, ]
 
-### Associated groups
-usedTrainGroup <- mixTrainGroup
-usedTestGroup <- mixTestGroup
-
-#names(usedTrainGroup) <- colnames(usedTrainMat)
-all(names(usedTrainGroup) == colnames(usedTrainMat))
-
-#names(usedTestGroup) <- colnames(usedTestMat)
-all(names(usedTestGroup) ==colnames(usedTestMat))
-
 #########
 ## Detect Top DE genes
 TopDEgenes <- SWAP.Filter.Wilcoxon(phenoGroup = usedTrainGroup, inputMat = usedTrainMat, featureNo = 200)
 
 ## Subset the expression matrix to the top DE genes only
-usedTrainMat <- usedTrainMat[TopDEgenes, ]
-usedTestMat <- usedTestMat[TopDEgenes, ]
+usedTrainMat_tmp <- usedTrainMat[TopDEgenes, ]
+
 #################################################################
 ### Transpose usedTrainMat (making samples as rows instead of columns)
-Training <- t(usedTrainMat)
-#names_train <- c(as.vector(rownames(usedTrainMat)))
-#colnames(Training) <- names_train
-
-## Making sure that sample names are identical in both Training and usedTrainGroup
-#names(usedTrainGroup) <- rownames(Training)
-all(rownames(Training) == names(usedTrainGroup))
-
+Training_tmp <- t(usedTrainMat)
 
 ## Combining the expression matrix and the phenotype in one data frame
-Training <- as.data.frame(Training)
-Data_train_Agnostic <- cbind(Training, usedTrainGroup)
+Training_tmp <- as.data.frame(Training_tmp)
+Data_train_Agnostic_tmp <- cbind(Training_tmp, usedTrainGroup)
 
-########################################################
-# Transpose usedTestMat and make the sample names identical 
-Testing <- t(usedTestMat)
-#names_Test <- c(as.vector(rownames(usedTestMat)))
-#colnames(Testing) <- names_Test
-#names(usedTestGroup) <- rownames(Testing)
-all(rownames(Testing) == names(usedTestGroup))
+#########################
+## Get the best parameters
 
-######
-#control <- trainControl(method="repeatedcv", number=10, repeats=5, classProbs = TRUE, summaryFunction = twoClassSummary)
+control <- trainControl(method="repeatedcv", number=10, repeats=5, classProbs = TRUE, summaryFunction = twoClassSummary, allowParallel = T)
 
-Grid <- expand.grid(degree = 3, scale = 0.1, C = 0.25)
+# 5-fold cross validation repeated 5 times (to find the best parameters)
+set.seed(333)
+fit.svmPoly_agnostic200 <- train(usedTrainGroup~., data=Data_train_Agnostic_tmp, method="svmPoly", trControl=control, tuneLength = 5, metric = "ROC")
+fit.svmPoly_agnostic200
+
+###########################
+# Use the best parameters in the bootstrap
+Grid_agn200 <- expand.grid(degree = 3, scale = 0.1, C = 0.25)
 
 # The function for bootstraping
 SVM_Strap <- function(data, indices) {
   d <- data[indices, ] # allows boot to select sample
-  SVM <- train(usedTrainGroup~., data=d, method="svmPoly", trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), tuneGrid = Grid, metric = "ROC")
+  
+  # get the top 200 DEGs
+  Top200genes <- SWAP.Filter.Wilcoxon(phenoGroup = d[,"usedTrainGroup"], inputMat = as.matrix(t(d[,!colnames(d) == "usedTrainGroup"])), featureNo = 200)
+  
+  # subset the data to those top genes
+  d <- d[, c(Top200genes, 'usedTrainGroup')]
+  
+  SVM <- train(usedTrainGroup~., data=d, method="svmPoly", trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), tuneGrid = Grid_agn200, metric = "ROC")
   Importance_Agnostic <- varImp(SVM, scale = TRUE)
   Importance_Agnostic <- Importance_Agnostic$importance
   Importance_Agnostic <- Importance_Agnostic[order(Importance_Agnostic$Progression, decreasing = TRUE),]
@@ -318,7 +361,6 @@ SVM_Strap <- function(data, indices) {
   ROCTestAgnostic <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("NoProgression", "Progression"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
   return(c(ROCTrainAgnostic$auc, ROCTestAgnostic$auc, N_ImportanVariables))
 }
-
 
 set.seed(333)
 bootobjectAgnostic_200 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, R= 1000, parallel = "multicore", ncpus = 15) 
@@ -331,60 +373,50 @@ bootobjectAgnostic_200 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, 
 load("./Objs/ProgressionDataGood2.rda")
 load("./Objs/Correlation/RGenes.rda")
 
-
 ### Normalization
 usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")[RGenes, ]
 usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")[RGenes, ]
-
-### Associated groups
-usedTrainGroup <- mixTrainGroup
-usedTestGroup <- mixTestGroup
-
-#names(usedTrainGroup) <- colnames(usedTrainMat)
-all(names(usedTrainGroup) == colnames(usedTrainMat))
-
-#names(usedTestGroup) <- colnames(usedTestMat)
-all(names(usedTestGroup) ==colnames(usedTestMat))
 
 #########
 ## Detect Top DE genes
 TopDEgenes <- SWAP.Filter.Wilcoxon(phenoGroup = usedTrainGroup, inputMat = usedTrainMat, featureNo = 500)
 
 ## Subset the expression matrix to the top DE genes only
-usedTrainMat <- usedTrainMat[TopDEgenes, ]
-usedTestMat <- usedTestMat[TopDEgenes, ]
+usedTrainMat_tmp <- usedTrainMat[TopDEgenes, ]
+
 #################################################################
 ### Transpose usedTrainMat (making samples as rows instead of columns)
-Training <- t(usedTrainMat)
-#names_train <- c(as.vector(rownames(usedTrainMat)))
-#colnames(Training) <- names_train
-
-## Making sure that sample names are identical in both Training and usedTrainGroup
-#names(usedTrainGroup) <- rownames(Training)
-all(rownames(Training) == names(usedTrainGroup))
-
+Training_tmp <- t(usedTrainMat_tmp)
 
 ## Combining the expression matrix and the phenotype in one data frame
-Training <- as.data.frame(Training)
-Data_train_Agnostic <- cbind(Training, usedTrainGroup)
+Training_tmp <- as.data.frame(Training_tmp)
+Data_train_Agnostic_tmp <- cbind(Training_tmp, usedTrainGroup)
 
-########################################################
-# Transpose usedTestMat and make the sample names identical 
-Testing <- t(usedTestMat)
-#names_Test <- c(as.vector(rownames(usedTestMat)))
-#colnames(Testing) <- names_Test
-#names(usedTestGroup) <- rownames(Testing)
-all(rownames(Testing) == names(usedTestGroup))
+#########################
+## Get the best parameters
 
-######
-#control <- trainControl(method="repeatedcv", number=10, repeats=5, classProbs = TRUE, summaryFunction = twoClassSummary)
+control <- trainControl(method="repeatedcv", number=10, repeats=5, classProbs = TRUE, summaryFunction = twoClassSummary, allowParallel = T)
 
-Grid <- expand.grid(degree = 3, scale = 0.1, C = 0.25)
+# 5-fold cross validation repeated 5 times (to find the best parameters)
+set.seed(333)
+fit.svmPoly_agnostic500 <- train(usedTrainGroup~., data=Data_train_Agnostic_tmp, method="svmPoly", trControl=control, tuneLength = 5, metric = "ROC")
+fit.svmPoly_agnostic500
+
+###########################
+# Use the best parameters in the bootstrap
+Grid_agn500 <- expand.grid(degree = 3, scale = 0.01, C = 0.25)
 
 # The function for bootstraping
 SVM_Strap <- function(data, indices) {
   d <- data[indices, ] # allows boot to select sample
-  SVM <- train(usedTrainGroup~., data=d, method="svmPoly", trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), tuneGrid = Grid, metric = "ROC")
+  
+  # get the top 500 DEGs
+  Top500genes <- SWAP.Filter.Wilcoxon(phenoGroup = d[,"usedTrainGroup"], inputMat = as.matrix(t(d[,!colnames(d) == "usedTrainGroup"])), featureNo = 500)
+  
+  # subset the data to those top genes
+  d <- d[, c(Top500genes, 'usedTrainGroup')]
+  
+  SVM <- train(usedTrainGroup~., data=d, method="svmPoly", trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), tuneGrid = Grid_agn500, metric = "ROC")
   Importance_Agnostic <- varImp(SVM, scale = TRUE)
   Importance_Agnostic <- Importance_Agnostic$importance
   Importance_Agnostic <- Importance_Agnostic[order(Importance_Agnostic$Progression, decreasing = TRUE),]
@@ -400,17 +432,16 @@ SVM_Strap <- function(data, indices) {
   return(c(ROCTrainAgnostic$auc, ROCTestAgnostic$auc, N_ImportanVariables))
 }
 
-
 set.seed(333)
 bootobjectAgnostic_500 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, R= 1000, parallel = "multicore", ncpus = 15) 
 
 ########################################################################################
 ########################################################################################
 ## Save all Objects
-save(bootobjectMech, bootobjectAgnostic_74, bootobjectAgnostic_100, bootobjectAgnostic_200, bootobjectAgnostic_500, file= "./Objs/SVM/SVMBootObjects.rda")
+save(bootobjectMech, bootobjectAgnostic_74, bootobjectAgnostic_100, bootobjectAgnostic_200, bootobjectAgnostic_500, file= "./Objs/SVM/SVMBootObjects_new.rda")
 
 ## Load
-load("./Objs/SVM/SVMBootObjects.rda")
+load("./Objs/SVM/SVMBootObjects_new.rda")
 
 ########################################################################################
 ########################################################################################
@@ -458,13 +489,13 @@ ModelCompareAUCTest_74$data_type <- "Testing"
 ModelCompareAUCTrain_74$NofFeatAgn <- "74_Genes"
 ModelCompareAUCTest_74$NofFeatAgn <- "74_Genes"
 
-save(ModelCompareAUCTrain_74, ModelCompareAUCTest_74, file = "./Objs/SVM/ModelCompareAUC_74.rda")
+save(ModelCompareAUCTrain_74, ModelCompareAUCTest_74, file = "./Objs/SVM/ModelCompareAUC_74_new.rda")
 
 ############################################################################
 # Save for the main figure
 ModelCompare_SVM <- rbind(ModelCompareAUCTrain_74, ModelCompareAUCTest_74)
 ModelCompare_SVM$algorithm <- "SVM"
-save(ModelCompare_SVM, file = "./Objs/SVM/ModelCompare_SVM.rda")
+save(ModelCompare_SVM, file = "./Objs/SVM/ModelCompare_SVM_new.rda")
 
 ############################################################################
 
@@ -544,7 +575,7 @@ ModelCompareAUCTest_100$data_type <- "Testing"
 ModelCompareAUCTrain_100$NofFeatAgn <- "100_Genes"
 ModelCompareAUCTest_100$NofFeatAgn <- "100_Genes"
 
-save(ModelCompareAUCTrain_100, ModelCompareAUCTest_100, file = "./Objs/SVM/ModelCompareAUC_100.rda")
+save(ModelCompareAUCTrain_100, ModelCompareAUCTest_100, file = "./Objs/SVM/ModelCompareAUC_100_new.rda")
 
 ######
 ## Plots
@@ -622,7 +653,7 @@ ModelCompareAUCTest_200$data_type <- "Testing"
 ModelCompareAUCTrain_200$NofFeatAgn <- "200_Genes"
 ModelCompareAUCTest_200$NofFeatAgn <- "200_Genes"
 
-save(ModelCompareAUCTrain_200, ModelCompareAUCTest_200, file = "./Objs/SVM/ModelCompareAUC_200.rda")
+save(ModelCompareAUCTrain_200, ModelCompareAUCTest_200, file = "./Objs/SVM/ModelCompareAUC_200_new.rda")
 
 ######
 ## Plots
@@ -694,7 +725,7 @@ ModelCompareAUCTest_500$data_type <- "Testing"
 ModelCompareAUCTrain_500$NofFeatAgn <- "500_Genes"
 ModelCompareAUCTest_500$NofFeatAgn <- "500_Genes"
 
-save(ModelCompareAUCTrain_500, ModelCompareAUCTest_500, file = "./Objs/SVM/ModelCompareAUC_500.rda")
+save(ModelCompareAUCTrain_500, ModelCompareAUCTest_500, file = "./Objs/SVM/ModelCompareAUC_500_new.rda")
 
 ######
 ## Plots

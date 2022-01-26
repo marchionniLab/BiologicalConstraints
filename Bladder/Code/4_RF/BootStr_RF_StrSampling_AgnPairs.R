@@ -285,10 +285,10 @@ bootobjectAgnostic_250 <- boot(data= DataAgnostic_Train, statistic= RF_Strap, R=
 
 ######################################################################################################
 ## Save all bootobjects
-save(bootobjectMech, bootobjectAgnostic_37, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_250, file = "./Objs/RF/RFBootObjects_AgnPairs.rda")
+save(bootobjectMech, bootobjectAgnostic_37, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_250, file = "./Objs/RF/RFBootObjects_AgnPairs_new.rda")
 
 ## load
-load("./Objs/RF/RFBootObjects_AgnPairs.rda")
+load("./Objs/RF/RFBootObjects_AgnPairs_new.rda")
 
 ########################################################################################
 ## Work with Agnostic bootobject 37 vs mechanistic
@@ -337,12 +337,12 @@ ModelCompareAUC_Test_37$NofFeatAgn <- "37_Pairs"
 ## Save for the main figure
 ModelCompare_RF <- rbind(ModelCompareAUC_Train_37, ModelCompareAUC_Test_37)
 ModelCompare_RF$algorithm <- "RF"
-save(ModelCompare_RF, file = "./Objs/RF/ModelCompare_RF_AgnPairs.rda")
+save(ModelCompare_RF, file = "./Objs/RF/ModelCompare_RF_AgnPairs_new.rda")
 
 #####################################################################
 ############################################################
 # Load the AUC comparisons from the indivdial genes and combine them with pairs
-load("./Objs/RF/ModelCompareAUC_74.rda")
+load("./Objs/RF/ModelCompareAUC_74_new.rda")
 
 # Combine
 ModelCompareAUC_Train_37_74 <- rbind(ModelCompareAUC_Train_37, ModelCompareAUC_Train_74)
@@ -428,7 +428,7 @@ ModelCompareAUC_Test_50$NofFeatAgn <- "50_Pairs"
 #####################################################################
 ############################################################
 # Load the AUC comparisons from the indivdial genes and combine them with pairs
-load("./Objs/RF/ModelCompareAUC_100.rda")
+load("./Objs/RF/ModelCompareAUC_100_new.rda")
 
 # Combine
 ModelCompareAUC_Train_50_100 <- rbind(ModelCompareAUC_Train_50, ModelCompareAUC_Train_100)
@@ -502,7 +502,7 @@ ModelCompareAUC_Test_100$NofFeatAgn <- "100_Pairs"
 #####################################################################
 ############################################################
 # Load the AUC comparisons from the indivdial genes and combine them with pairs
-load("./Objs/RF/ModelCompareAUC_200.rda")
+load("./Objs/RF/ModelCompareAUC_200_new.rda")
 
 # Combine
 ModelCompareAUC_Train_100_200 <- rbind(ModelCompareAUC_Train_100, ModelCompareAUC_Train_200)
@@ -573,7 +573,7 @@ ModelCompareAUC_Test_250$NofFeatAgn <- "250_Pairs"
 #####################################################################
 ############################################################
 # Load the AUC comparisons from the indivdial genes and combine them with pairs
-load("./Objs/RF/ModelCompareAUC_500.rda")
+load("./Objs/RF/ModelCompareAUC_500_new.rda")
 
 # Combine
 ModelCompareAUC_Train_250_500 <- rbind(ModelCompareAUC_Train_250, ModelCompareAUC_Train_500)
@@ -594,7 +594,7 @@ ModelCompare_RF_DiffNoFeat <- rbind(ModelCompareAUC_Train_37_74,
                                      ModelCompareAUC_Test_250_500
 )
 
-save(ModelCompare_RF_DiffNoFeat, file = "./Objs/RF/ModelCompare_RF_DiffNoFeat.rda")
+save(ModelCompare_RF_DiffNoFeat, file = "./Objs/RF/ModelCompare_RF_DiffNoFeat_new.rda")
 
 ####################################################################################
 ####################################################################################

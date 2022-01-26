@@ -19,11 +19,10 @@ library(xtable)
 
 ###########################################################################
 ### Load expression and phenotype data
-load("./Objs/icbData_GSE78220Out.rda")
+load("./Objs/icbData_TCGAOut.rda")
 
 ############################################################################
 ## Load the selected genes
-## Load the selected genes *(Notch pairs)
 load("./Objs/ImmunePairs.rda")
 
 myTSPs <- ImmunePairs
@@ -83,5 +82,5 @@ summary(ktspStatsTestRes$statistics)
 KTSP_STATs_Test_Mechanistic <- t(ktspStatsTestRes$comparisons)
 KTSP_STATs_Test_Mechanistic[KTSP_STATs_Test_Mechanistic == FALSE] <- 0
 
-save(KTSP_STATs_Train_Mechanistic, KTSP_STATs_Test_Mechanistic, file = "./Objs/KTSP/KTSP_STATs_Mechanistic_GSE78220Out.rda")
+save(KTSP_STATs_Train_Mechanistic, KTSP_STATs_Test_Mechanistic, file = "./Objs/KTSP/KTSP_STATs_Mechanistic_TCGAOut.rda")
 

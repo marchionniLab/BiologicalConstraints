@@ -97,13 +97,6 @@ all(names(usedTrainGroup) == colnames(usedTrainMat))
 names(usedTestGroup) <- colnames(usedTestMat)
 all(names(usedTestGroup) ==colnames(usedTestMat))
 
-#########
-## Detect Top DE genes
-TopDEgenes <- SWAP.Filter.Wilcoxon(phenoGroup = usedTrainGroup, inputMat = usedTrainMat, featureNo = 74)
-
-## Subset the expression matrix to the top DE genes only
-usedTrainMat <- usedTrainMat[TopDEgenes, ]
-usedTestMat <- usedTestMat[TopDEgenes, ]
 ########################
 
 
@@ -125,6 +118,13 @@ levels(DataAgnostic_Train[, "usedTrainGroup"]) <- c("NoProgression", "Progressio
 # The function for bootstraping
 RF_Strap <- function(data, indices) {
   d <- data[indices, ] # allows boot to select sample
+  
+  # get the top 74 DEGs
+  Top74genes <- SWAP.Filter.Wilcoxon(phenoGroup = d[,"usedTrainGroup"], inputMat = as.matrix(t(d[,!colnames(d) == "usedTrainGroup"])), featureNo = 74)
+  
+  # subset the data to those top genes
+  d <- d[, c(Top74genes, 'usedTrainGroup')]
+  
   # Select the minimum sample size
   tmp <- as.vector(table(d$usedTrainGroup))
   num_classes <- length(tmp)
@@ -174,11 +174,11 @@ all(names(usedTestGroup) ==colnames(usedTestMat))
 
 #########
 ## Detect Top DE genes
-TopDEgenes <- SWAP.Filter.Wilcoxon(phenoGroup = usedTrainGroup, inputMat = usedTrainMat, featureNo = 100)
-
-## Subset the expression matrix to the top DE genes only
-usedTrainMat <- usedTrainMat[TopDEgenes, ]
-usedTestMat <- usedTestMat[TopDEgenes, ]
+# TopDEgenes <- SWAP.Filter.Wilcoxon(phenoGroup = usedTrainGroup, inputMat = usedTrainMat, featureNo = 100)
+# 
+# ## Subset the expression matrix to the top DE genes only
+# usedTrainMat <- usedTrainMat[TopDEgenes, ]
+# usedTestMat <- usedTestMat[TopDEgenes, ]
 ########################
 
 
@@ -200,6 +200,13 @@ levels(DataAgnostic_Train[, "usedTrainGroup"]) <- c("NoProgression", "Progressio
 # The function for bootstraping
 RF_Strap <- function(data, indices) {
   d <- data[indices, ] # allows boot to select sample
+  
+  # get the top 74 DEGs
+  Top100genes <- SWAP.Filter.Wilcoxon(phenoGroup = d[,"usedTrainGroup"], inputMat = as.matrix(t(d[,!colnames(d) == "usedTrainGroup"])), featureNo = 100)
+  
+  # subset the data to those top genes
+  d <- d[, c(Top100genes, 'usedTrainGroup')]
+  
   # Select the minimum sample size
   tmp <- as.vector(table(d$usedTrainGroup))
   num_classes <- length(tmp)
@@ -247,11 +254,11 @@ all(names(usedTestGroup) ==colnames(usedTestMat))
 
 #########
 ## Detect Top DE genes
-TopDEgenes <- SWAP.Filter.Wilcoxon(phenoGroup = usedTrainGroup, inputMat = usedTrainMat, featureNo = 200)
-
-## Subset the expression matrix to the top DE genes only
-usedTrainMat <- usedTrainMat[TopDEgenes, ]
-usedTestMat <- usedTestMat[TopDEgenes, ]
+# TopDEgenes <- SWAP.Filter.Wilcoxon(phenoGroup = usedTrainGroup, inputMat = usedTrainMat, featureNo = 200)
+# 
+# ## Subset the expression matrix to the top DE genes only
+# usedTrainMat <- usedTrainMat[TopDEgenes, ]
+# usedTestMat <- usedTestMat[TopDEgenes, ]
 ########################
 
 
@@ -273,6 +280,13 @@ levels(DataAgnostic_Train[, "usedTrainGroup"]) <- c("NoProgression", "Progressio
 # The function for bootstraping
 RF_Strap <- function(data, indices) {
   d <- data[indices, ] # allows boot to select sample
+  
+  # get the top 200 DEGs
+  Top200genes <- SWAP.Filter.Wilcoxon(phenoGroup = d[,"usedTrainGroup"], inputMat = as.matrix(t(d[,!colnames(d) == "usedTrainGroup"])), featureNo = 200)
+  
+  # subset the data to those top genes
+  d <- d[, c(Top200genes, 'usedTrainGroup')]
+  
   # Select the minimum sample size
   tmp <- as.vector(table(d$usedTrainGroup))
   num_classes <- length(tmp)
@@ -321,11 +335,11 @@ all(names(usedTestGroup) ==colnames(usedTestMat))
 
 #########
 ## Detect Top DE genes
-TopDEgenes <- SWAP.Filter.Wilcoxon(phenoGroup = usedTrainGroup, inputMat = usedTrainMat, featureNo = 500)
-
-## Subset the expression matrix to the top DE genes only
-usedTrainMat <- usedTrainMat[TopDEgenes, ]
-usedTestMat <- usedTestMat[TopDEgenes, ]
+# TopDEgenes <- SWAP.Filter.Wilcoxon(phenoGroup = usedTrainGroup, inputMat = usedTrainMat, featureNo = 500)
+# 
+# ## Subset the expression matrix to the top DE genes only
+# usedTrainMat <- usedTrainMat[TopDEgenes, ]
+# usedTestMat <- usedTestMat[TopDEgenes, ]
 ########################
 
 
@@ -347,6 +361,13 @@ levels(DataAgnostic_Train[, "usedTrainGroup"]) <- c("NoProgression", "Progressio
 # The function for bootstraping
 RF_Strap <- function(data, indices) {
   d <- data[indices, ] # allows boot to select sample
+  
+  # get the top 500 DEGs
+  Top500genes <- SWAP.Filter.Wilcoxon(phenoGroup = d[,"usedTrainGroup"], inputMat = as.matrix(t(d[,!colnames(d) == "usedTrainGroup"])), featureNo = 500)
+  
+  # subset the data to those top genes
+  d <- d[, c(Top500genes, 'usedTrainGroup')]
+  
   # Select the minimum sample size
   tmp <- as.vector(table(d$usedTrainGroup))
   num_classes <- length(tmp)
@@ -374,10 +395,10 @@ bootobjectAgnostic_500 <- boot(data= DataAgnostic_Train, statistic= RF_Strap, R=
 ################################################################################
 
 ## Save all bootobjects
-save(bootobjectMech, bootobjectAgnostic_74, bootobjectAgnostic_100, bootobjectAgnostic_200, bootobjectAgnostic_500, file = "./Objs/RF/RFBootObjects.rda")
+save(bootobjectMech, bootobjectAgnostic_74, bootobjectAgnostic_100, bootobjectAgnostic_200, bootobjectAgnostic_500, file = "./Objs/RF/RFBootObjects_new.rda")
 
 ## load
-load("./Objs/RF/RFBootObjects.rda")
+load("./Objs/RF/RFBootObjects_new.rda")
 
 ##################################################################################
 ##################################################################################
@@ -425,13 +446,13 @@ ModelCompareAUC_Test_74$data_type <- "Testing"
 ModelCompareAUC_Train_74$NofFeatAgn <- "74_Genes"
 ModelCompareAUC_Test_74$NofFeatAgn <- "74_Genes"
 
-save(ModelCompareAUC_Train_74, ModelCompareAUC_Test_74, file = "./Objs/RF/ModelCompareAUC_74.rda")
+save(ModelCompareAUC_Train_74, ModelCompareAUC_Test_74, file = "./Objs/RF/ModelCompareAUC_74_new.rda")
 
 ###############################################################################
 ## Save for the main figure
 ModelCompare_RF <- rbind(ModelCompareAUC_Train_74, ModelCompareAUC_Test_74)
 ModelCompare_RF$algorithm <- "RF"
-save(ModelCompare_RF, file = "./Objs/RF/ModelCompare_RF.rda")
+save(ModelCompare_RF, file = "./Objs/RF/ModelCompare_RF_new.rda")
 ###############################################################################
 
 ############
@@ -509,7 +530,7 @@ ModelCompareAUC_Test_100$data_type <- "Testing"
 ModelCompareAUC_Train_100$NofFeatAgn <- "100_Genes"
 ModelCompareAUC_Test_100$NofFeatAgn <- "100_Genes"
 
-save(ModelCompareAUC_Train_100, ModelCompareAUC_Test_100, file = "./Objs/RF/ModelCompareAUC_100.rda")
+save(ModelCompareAUC_Train_100, ModelCompareAUC_Test_100, file = "./Objs/RF/ModelCompareAUC_100_new.rda")
 
 ############
 ## Plots
@@ -573,7 +594,7 @@ ModelCompareAUC_Test_200$data_type <- "Testing"
 ModelCompareAUC_Train_200$NofFeatAgn <- "200_Genes"
 ModelCompareAUC_Test_200$NofFeatAgn <- "200_Genes"
 
-save(ModelCompareAUC_Train_200, ModelCompareAUC_Test_200, file = "./Objs/RF/ModelCompareAUC_200.rda")
+save(ModelCompareAUC_Train_200, ModelCompareAUC_Test_200, file = "./Objs/RF/ModelCompareAUC_200_new.rda")
 
 ############
 ## Plots
@@ -637,7 +658,7 @@ ModelCompareAUC_Test_500$data_type <- "Testing"
 ModelCompareAUC_Train_500$NofFeatAgn <- "500_Genes"
 ModelCompareAUC_Test_500$NofFeatAgn <- "500_Genes"
 
-save(ModelCompareAUC_Train_500, ModelCompareAUC_Test_500, file = "./Objs/RF/ModelCompareAUC_500.rda")
+save(ModelCompareAUC_Train_500, ModelCompareAUC_Test_500, file = "./Objs/RF/ModelCompareAUC_500_new.rda")
 
 ############
 ## Plots
