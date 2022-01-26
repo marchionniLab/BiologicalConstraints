@@ -8,9 +8,9 @@ library(ggsci)
 
 ## Load model comparisons: mechanistic vs agnostic (as genes) 
 load("./Objs/KTSP/ModelCompare_KTSP.rda")
-load("./Objs/RF/ModelCompare_RF.rda")
-load("./Objs/SVM/ModelCompare_SVM.rda")
-load("./Objs/XGB/ModelCompare_XGB.rda")
+load("./Objs/RF/ModelCompare_RF_new.rda")
+load("./Objs/SVM/ModelCompare_SVM_new.rda")
+load("./Objs/XGB/ModelCompare_XGB_new.rda")
 
 
 ## Bind the 4 together in one data frame
@@ -23,9 +23,9 @@ levels(AllModelCompare_Breast_AgnIndGenes$modelType) <- c("Agnostic (top 500 DEG
 
 ## Load model comparisons: mechanistic vs agnostic (as pairs) 
 load("./Objs/KTSP/ModelCompare_KTSP.rda") # K-TSPs is the same
-load("./Objs/RF/ModelCompare_RF_AgnPairs.rda")
-load("./Objs/SVM/ModelCompare_SVM_AgnPairs.rda")
-load("./Objs/XGB/ModelCompare_XGB_AgnPairs.rda")
+load("./Objs/RF/ModelCompare_RF_AgnPairs_new.rda")
+load("./Objs/SVM/ModelCompare_SVM_AgnPairs_new.rda")
+load("./Objs/XGB/ModelCompare_XGB_AgnPairs_new.rda")
 
 ## Bind the 4 together in one data frame
 AllModelCompare_Breast_AgnPairs <- rbind(ModelCompare_KTSP, ModelCompare_RF, ModelCompare_SVM, ModelCompare_XGB)
@@ -55,7 +55,7 @@ My_Theme = theme(
 
 
 ## Density plot
-png(filename = "./Figs/Breast_BS_AllModels_Density.png", width = 3000, height = 1500, res = 200)
+png(filename = "./Figs/Breast_BS_AllModels_Density_new.png", width = 3000, height = 1500, res = 200)
 BS_AUC_ModelCompare <- ggplot(AllModelCompare_Breast, aes(x = AUC, y = modelType, fill = modelType, alpha = data_type, height = ..ndensity..)) + 
   geom_density_ridges(stat = "density", bw = 0.8, adjust= 0.01, scale=1.2) +
   scale_x_continuous(limits = c(0.60, 1.02), breaks = seq(0.5, 1, by = 0.1), expand = c(0, 0)) +
