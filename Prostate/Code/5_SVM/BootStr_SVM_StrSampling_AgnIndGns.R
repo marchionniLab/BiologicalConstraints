@@ -122,30 +122,27 @@ all(names(usedTestGroup) ==colnames(usedTestMat))
 TopDEgenes <- SWAP.Filter.Wilcoxon(phenoGroup = usedTrainGroup, inputMat = usedTrainMat, featureNo = 50)
 
 ## Subset the expression matrix to the top DE genes only
-usedTrainMat <- usedTrainMat[TopDEgenes, ]
-usedTestMat <- usedTestMat[TopDEgenes, ]
+usedTrainMat_tmp <- usedTrainMat[TopDEgenes, ]
 
 #################################################################
 ### Transpose usedTrainMat (making samples as rows instead of columns)
 Training <- t(usedTrainMat)
-#names_train <- c(as.vector(rownames(usedTrainMat)))
-#colnames(Training) <- names_train
+Training_tmp <- t(usedTrainMat_tmp)
 
 ## Making sure that sample names are identical in both Training and usedTrainGroup
-#names(usedTrainGroup) <- rownames(Training)
 all(rownames(Training) == names(usedTrainGroup))
 
 
 ## Combining the expression matrix and the phenotype in one data frame
 Training <- as.data.frame(Training)
+Training_tmp <- as.data.frame(Training_tmp)
+
 Data_train_Agnostic <- cbind(Training, usedTrainGroup)
+Data_train_Agnostic_tmp <- cbind(Training_tmp, usedTrainGroup)
 
 ########################################################
 # Transpose usedTestMat and make the sample names identical
 Testing <- t(usedTestMat)
-#names_Test <- c(as.vector(rownames(usedTestMat)))
-#colnames(Testing) <- names_Test
-#names(usedTestGroup) <- rownames(Testing)
 all(rownames(Testing) == names(usedTestGroup))
 
 
@@ -156,7 +153,7 @@ control <- trainControl(method="repeatedcv", number=10, repeats=5, classProbs = 
 
 # 5-fold cross validation repeated 5 times (to find the best parameters)
 set.seed(333)
-fit.svmPoly_agnostic50 <- train(usedTrainGroup~., data=Data_train_Agnostic, method="svmPoly", trControl=control, tuneLength = 5, metric = "ROC")
+fit.svmPoly_agnostic50 <- train(usedTrainGroup~., data=Data_train_Agnostic_tmp, method="svmPoly", trControl=control, tuneLength = 5, metric = "ROC")
 fit.svmPoly_agnostic50
 
 ###########################
@@ -166,7 +163,16 @@ Grid_agn50 <- expand.grid(degree = 3, scale = 0.01, C = 0.25)
 # The function for bootstraping
 SVM_Strap <- function(data, indices) {
   d <- data[indices, ] # allows boot to select sample
+  
+  # get the top 50 DEGs
+  Top50genes <- SWAP.Filter.Wilcoxon(phenoGroup = d[,"usedTrainGroup"], inputMat = as.matrix(t(d[,!colnames(d) == "usedTrainGroup"])), featureNo = 50)
+  
+  # subset the data to those top genes
+  d <- d[, c(Top50genes, 'usedTrainGroup')]
+  
+  # train the model
   SVM <- train(usedTrainGroup~., data=d, method="svmPoly", trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), tuneGrid = Grid_agn50, metric = "ROC")
+  
   Importance_Agnostic <- varImp(SVM, scale = TRUE)
   Importance_Agnostic <- Importance_Agnostic$importance
   Importance_Agnostic <- Importance_Agnostic[order(Importance_Agnostic$Mets, decreasing = TRUE),]
@@ -206,10 +212,7 @@ usedTrainGroup <- mixTrainGroup
 usedTestGroup <- mixTestGroup
 
 
-#names(usedTrainGroup) <- colnames(usedTrainMat)
 all(names(usedTrainGroup) == colnames(usedTrainMat))
-
-#names(usedTestGroup) <- colnames(usedTestMat)
 all(names(usedTestGroup) ==colnames(usedTestMat))
 
 #########
@@ -217,29 +220,19 @@ all(names(usedTestGroup) ==colnames(usedTestMat))
 TopDEgenes <- SWAP.Filter.Wilcoxon(phenoGroup = usedTrainGroup, inputMat = usedTrainMat, featureNo = 100)
 
 ## Subset the expression matrix to the top DE genes only
-usedTrainMat <- usedTrainMat[TopDEgenes, ]
-usedTestMat <- usedTestMat[TopDEgenes, ]
+usedTrainMat_tmp <- usedTrainMat[TopDEgenes, ]
+
 #################################################################
 ### Transpose usedTrainMat (making samples as rows instead of columns)
-Training <- t(usedTrainMat)
-#names_train <- c(as.vector(rownames(usedTrainMat)))
-#colnames(Training) <- names_train
-
-## Making sure that sample names are identical in both Training and usedTrainGroup
-#names(usedTrainGroup) <- rownames(Training)
-all(rownames(Training) == names(usedTrainGroup))
-
+Training_tmp <- t(usedTrainMat_tmp)
 
 ## Combining the expression matrix and the phenotype in one data frame
-Training <- as.data.frame(Training)
-Data_train_Agnostic <- cbind(Training, usedTrainGroup)
+Training_tmp <- as.data.frame(Training_tmp)
+Data_train_Agnostic_tmp <- cbind(Training_tmp, usedTrainGroup)
 
 ########################################################
 # Transpose usedTestMat and make the sample names identical 
 Testing <- t(usedTestMat)
-#names_Test <- c(as.vector(rownames(usedTestMat)))
-#colnames(Testing) <- names_Test
-#names(usedTestGroup) <- rownames(Testing)
 all(rownames(Testing) == names(usedTestGroup))
 
 #########################
@@ -249,7 +242,7 @@ control <- trainControl(method="repeatedcv", number=10, repeats=5, classProbs = 
 
 # 5-fold cross validation repeated 5 times (to find the best parameters)
 set.seed(333)
-fit.svmPoly_agnostic100 <- train(usedTrainGroup~., data=Data_train_Agnostic, method="svmPoly", trControl=control, tuneLength = 5, metric = "ROC")
+fit.svmPoly_agnostic100 <- train(usedTrainGroup~., data=Data_train_Agnostic_tmp, method="svmPoly", trControl=control, tuneLength = 5, metric = "ROC")
 fit.svmPoly_agnostic100
 
 ###########################
@@ -259,6 +252,13 @@ Grid_agn100 <- expand.grid(degree = 3, scale = 0.01, C = 0.25)
 # The function for bootstraping
 SVM_Strap <- function(data, indices) {
   d <- data[indices, ] # allows boot to select sample
+  
+  # get the top 100 DEGs
+  Top100genes <- SWAP.Filter.Wilcoxon(phenoGroup = d[,"usedTrainGroup"], inputMat = as.matrix(t(d[,!colnames(d) == "usedTrainGroup"])), featureNo = 100)
+  
+  # subset the data to those top genes
+  d <- d[, c(Top100genes, 'usedTrainGroup')]
+  
   SVM <- train(usedTrainGroup~., data=d, method="svmPoly", trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), tuneGrid = Grid_agn100, metric = "ROC")
   Importance_Agnostic <- varImp(SVM, scale = TRUE)
   Importance_Agnostic <- Importance_Agnostic$importance
@@ -299,10 +299,7 @@ usedTrainGroup <- mixTrainGroup
 usedTestGroup <- mixTestGroup
 
 
-#names(usedTrainGroup) <- colnames(usedTrainMat)
 all(names(usedTrainGroup) == colnames(usedTrainMat))
-
-#names(usedTestGroup) <- colnames(usedTestMat)
 all(names(usedTestGroup) ==colnames(usedTestMat))
 
 #########
@@ -310,29 +307,19 @@ all(names(usedTestGroup) ==colnames(usedTestMat))
 TopDEgenes <- SWAP.Filter.Wilcoxon(phenoGroup = usedTrainGroup, inputMat = usedTrainMat, featureNo = 200)
 
 ## Subset the expression matrix to the top DE genes only
-usedTrainMat <- usedTrainMat[TopDEgenes, ]
-usedTestMat <- usedTestMat[TopDEgenes, ]
+usedTrainMat_tmp <- usedTrainMat[TopDEgenes, ]
+
 #################################################################
 ### Transpose usedTrainMat (making samples as rows instead of columns)
-Training <- t(usedTrainMat)
-#names_train <- c(as.vector(rownames(usedTrainMat)))
-#colnames(Training) <- names_train
-
-## Making sure that sample names are identical in both Training and usedTrainGroup
-#names(usedTrainGroup) <- rownames(Training)
-all(rownames(Training) == names(usedTrainGroup))
-
+Training <- t(usedTrainMat_tmp)
 
 ## Combining the expression matrix and the phenotype in one data frame
-Training <- as.data.frame(Training)
-Data_train_Agnostic <- cbind(Training, usedTrainGroup)
+Training_tmp <- as.data.frame(Training_tmp)
+Data_train_Agnostic_tmp <- cbind(Training_tmp, usedTrainGroup)
 
 ########################################################
 # Transpose usedTestMat and make the sample names identical 
 Testing <- t(usedTestMat)
-#names_Test <- c(as.vector(rownames(usedTestMat)))
-#colnames(Testing) <- names_Test
-#names(usedTestGroup) <- rownames(Testing)
 all(rownames(Testing) == names(usedTestGroup))
 
 #########################
@@ -352,7 +339,16 @@ Grid_agn200 <- expand.grid(degree = 2, scale = 0.01, C = 0.25)
 # The function for bootstraping
 SVM_Strap <- function(data, indices) {
   d <- data[indices, ] # allows boot to select sample
+  
+  # get the top 200 DEGs
+  Top200genes <- SWAP.Filter.Wilcoxon(phenoGroup = d[,"usedTrainGroup"], inputMat = as.matrix(t(d[,!colnames(d) == "usedTrainGroup"])), featureNo = 200)
+  
+  # subset the data to those top genes
+  d <- d[, c(Top200genes, 'usedTrainGroup')]
+  
+  # train the model
   SVM <- train(usedTrainGroup~., data=d, method="svmPoly", trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), tuneGrid = Grid_agn200, metric = "ROC")
+  
   Importance_Agnostic <- varImp(SVM, scale = TRUE)
   Importance_Agnostic <- Importance_Agnostic$importance
   Importance_Agnostic <- Importance_Agnostic[order(Importance_Agnostic$Mets, decreasing = TRUE),]
@@ -392,10 +388,7 @@ usedTrainGroup <- mixTrainGroup
 usedTestGroup <- mixTestGroup
 
 
-#names(usedTrainGroup) <- colnames(usedTrainMat)
 all(names(usedTrainGroup) == colnames(usedTrainMat))
-
-#names(usedTestGroup) <- colnames(usedTestMat)
 all(names(usedTestGroup) ==colnames(usedTestMat))
 
 #########
@@ -403,28 +396,19 @@ all(names(usedTestGroup) ==colnames(usedTestMat))
 TopDEgenes <- SWAP.Filter.Wilcoxon(phenoGroup = usedTrainGroup, inputMat = usedTrainMat, featureNo = 500)
 
 ## Subset the expression matrix to the top DE genes only
-usedTrainMat <- usedTrainMat[TopDEgenes, ]
-usedTestMat <- usedTestMat[TopDEgenes, ]
+usedTrainMat_tmp <- usedTrainMat[TopDEgenes, ]
+
 #################################################################
 ### Transpose usedTrainMat (making samples as rows instead of columns)
-Training <- t(usedTrainMat)
-#names_train <- c(as.vector(rownames(usedTrainMat)))
-#colnames(Training) <- names_train
-
-## Making sure that sample names are identical in both Training and usedTrainGroup
-#names(usedTrainGroup) <- rownames(Training)
-all(rownames(Training) == names(usedTrainGroup))
+Training_tmp <- t(usedTrainMat_tmp)
 
 ## Combining the expression matrix and the phenotype in one data frame
-Training <- as.data.frame(Training)
-Data_train_Agnostic <- cbind(Training, usedTrainGroup)
+Training_tmp <- as.data.frame(Training_tmp)
+Data_train_Agnostic_tmp <- cbind(Training_tmp, usedTrainGroup)
 
 ########################################################
 # Transpose usedTestMat and make the sample names identical 
 Testing <- t(usedTestMat)
-#names_Test <- c(as.vector(rownames(usedTestMat)))
-#colnames(Testing) <- names_Test
-#names(usedTestGroup) <- rownames(Testing)
 all(rownames(Testing) == names(usedTestGroup))
 
 #########################
@@ -444,7 +428,16 @@ Grid_agn500 <- expand.grid(degree = 3, scale = 0.01, C = 0.25)
 # The function for bootstraping
 SVM_Strap <- function(data, indices) {
   d <- data[indices, ] # allows boot to select sample
+  
+  # get the top 500 DEGs
+  Top500genes <- SWAP.Filter.Wilcoxon(phenoGroup = d[,"usedTrainGroup"], inputMat = as.matrix(t(d[,!colnames(d) == "usedTrainGroup"])), featureNo = 500)
+  
+  # subset the data to those top genes
+  d <- d[, c(Top500genes, 'usedTrainGroup')]
+  
+  # train the model
   SVM <- train(usedTrainGroup~., data=d, method="svmPoly", trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), tuneGrid = Grid_agn500, metric = "ROC")
+  
   Importance_Agnostic <- varImp(SVM, scale = TRUE)
   Importance_Agnostic <- Importance_Agnostic$importance
   Importance_Agnostic <- Importance_Agnostic[order(Importance_Agnostic$Mets, decreasing = TRUE),]
@@ -467,14 +460,13 @@ bootobjectAgnostic_500 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, 
 ########################################################################################
 ########################################################################################
 ## Save all Objects
-save(bootobjectMech, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_200, bootobjectAgnostic_500, file= "./Objs/SVM/SVMBootObjects_AdhesionActivationO2response.rda")
+save(bootobjectMech, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_200, bootobjectAgnostic_500, file= "./Objs/SVM/SVMBootObjects_AdhesionActivationO2response_new.rda")
 
 ## Load
-load("./Objs/SVM/SVMBootObjects_AdhesionActivationO2response.rda")
+load("./Objs/SVM/SVMBootObjects_AdhesionActivationO2response_new.rda")
 
 ########################################################################################
 ########################################################################################
-
 ## Work with Agnostic bootobject 50 vs mechanistic
 
 AUCs_SVM_Agnostic_50 <- bootobjectAgnostic_50$t
@@ -486,12 +478,10 @@ colnames(AUCs_SVM_Mech) <- c("AUC_Train", "AUC_Test", "N_ImportanVariables")
 # Calculate the difference and the CI of the difference in the training data
 DiffAgnostic_50 <- AUCs_SVM_Agnostic_50[, "AUC_Train"] - AUCs_SVM_Agnostic_50[, "AUC_Test"]
 quantile(DiffAgnostic_50, c(0.025, 0.975))
-#colnames(Diff) <- "Diff"
 
 # Calculate the difference and the CI of the difference in the testing data
 DiffMech <- AUCs_SVM_Mech[, "AUC_Train"] - AUCs_SVM_Mech[, "AUC_Test"]
 quantile(DiffMech, c(0.025, 0.975))
-#colnames(Diff) <- "Diff"
 
 ## Plot the distributions of the AUCs from both methods in the training data
 MechanisticAUCTrain <- data.frame(AUC = AUCs_SVM_Mech[, "AUC_Train"])
@@ -518,13 +508,7 @@ ModelCompareAUCTest_50$data_type <- "Testing"
 ModelCompareAUCTrain_50$NofFeatAgn <- "50_Genes"
 ModelCompareAUCTest_50$NofFeatAgn <- "50_Genes"
 
-save(ModelCompareAUCTrain_50, ModelCompareAUCTest_50, file = "./Objs/SVM/ModelCompareAUC_50.rda")
-
-# ###########################################################################3
-# ## Save for the main figure
-# ModelCompare_SVM <- rbind(ModelCompareAUCTrain_50, ModelCompareAUCTest_50)
-# ModelCompare_SVM$algorithm <- "SVM"
-# save(ModelCompare_SVM, file = "./Objs/SVM/ModelCompare_SVM.rda")
+save(ModelCompareAUCTrain_50, ModelCompareAUCTest_50, file = "./Objs/SVM/ModelCompareAUC_50_new.rda")
 
 ########################################################################################
 ########################################################################################
@@ -570,13 +554,13 @@ ModelCompareAUCTest_100$data_type <- "Testing"
 ModelCompareAUCTrain_100$NofFeatAgn <- "100_Genes"
 ModelCompareAUCTest_100$NofFeatAgn <- "100_Genes"
 
-save(ModelCompareAUCTrain_100, ModelCompareAUCTest_100, file = "./Objs/SVM/ModelCompareAUC_100.rda")
+save(ModelCompareAUCTrain_100, ModelCompareAUCTest_100, file = "./Objs/SVM/ModelCompareAUC_100_new.rda")
 
 ###########################################################################3
 ## Save for the main figure
 ModelCompare_SVM <- rbind(ModelCompareAUCTrain_100, ModelCompareAUCTest_100)
 ModelCompare_SVM$algorithm <- "SVM"
-save(ModelCompare_SVM, file = "./Objs/SVM/ModelCompare_SVM.rda")
+save(ModelCompare_SVM, file = "./Objs/SVM/ModelCompare_SVM_new.rda")
 
 ########################################################################################
 ########################################################################################
@@ -589,8 +573,6 @@ colnames(AUCs_SVM_Agnostic_200) <- c("AUC_Train", "AUC_Test", "N_ImportanVariabl
 # Calculate the difference and the CI of the difference in the training data
 DiffAgnostic_200 <- AUCs_SVM_Agnostic_200[, "AUC_Train"] - AUCs_SVM_Agnostic_200[, "AUC_Test"]
 quantile(DiffAgnostic_200, c(0.025, 0.975))
-#colnames(Diff) <- "Diff"
-
 
 ## Plot the distributions of the AUCs from both methods in the training data
 AgnosticAUCTrain_200 <- data.frame(AUC = AUCs_SVM_Agnostic_200[, "AUC_Train"])
@@ -613,7 +595,7 @@ ModelCompareAUCTest_200$data_type <- "Testing"
 ModelCompareAUCTrain_200$NofFeatAgn <- "200_Genes"
 ModelCompareAUCTest_200$NofFeatAgn <- "200_Genes"
 
-save(ModelCompareAUCTrain_200, ModelCompareAUCTest_200, file = "./Objs/SVM/ModelCompareAUC_200.rda")
+save(ModelCompareAUCTrain_200, ModelCompareAUCTest_200, file = "./Objs/SVM/ModelCompareAUC_200_new.rda")
 
 ########################################################################################
 ########################################################################################
@@ -626,8 +608,6 @@ colnames(AUCs_SVM_Agnostic_500) <- c("AUC_Train", "AUC_Test", "N_ImportanVariabl
 # Calculate the difference and the CI of the difference in the training data
 DiffAgnostic_500 <- AUCs_SVM_Agnostic_500[, "AUC_Train"] - AUCs_SVM_Agnostic_500[, "AUC_Test"]
 quantile(DiffAgnostic_500, c(0.025, 0.975))
-#colnames(Diff) <- "Diff"
-
 
 ## Plot the distributions of the AUCs from both methods in the training data
 AgnosticAUCTrain_500 <- data.frame(AUC = AUCs_SVM_Agnostic_500[, "AUC_Train"])
@@ -650,5 +630,5 @@ ModelCompareAUCTest_500$data_type <- "Testing"
 ModelCompareAUCTrain_500$NofFeatAgn <- "500_Genes"
 ModelCompareAUCTest_500$NofFeatAgn <- "500_Genes"
 
-save(ModelCompareAUCTrain_500, ModelCompareAUCTest_500, file = "./Objs/SVM/ModelCompareAUC_500.rda")
+save(ModelCompareAUCTrain_500, ModelCompareAUCTest_500, file = "./Objs/SVM/ModelCompareAUC_500_new.rda")
 

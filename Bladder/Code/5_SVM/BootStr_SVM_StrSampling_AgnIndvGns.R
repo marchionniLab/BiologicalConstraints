@@ -122,7 +122,7 @@ TopDEgenes <- SWAP.Filter.Wilcoxon(phenoGroup = usedTrainGroup, inputMat = usedT
 
 ## Subset the expression matrix to the top DE genes only
 usedTrainMat_tmp <- usedTrainMat[TopDEgenes, ]
-usedTestMat_tmp <- usedTestMat[TopDEgenes, ]
+#usedTestMat_tmp <- usedTestMat[TopDEgenes, ]
 
 #################################################################
 ### Transpose usedTrainMat (making samples as rows instead of columns)

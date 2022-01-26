@@ -869,7 +869,7 @@ parameters <- list(
 XGBStrap <- function(data, indices) {
   d <- data[indices, ] # allows boot to select sample
   
-  # get the top 74 DEGs
+  # get the top 500 DEGs
   Top500genes <- SWAP.Filter.Wilcoxon(phenoGroup = d[,"usedTrainGroup1"], inputMat = as.matrix(t(d[,!colnames(d) == "usedTrainGroup1"])), featureNo = 500)
   
   # subset the training data to those top genes

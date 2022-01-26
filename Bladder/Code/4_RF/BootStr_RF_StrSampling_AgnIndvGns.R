@@ -201,7 +201,7 @@ levels(DataAgnostic_Train[, "usedTrainGroup"]) <- c("NoProgression", "Progressio
 RF_Strap <- function(data, indices) {
   d <- data[indices, ] # allows boot to select sample
   
-  # get the top 74 DEGs
+  # get the top 100 DEGs
   Top100genes <- SWAP.Filter.Wilcoxon(phenoGroup = d[,"usedTrainGroup"], inputMat = as.matrix(t(d[,!colnames(d) == "usedTrainGroup"])), featureNo = 100)
   
   # subset the data to those top genes
