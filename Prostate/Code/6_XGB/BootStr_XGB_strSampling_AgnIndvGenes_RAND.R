@@ -5,12 +5,16 @@ rm(list = ls())
 
 ## Load necessary packages
 library(xgboost)
+library(pdp)
+library(lime)
 library(preprocessCore)
 library(limma)
 library(pROC)
 library(caret)
+library(DiagrammeR)
 library(ggplot2)
 library(dplyr)
+library(Ckmeans.1d.dp)
 library(mltools)
 library(patchwork)
 library(boot)
@@ -20,8 +24,8 @@ library(boot)
 # Mechanistic
 
 ## Load data
-load("./Objs/KTSP/KTSP_STATs_Mechanistic.rda")
-load("./Objs/ProgressionDataGood2.rda")
+load("../../Objs/KTSP/KTSP_STATs_Mechanistic_Combined.rda")
+load("../../Objs/MetastasisDataGood.rda")
 
 
 ### Associated groups
@@ -109,7 +113,7 @@ DataVal_Mech <- xgb.DMatrix(as.matrix(Validation), label = Val_label)
 DataTest_Mech <- xgb.DMatrix(as.matrix(Testing), label = Test_label)
 
 ## Creat a watch list
-#watchlist <- list(train  = DataTrain_Mech, test = DataVal_Mech)
+watchlist <- list(train  = DataTrain_Mech, test = DataVal_Mech)
 
 ##########################
 
@@ -121,36 +125,31 @@ parameters <- list(
   booster            = "gbtree",          # default = "gbtree"
   silent             = 1,                 # default = 0
   # Booster Parameters
-  eta                = 0.1,           #0.1   # default = 0.3, range: [0,1]
-  gamma              = 0,             #0  # default = 0,   range: [0,∞]
-  max_depth          = 1,             # 1
-  min_child_weight   = 1,             #1   # default = 1,   range: [0,∞]
-  subsample          = 0.4,           #0.4     # default = 1,   range: (0,1]
-  colsample_bytree   = 1,           #1      # default = 1,   range: (0,1]
-  colsample_bylevel  = 1,    #1  # default = 1,   range: (0,1]
-  lambda             = 0,             #0  # default = 1
-  alpha              = 0,           # 0    # default = 0
+  eta                = 0.1,           #0.3  # default = 0.3, range: [0,1]
+  gamma              = 0,             #0   # default = 0,   range: [0,∞]
+  max_depth          = 1,             # 2 
+  min_child_weight   = 1,             #1    # default = 1,   range: [0,∞]
+  subsample          = 0.5,             #0.4  # default = 1,   range: (0,1]
+  colsample_bytree   = 1,             # 1   # default = 1,   range: (0,1]
+  colsample_bylevel  = 1,             #1    # default = 1,   range: (0,1]
+  lambda             = 0,             #    # default = 1
+  alpha              = 0,           # 0.1    # default = 0
   # Task Parameters
   objective          = "binary:logistic",   # default = "reg:linear"
   eval_metric        = "auc"
 )
+
 
 # The function for bootstraping
 XGBStrap <- function(data, indices) {
   d <- data[indices, ] # allows boot to select sample
   Train_label <- as.integer(d$usedTrainGroup1)-1
   # Scale weight (to compensate for un-balanced class sizes)
-  Progression <- sum(Train_label == 1)
-  NoProgression <- sum(Train_label == 0)
+  No_Mets <- sum(Train_label == 0)
+  Mets <- sum(Train_label == 1)
   d$usedTrainGroup1 <- NULL
   d2 <- xgb.DMatrix(as.matrix(d), label = Train_label)
-  
-  # add the watch list
-  watchlist <- list(train  = d2, test = DataVal_Mech)
-  # train the mode
-  XGB <- xgb.train(parameters, data = d2, nrounds = 500, watchlist,  early_stopping_rounds = 50, scale_pos_weight = NoProgression/Progression)
-  
-  
+  XGB <- xgb.train(parameters, data = d2, nrounds = 500, watchlist,  early_stopping_rounds = 50, scale_pos_weight = No_Mets/Mets)
   Importance_Mech <- xgb.importance(model = XGB)
   Importance_Mech <- Importance_Mech[order(Importance_Mech$Gain, decreasing = TRUE), ]
   Importance_Mech <- Importance_Mech[Importance_Mech$Gain > 0, ]
@@ -162,31 +161,30 @@ XGBStrap <- function(data, indices) {
   return(c(ROCTrainMech$auc, ROCTestMech$auc, N_ImportanVariables))
 }
 
-
+print("A")
 set.seed(333)
 bootobjectMech <- boot(data= Data_train_Mech, statistic= XGBStrap, R= 1000, parallel = "multicore", ncpus = 15) 
 AUCs_XG_Mech <- bootobjectMech$t
 colnames(AUCs_XG_Mech) <- c("AUC_Train", "AUC_Test", "N_ImportanVariables")
 
-save(bootobjectMech, file= "./Objs/XGB/XGB_MechBootObject_new.rda")
-
 #########################################################################3
 #########################################################################3
 
 # Agnostic
-## Top 74 DEGs
+## 50 random genes
 
 ## Load data
-load("./Objs/ProgressionDataGood2.rda")
-load("./Objs/Correlation/RGenes.rda")
+load("../../Objs/MetastasisDataGood.rda")
+load("../../Objs/Correlation/RGenes.rda")
 
-### Quantile normalize
+### Normalization
 usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")[RGenes, ]
 usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")[RGenes, ]
 
-### Associated groups
+####
 usedTrainGroup <- mixTrainGroup
 usedTestGroup <- mixTestGroup
+
 
 #names(usedTrainGroup) <- colnames(usedTrainMat)
 all(names(usedTrainGroup) == colnames(usedTrainMat))
@@ -195,12 +193,181 @@ all(names(usedTrainGroup) == colnames(usedTrainMat))
 all(names(usedTestGroup) ==colnames(usedTestMat))
 
 #########
-## Detect Top DE genes
-#TopDEgenes <- SWAP.Filter.Wilcoxon(phenoGroup = usedTrainGroup, inputMat = usedTrainMat, featureNo = 74)
-## Subset the expression matrix to the top DE genes only
-# usedTrainMat <- usedTrainMat[TopDEgenes, ]
-# usedTestMat <- usedTestMat[TopDEgenes, ]
 
+Training <- t(usedTrainMat)
+
+#####################
+## Here, WE divide the training data into "actual training" and another validation
+# This validation data will be used in the "WatchList" parameter. It is independent of the testing data.
+set.seed(333)
+inds <- createDataPartition(usedTrainGroup, p = 0.7, list = F)
+Training1 <- Training[inds, ]
+Validation <- Training[-inds, ]
+
+usedTrainGroup1 <- usedTrainGroup[inds]
+usedValGroup <- usedTrainGroup[-inds]
+
+table(usedTrainGroup1)
+table(usedValGroup)
+
+
+
+## Making sure that sample names are identical in both Training and usedTrainGroup
+#names(usedTrainGroup1) <- rownames(Training1)
+all(rownames(Training1) == names(usedTrainGroup1))
+
+#names(usedValGroup) <- rownames(Validation)
+all(rownames(Validation) == names(usedValGroup))
+
+
+## Combining the expression matrix and the phenotype in one data frame
+Training <- as.data.frame(Training1)
+#usedTrainGroup <- as.data.frame(usedTrainGroup)
+Data_train_Agnostic <- cbind(Training, usedTrainGroup1)
+
+## The same for validation
+Validation <- as.data.frame(Validation)
+#usedTrainGroup <- as.data.frame(usedTrainGroup)
+Data_val_Agnostic <- cbind(Validation, usedValGroup)
+
+########################################################
+# Transpose usedTestMat and make the sample names identical
+Testing <- t(usedTestMat)
+
+#names(usedTestGroup) <- rownames(Testing)
+all(rownames(Testing) == names(usedTestGroup))
+
+###########################################################
+## Converting classes from Progression/NoProgression Format to 0-1 Format
+table(Data_train_Agnostic$usedTrainGroup1)
+levels(Data_train_Agnostic$usedTrainGroup1) <- c(0,1)
+Data_train_Agnostic$usedTrainGroup1 <- factor(Data_train_Agnostic$usedTrainGroup1, levels = c(0,1)) # 0=No,1= Yes
+Train_label <- Data_train_Agnostic$usedTrainGroup1
+Train_label <- as.vector(Train_label)
+table(Train_label)
+
+## The same for validation
+table(Data_val_Agnostic$usedValGroup)
+levels(Data_val_Agnostic$usedValGroup) <- c(0,1)
+Data_val_Agnostic$usedValGroup <- factor(Data_val_Agnostic$usedValGroup, levels = c(0,1)) # 0=No,1= Yes
+Val_label <- Data_val_Agnostic$usedValGroup
+Val_label <- as.vector(Val_label)
+table(Val_label)
+
+
+## Combine both the Expression matrix and the phenotype into one matrix
+Testing <- as.data.frame(Testing)
+Data_test_Agnostic <- cbind(Testing, usedTestGroup)
+
+## Converting classes from Progression/NoProgression Format to 0-1 Format
+table(Data_test_Agnostic$usedTestGroup)
+levels(Data_test_Agnostic$usedTestGroup) <- c(0,1)
+Data_test_Agnostic$usedTestGroup <- factor(Data_test_Agnostic$usedTestGroup, levels = c(0,1)) #0=No, 1=Yes
+Test_label <- Data_test_Agnostic$usedTestGroup
+Test_label <- as.vector(Test_label)
+table(Test_label)
+
+
+
+## Convert to xgb.DMatrix
+DataTrain_Agnostic <- xgb.DMatrix(as.matrix(Training), label = Train_label)
+DataVal_Agnostic <- xgb.DMatrix(as.matrix(Validation), label = Val_label)
+DataTest_Agnostic <- xgb.DMatrix(as.matrix(Testing), label = Test_label)
+
+## Creat a watch list
+watchlist <- list(train  = DataTrain_Agnostic, test = DataVal_Agnostic)
+
+##########################
+
+## Make a list of model parameters
+set.seed(333)
+
+parameters <- list(
+  # General Parameters
+  booster            = "gbtree",          # default = "gbtree"
+  silent             = 1,                 # default = 0
+  # Booster Parameters
+  eta                = 0.1,           #0.3    # default = 0.3, range: [0,1]
+  gamma              = 0,             #0   # default = 0,   range: [0,∞]
+  max_depth          = 1,             # 2
+  min_child_weight   = 1,             #1    # default = 1,   range: [0,∞]
+  subsample          = 0.4,             #0.5  # default = 1,   range: (0,1]
+  colsample_bytree   = 1,             #1    # default = 1,   range: (0,1]
+  colsample_bylevel  = 1,             #1    # default = 1,   range: (0,1]
+  lambda             = 0,             # 0  # default = 1
+  alpha              = 0,             # 0    # default = 0
+  # Task Parameters
+  objective          = "binary:logistic",   # default = "reg:linear"
+  eval_metric        = "auc"
+)
+
+
+# The function for bootstraping
+XGBStrap <- function(data, indices) {
+  
+  sel.genes = sample(setdiff(colnames(data),  "usedTrainGroup1"), 50)
+  data = data[, c(sel.genes, "usedTrainGroup1")]
+  
+  # subset the validation data
+  Validation <- Validation[ , c(sel.genes)]
+  
+  # subset the testing data
+  Testing <- Testing[ , c(sel.genes)]
+  
+  d <- data[indices, ] # allows boot to select sample
+  Train_label <- as.integer(d$usedTrainGroup1)-1
+  # Scale weight (to compensate for un-balanced class sizes)
+  No_Mets <- sum(Train_label == 0)
+  Mets <- sum(Train_label == 1)
+  d$usedTrainGroup1 <- NULL
+  d2 <- xgb.DMatrix(as.matrix(d), label = Train_label)
+  
+  DataVal_Agnostic <- xgb.DMatrix(as.matrix(Validation), label = Val_label)
+  DataTest_Agnostic <- xgb.DMatrix(as.matrix(Testing), label = Test_label)
+  watchlist <- list(train  = d2, test = DataVal_Agnostic)
+  
+  XGB <- xgb.train(parameters, data = d2, nrounds = 500, watchlist,  early_stopping_rounds = 50, scale_pos_weight = No_Mets/Mets)
+  Importance_Agnostic <- xgb.importance(model = XGB)
+  Importance_Agnostic <- Importance_Agnostic[order(Importance_Agnostic$Gain, decreasing = TRUE), ]
+  Importance_Agnostic <- Importance_Agnostic[Importance_Agnostic$Gain > 0, ]
+  N_ImportanVariables <- length(Importance_Agnostic$Gain)
+  train_preds <- predict(XGB, d2)
+  test_preds <- predict(XGB, DataTest_Agnostic)
+  ROCTrainAgnostic <- roc(Train_label, train_preds, plot = F, print.auc = TRUE, levels = c("0", "1"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTestAgnostic <- roc(Test_label, test_preds, plot = F, print.auc = TRUE, levels = c("0", "1"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  return(c(ROCTrainAgnostic$auc, ROCTestAgnostic$auc, N_ImportanVariables))
+}
+
+print("B")
+set.seed(333)
+bootobjectAgnostic_50 <- boot(data= Data_train_Agnostic, statistic= XGBStrap, R= 1000, parallel = "multicore", ncpus = 15)
+
+#########################################################################3
+#########################################################################3
+
+# Agnostic
+## 100 Random genes
+
+## Load data
+load("../../Objs/MetastasisDataGood.rda")
+load("../../Objs/Correlation/RGenes.rda")
+
+### Normalization
+usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")[RGenes, ]
+usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")[RGenes, ]
+
+####
+usedTrainGroup <- mixTrainGroup
+usedTestGroup <- mixTestGroup
+
+
+#names(usedTrainGroup) <- colnames(usedTrainMat)
+all(names(usedTrainGroup) == colnames(usedTrainMat))
+
+#names(usedTestGroup) <- colnames(usedTestMat)
+all(names(usedTestGroup) ==colnames(usedTestMat))
+
+#########
 
 Training <- t(usedTrainMat)
 
@@ -278,12 +445,12 @@ table(Test_label)
 
 
 ## Convert to xgb.DMatrix
-#DataTrain_Agnostic <- xgb.DMatrix(as.matrix(Training), label = Train_label)
-#DataVal_Agnostic <- xgb.DMatrix(as.matrix(Validation), label = Val_label)
-#DataTest_Agnostic <- xgb.DMatrix(as.matrix(Testing), label = Test_label)
+DataTrain_Agnostic <- xgb.DMatrix(as.matrix(Training), label = Train_label)
+DataVal_Agnostic <- xgb.DMatrix(as.matrix(Validation), label = Val_label)
+DataTest_Agnostic <- xgb.DMatrix(as.matrix(Testing), label = Test_label)
 
 ## Creat a watch list
-#watchlist <- list(train  = DataTrain_Agnostic, test = DataVal_Agnostic)
+watchlist <- list(train  = DataTrain_Agnostic, test = DataVal_Agnostic)
 
 ##########################
 
@@ -295,15 +462,15 @@ parameters <- list(
   booster            = "gbtree",          # default = "gbtree"
   silent             = 1,                 # default = 0
   # Booster Parameters
-  eta                = 0.1,           #0.1    # default = 0.3, range: [0,1]
+  eta                = 0.1,           #0.3    # default = 0.3, range: [0,1]
   gamma              = 0,             #0   # default = 0,   range: [0,∞]
-  max_depth          = 1,             # 1
+  max_depth          = 1,             # 2
   min_child_weight   = 1,             #1    # default = 1,   range: [0,∞]
-  subsample          = 0.4,           # 0.4      # default = 1,   range: (0,1]
-  colsample_bytree   = 0.5,           # 0.5      # default = 1,   range: (0,1]
-  colsample_bylevel  = 0.3,              # 0.3   # default = 1,   range: (0,1]
-  lambda             = 3,             # 3 # default = 1
-  alpha              = 0,           # 0    # default = 0
+  subsample          = 0.4,             #0.5  # default = 1,   range: (0,1]
+  colsample_bytree   = 1,             #1    # default = 1,   range: (0,1]
+  colsample_bylevel  = 1,             #1    # default = 1,   range: (0,1]
+  lambda             = 0,             # 0  # default = 1
+  alpha              = 0,             # 0    # default = 0
   # Task Parameters
   objective          = "binary:logistic",   # default = "reg:linear"
   eval_metric        = "auc"
@@ -312,37 +479,29 @@ parameters <- list(
 
 # The function for bootstraping
 XGBStrap <- function(data, indices) {
-  d <- data[indices, ] # allows boot to select sample
   
-  # get the top 74 DEGs
-  Top74genes <- SWAP.Filter.Wilcoxon(phenoGroup = d[,"usedTrainGroup1"], inputMat = as.matrix(t(d[,!colnames(d) == "usedTrainGroup1"])), featureNo = 74)
-  
-  # subset the training data to those top genes
-  d <- d[, c(Top74genes, 'usedTrainGroup1')]
+  sel.genes = sample(setdiff(colnames(data),  "usedTrainGroup1"), 100)
+  data = data[, c(sel.genes, "usedTrainGroup1")]
   
   # subset the validation data
-  valData <- Validation[ , c(Top74genes)]
+  Validation <- Validation[ , c(sel.genes)]
   
   # subset the testing data
-  TestData <- Testing[ , c(Top74genes)]
+  Testing <- Testing[ , c(sel.genes)]
   
-  # scaling the positive class 
+  d <- data[indices, ] # allows boot to select sample
   Train_label <- as.integer(d$usedTrainGroup1)-1
   # Scale weight (to compensate for un-balanced class sizes)
-  Progression <- sum(Train_label == 1)
-  NoProgression <- sum(Train_label == 0)
+  No_Mets <- sum(Train_label == 0)
+  Mets <- sum(Train_label == 1)
   d$usedTrainGroup1 <- NULL
-  
-  # convert to DMatrix
   d2 <- xgb.DMatrix(as.matrix(d), label = Train_label)
-  DataVal_Agnostic <- xgb.DMatrix(as.matrix(valData), label = Val_label)
-  DataTest_Agnostic <- xgb.DMatrix(as.matrix(TestData), label = Test_label)
-
-  # add the watch list
-  watchlist <- list(train  = d2, test = DataVal_Agnostic)
-  # train the model
-  XGB <- xgb.train(parameters, data = d2, nrounds = 500, watchlist,  early_stopping_rounds = 50, scale_pos_weight = NoProgression/Progression)
   
+  DataVal_Agnostic <- xgb.DMatrix(as.matrix(Validation), label = Val_label)
+  DataTest_Agnostic <- xgb.DMatrix(as.matrix(Testing), label = Test_label)
+  watchlist <- list(train  = d2, test = DataVal_Agnostic)
+  
+  XGB <- xgb.train(parameters, data = d2, nrounds = 500, watchlist,  early_stopping_rounds = 50, scale_pos_weight = No_Mets/Mets)
   Importance_Agnostic <- xgb.importance(model = XGB)
   Importance_Agnostic <- Importance_Agnostic[order(Importance_Agnostic$Gain, decreasing = TRUE), ]
   Importance_Agnostic <- Importance_Agnostic[Importance_Agnostic$Gain > 0, ]
@@ -354,188 +513,7 @@ XGBStrap <- function(data, indices) {
   return(c(ROCTrainAgnostic$auc, ROCTestAgnostic$auc, N_ImportanVariables))
 }
 
-
-set.seed(333)
-bootobjectAgnostic_74 <- boot(data= Data_train_Agnostic, statistic= XGBStrap, R= 1000, parallel = "multicore", ncpus = 15) 
-
-#########################################################################3
-#########################################################################3
-
-# Agnostic
-## Top 100 DEGs
-
-## Load data
-# load("./Objs/ProgressionDataGood2.rda")
-# load("./Objs/Correlation/RGenes.rda")
-# 
-# ### Quantile normalize
-# usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")[RGenes, ]
-# usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")[RGenes, ]
-# 
-# ### Associated groups
-# usedTrainGroup <- mixTrainGroup
-# usedTestGroup <- mixTestGroup
-# 
-# #names(usedTrainGroup) <- colnames(usedTrainMat)
-# all(names(usedTrainGroup) == colnames(usedTrainMat))
-# 
-# #names(usedTestGroup) <- colnames(usedTestMat)
-# all(names(usedTestGroup) ==colnames(usedTestMat))
-
-#########
-## Detect Top DE genes
-# TopDEgenes <- SWAP.Filter.Wilcoxon(phenoGroup = usedTrainGroup, inputMat = usedTrainMat, featureNo = 100)
-# 
-# ## Subset the expression matrix to the top DE genes only
-# usedTrainMat <- usedTrainMat[TopDEgenes, ]
-# usedTestMat <- usedTestMat[TopDEgenes, ]
-# 
-# 
-# Training <- t(usedTrainMat)
-
-#####################
-## Here, WE divide the training data into "actual training" and another validation
-# This validation data will be used in the "WatchList" parameter. It is independent of the testing data.
-# set.seed(333)
-# inds <- createDataPartition(usedTrainGroup, p = 0.7, list = F)
-# Training1 <- Training[inds, ]
-# Validation <- Training[-inds, ]
-# 
-# usedTrainGroup1 <- usedTrainGroup[inds]
-# usedValGroup <- usedTrainGroup[-inds]
-# 
-# table(usedTrainGroup1)
-# table(usedValGroup)
-
-
-
-## Making sure that sample names are identical in both Training and usedTrainGroup
-#all(rownames(Training1) == names(usedTrainGroup1))
-
-#all(rownames(Validation) == names(usedValGroup))
-
-
-## Combining the expression matrix and the phenotype in one data frame
-#Training <- as.data.frame(Training1)
-#Data_train_Agnostic <- cbind(Training, usedTrainGroup1)
-
-## The same for validation
-#Validation <- as.data.frame(Validation)
-#Data_val_Agnostic <- cbind(Validation, usedValGroup)
-
-########################################################
-# Transpose usedTestMat and make the sample names identical 
-#Testing <- t(usedTestMat)
-#all(rownames(Testing) == names(usedTestGroup))
-
-###########################################################
-## Converting classes from Progression/NoProgression Format to 0-1 Format
-# table(Data_train_Agnostic$usedTrainGroup1)  
-# levels(Data_train_Agnostic$usedTrainGroup1) <- c(0,1) 
-# Data_train_Agnostic$usedTrainGroup1 <- factor(Data_train_Agnostic$usedTrainGroup1, levels = c(0,1)) # 0=No,1= Yes 
-# Train_label <- Data_train_Agnostic$usedTrainGroup1
-# Train_label <- as.vector(Train_label)
-# table(Train_label)
-# 
-# ## The same for validation
-# table(Data_val_Agnostic$usedValGroup)  
-# levels(Data_val_Agnostic$usedValGroup) <- c(0,1) 
-# Data_val_Agnostic$usedValGroup <- factor(Data_val_Agnostic$usedValGroup, levels = c(0,1)) # 0=No,1= Yes 
-# Val_label <- Data_val_Agnostic$usedValGroup
-# Val_label <- as.vector(Val_label)
-# table(Val_label)
-# 
-# 
-# ## Combine both the Expression matrix and the phenotype into one matrix
-# Testing <- as.data.frame(Testing)
-# Data_test_Agnostic <- cbind(Testing, usedTestGroup)
-# 
-# ## Converting classes from Progression/NoProgression Format to 0-1 Format
-# table(Data_test_Agnostic$usedTestGroup)  
-# levels(Data_test_Agnostic$usedTestGroup) <- c(0,1)
-# Data_test_Agnostic$usedTestGroup <- factor(Data_test_Agnostic$usedTestGroup, levels = c(0,1)) #0=No, 1=Yes
-# Test_label <- Data_test_Agnostic$usedTestGroup
-# Test_label <- as.vector(Test_label)
-# table(Test_label)
-# 
-# 
-# 
-# ## Convert to xgb.DMatrix
-# DataTrain_Agnostic <- xgb.DMatrix(as.matrix(Training), label = Train_label)
-# DataVal_Agnostic <- xgb.DMatrix(as.matrix(Validation), label = Val_label)
-# DataTest_Agnostic <- xgb.DMatrix(as.matrix(Testing), label = Test_label)
-# 
-# ## Creat a watch list
-# watchlist <- list(train  = DataTrain_Agnostic, test = DataVal_Agnostic)
-
-##########################
-
-## Make a list of model parameters
-set.seed(333)
-
-parameters <- list(
-  # General Parameters
-  booster            = "gbtree",          # default = "gbtree"
-  silent             = 1,                 # default = 0
-  # Booster Parameters
-  eta                = 0.1,           #0.1    # default = 0.3, range: [0,1]
-  gamma              = 0,             #0   # default = 0,   range: [0,∞]
-  max_depth          = 1,             # 1
-  min_child_weight   = 1,             #1    # default = 1,   range: [0,∞]
-  subsample          = 0.4,           # 0.4      # default = 1,   range: (0,1]
-  colsample_bytree   = 0.5,           # 0.5      # default = 1,   range: (0,1]
-  colsample_bylevel  = 0.3,              # 0.3   # default = 1,   range: (0,1]
-  lambda             = 3,             # 3 # default = 1
-  alpha              = 0,           # 0    # default = 0
-  # Task Parameters
-  objective          = "binary:logistic",   # default = "reg:linear"
-  eval_metric        = "auc"
-)
-
-
-XGBStrap <- function(data, indices) {
-  d <- data[indices, ] # allows boot to select sample
-  
-  # get the top 100 DEGs
-  Top100genes <- SWAP.Filter.Wilcoxon(phenoGroup = d[,"usedTrainGroup1"], inputMat = as.matrix(t(d[,!colnames(d) == "usedTrainGroup1"])), featureNo = 100)
-  
-  # subset the training data to those top genes
-  d <- d[, c(Top100genes, 'usedTrainGroup1')]
-  
-  # subset the validation data
-  valData <- Validation[ , c(Top100genes)]
-  
-  # subset the testing data
-  TestData <- Testing[ , c(Top100genes)]
-  
-  # scaling the positive class 
-  Train_label <- as.integer(d$usedTrainGroup1)-1
-  # Scale weight (to compensate for un-balanced class sizes)
-  Progression <- sum(Train_label == 1)
-  NoProgression <- sum(Train_label == 0)
-  d$usedTrainGroup1 <- NULL
-  
-  # convert to DMatrix
-  d2 <- xgb.DMatrix(as.matrix(d), label = Train_label)
-  DataVal_Agnostic <- xgb.DMatrix(as.matrix(valData), label = Val_label)
-  DataTest_Agnostic <- xgb.DMatrix(as.matrix(TestData), label = Test_label)
-  
-  # add the watch list
-  watchlist <- list(train  = d2, test = DataVal_Agnostic)
-  # train the model
-  XGB <- xgb.train(parameters, data = d2, nrounds = 500, watchlist,  early_stopping_rounds = 50, scale_pos_weight = NoProgression/Progression)
-  
-  Importance_Agnostic <- xgb.importance(model = XGB)
-  Importance_Agnostic <- Importance_Agnostic[order(Importance_Agnostic$Gain, decreasing = TRUE), ]
-  Importance_Agnostic <- Importance_Agnostic[Importance_Agnostic$Gain > 0, ]
-  N_ImportanVariables <- length(Importance_Agnostic$Gain)
-  train_preds <- predict(XGB, d2)
-  test_preds <- predict(XGB, DataTest_Agnostic)
-  ROCTrainAgnostic <- roc(Train_label, train_preds, plot = F, print.auc = TRUE, levels = c("0", "1"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
-  ROCTestAgnostic <- roc(Test_label, test_preds, plot = F, print.auc = TRUE, levels = c("0", "1"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
-  return(c(ROCTrainAgnostic$auc, ROCTestAgnostic$auc, N_ImportanVariables))
-}
-
+print("C")
 set.seed(333)
 bootobjectAgnostic_100 <- boot(data= Data_train_Agnostic, statistic= XGBStrap, R= 1000, parallel = "multicore", ncpus = 15) 
 
@@ -543,113 +521,111 @@ bootobjectAgnostic_100 <- boot(data= Data_train_Agnostic, statistic= XGBStrap, R
 #########################################################################3
 
 # Agnostic
-## Top 200 DEGs
+## 200 random genes
 
 ## Load data
-# load("./Objs/ProgressionDataGood2.rda")
-# load("./Objs/Correlation/RGenes.rda")
-# 
-# ### Quantile normalize
-# usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")[RGenes, ]
-# usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")[RGenes, ]
-# 
-# ### Associated groups
-# usedTrainGroup <- mixTrainGroup
-# usedTestGroup <- mixTestGroup
-# 
-# #names(usedTrainGroup) <- colnames(usedTrainMat)
-# all(names(usedTrainGroup) == colnames(usedTrainMat))
-# 
-# #names(usedTestGroup) <- colnames(usedTestMat)
-# all(names(usedTestGroup) ==colnames(usedTestMat))
-# 
-# #########
-# ## Detect Top DE genes
-# TopDEgenes <- SWAP.Filter.Wilcoxon(phenoGroup = usedTrainGroup, inputMat = usedTrainMat, featureNo = 200)
-# 
-# ## Subset the expression matrix to the top DE genes only
-# usedTrainMat <- usedTrainMat[TopDEgenes, ]
-# usedTestMat <- usedTestMat[TopDEgenes, ]
-# 
-# 
-# Training <- t(usedTrainMat)
-# 
-# #####################
-# ## Here, WE divide the training data into "actual training" and another validation
-# # This validation data will be used in the "WatchList" parameter. It is independent of the testing data.
-# set.seed(333)
-# inds <- createDataPartition(usedTrainGroup, p = 0.7, list = F)
-# Training1 <- Training[inds, ]
-# Validation <- Training[-inds, ]
-# 
-# usedTrainGroup1 <- usedTrainGroup[inds]
-# usedValGroup <- usedTrainGroup[-inds]
-# 
-# table(usedTrainGroup1)
-# table(usedValGroup)
+load("../../Objs/MetastasisDataGood.rda")
+load("../../Objs/Correlation/RGenes.rda")
+
+### Normalization
+usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")[RGenes, ]
+usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")[RGenes, ]
+
+####
+usedTrainGroup <- mixTrainGroup
+usedTestGroup <- mixTestGroup
+
+
+#names(usedTrainGroup) <- colnames(usedTrainMat)
+all(names(usedTrainGroup) == colnames(usedTrainMat))
+
+#names(usedTestGroup) <- colnames(usedTestMat)
+all(names(usedTestGroup) ==colnames(usedTestMat))
+
+#########
+
+Training <- t(usedTrainMat)
+
+#####################
+## Here, WE divide the training data into "actual training" and another validation
+# This validation data will be used in the "WatchList" parameter. It is independent of the testing data.
+set.seed(333)
+inds <- createDataPartition(usedTrainGroup, p = 0.7, list = F)
+Training1 <- Training[inds, ]
+Validation <- Training[-inds, ]
+
+usedTrainGroup1 <- usedTrainGroup[inds]
+usedValGroup <- usedTrainGroup[-inds]
+
+table(usedTrainGroup1)
+table(usedValGroup)
 
 
 
 ## Making sure that sample names are identical in both Training and usedTrainGroup
-# all(rownames(Training1) == names(usedTrainGroup1))
-# 
-# #names(usedValGroup) <- rownames(Validation) 
-# all(rownames(Validation) == names(usedValGroup))
-# 
-# 
-# ## Combining the expression matrix and the phenotype in one data frame
-# Training <- as.data.frame(Training1)
-# Data_train_Agnostic <- cbind(Training, usedTrainGroup1)
-# 
-# ## The same for validation
-# Validation <- as.data.frame(Validation)
-# Data_val_Agnostic <- cbind(Validation, usedValGroup)
-# 
-# ########################################################
-# # Transpose usedTestMat and make the sample names identical 
-# Testing <- t(usedTestMat)
-# 
-# all(rownames(Testing) == names(usedTestGroup))
+#names(usedTrainGroup1) <- rownames(Training1)
+all(rownames(Training1) == names(usedTrainGroup1))
+
+#names(usedValGroup) <- rownames(Validation) 
+all(rownames(Validation) == names(usedValGroup))
+
+
+## Combining the expression matrix and the phenotype in one data frame
+Training <- as.data.frame(Training1)
+#usedTrainGroup <- as.data.frame(usedTrainGroup)
+Data_train_Agnostic <- cbind(Training, usedTrainGroup1)
+
+## The same for validation
+Validation <- as.data.frame(Validation)
+#usedTrainGroup <- as.data.frame(usedTrainGroup)
+Data_val_Agnostic <- cbind(Validation, usedValGroup)
+
+########################################################
+# Transpose usedTestMat and make the sample names identical 
+Testing <- t(usedTestMat)
+
+#names(usedTestGroup) <- rownames(Testing)
+all(rownames(Testing) == names(usedTestGroup))
 
 ###########################################################
 ## Converting classes from Progression/NoProgression Format to 0-1 Format
-# table(Data_train_Agnostic$usedTrainGroup1)  
-# levels(Data_train_Agnostic$usedTrainGroup1) <- c(0,1) 
-# Data_train_Agnostic$usedTrainGroup1 <- factor(Data_train_Agnostic$usedTrainGroup1, levels = c(0,1)) # 0=No,1= Yes 
-# Train_label <- Data_train_Agnostic$usedTrainGroup1
-# Train_label <- as.vector(Train_label)
-# table(Train_label)
-# 
-# ## The same for validation
-# table(Data_val_Agnostic$usedValGroup)  
-# levels(Data_val_Agnostic$usedValGroup) <- c(0,1) 
-# Data_val_Agnostic$usedValGroup <- factor(Data_val_Agnostic$usedValGroup, levels = c(0,1)) # 0=No,1= Yes 
-# Val_label <- Data_val_Agnostic$usedValGroup
-# Val_label <- as.vector(Val_label)
-# table(Val_label)
-# 
-# 
-# ## Combine both the Expression matrix and the phenotype into one matrix
-# Testing <- as.data.frame(Testing)
-# Data_test_Agnostic <- cbind(Testing, usedTestGroup)
-# 
-# ## Converting classes from Progression/NoProgression Format to 0-1 Format
-# table(Data_test_Agnostic$usedTestGroup)  
-# levels(Data_test_Agnostic$usedTestGroup) <- c(0,1)
-# Data_test_Agnostic$usedTestGroup <- factor(Data_test_Agnostic$usedTestGroup, levels = c(0,1)) #0=No, 1=Yes
-# Test_label <- Data_test_Agnostic$usedTestGroup
-# Test_label <- as.vector(Test_label)
-# table(Test_label)
-# 
-# 
-# 
-# ## Convert to xgb.DMatrix
-# DataTrain_Agnostic <- xgb.DMatrix(as.matrix(Training), label = Train_label)
-# DataVal_Agnostic <- xgb.DMatrix(as.matrix(Validation), label = Val_label)
-# DataTest_Agnostic <- xgb.DMatrix(as.matrix(Testing), label = Test_label)
-# 
-# ## Creat a watch list
-# watchlist <- list(train  = DataTrain_Agnostic, test = DataVal_Agnostic)
+table(Data_train_Agnostic$usedTrainGroup1)  
+levels(Data_train_Agnostic$usedTrainGroup1) <- c(0,1) 
+Data_train_Agnostic$usedTrainGroup1 <- factor(Data_train_Agnostic$usedTrainGroup1, levels = c(0,1)) # 0=No,1= Yes 
+Train_label <- Data_train_Agnostic$usedTrainGroup1
+Train_label <- as.vector(Train_label)
+table(Train_label)
+
+## The same for validation
+table(Data_val_Agnostic$usedValGroup)  
+levels(Data_val_Agnostic$usedValGroup) <- c(0,1) 
+Data_val_Agnostic$usedValGroup <- factor(Data_val_Agnostic$usedValGroup, levels = c(0,1)) # 0=No,1= Yes 
+Val_label <- Data_val_Agnostic$usedValGroup
+Val_label <- as.vector(Val_label)
+table(Val_label)
+
+
+## Combine both the Expression matrix and the phenotype into one matrix
+Testing <- as.data.frame(Testing)
+Data_test_Agnostic <- cbind(Testing, usedTestGroup)
+
+## Converting classes from Progression/NoProgression Format to 0-1 Format
+table(Data_test_Agnostic$usedTestGroup)  
+levels(Data_test_Agnostic$usedTestGroup) <- c(0,1)
+Data_test_Agnostic$usedTestGroup <- factor(Data_test_Agnostic$usedTestGroup, levels = c(0,1)) #0=No, 1=Yes
+Test_label <- Data_test_Agnostic$usedTestGroup
+Test_label <- as.vector(Test_label)
+table(Test_label)
+
+
+
+## Convert to xgb.DMatrix
+DataTrain_Agnostic <- xgb.DMatrix(as.matrix(Training), label = Train_label)
+DataVal_Agnostic <- xgb.DMatrix(as.matrix(Validation), label = Val_label)
+DataTest_Agnostic <- xgb.DMatrix(as.matrix(Testing), label = Test_label)
+
+## Creat a watch list
+watchlist <- list(train  = DataTrain_Agnostic, test = DataVal_Agnostic)
 
 ##########################
 
@@ -661,55 +637,46 @@ parameters <- list(
   booster            = "gbtree",          # default = "gbtree"
   silent             = 1,                 # default = 0
   # Booster Parameters
-  eta                = 0.1,           #0.1    # default = 0.3, range: [0,1]
+  eta                = 0.1,           #0.3    # default = 0.3, range: [0,1]
   gamma              = 0,             #0   # default = 0,   range: [0,∞]
-  max_depth          = 1,             # 1
+  max_depth          = 1,             # 2
   min_child_weight   = 1,             #1    # default = 1,   range: [0,∞]
-  subsample          = 0.4,           # 0.4      # default = 1,   range: (0,1]
-  colsample_bytree   = 0.5,           # 0.5      # default = 1,   range: (0,1]
-  colsample_bylevel  = 0.3,              # 0.3   # default = 1,   range: (0,1]
-  lambda             = 3,             # 3 # default = 1
-  alpha              = 0,           # 0    # default = 0
+  subsample          = 0.4,             #0.5  # default = 1,   range: (0,1]
+  colsample_bytree   = 1,             #1    # default = 1,   range: (0,1]
+  colsample_bylevel  = 1,             #1    # default = 1,   range: (0,1]
+  lambda             = 0,             # 0  # default = 1
+  alpha              = 0,             # 0    # default = 0
   # Task Parameters
   objective          = "binary:logistic",   # default = "reg:linear"
   eval_metric        = "auc"
 )
 
-
 # The function for bootstraping
-
 XGBStrap <- function(data, indices) {
-  d <- data[indices, ] # allows boot to select sample
   
-  # get the top 200 DEGs
-  Top200genes <- SWAP.Filter.Wilcoxon(phenoGroup = d[,"usedTrainGroup1"], inputMat = as.matrix(t(d[,!colnames(d) == "usedTrainGroup1"])), featureNo = 200)
-  
-  # subset the training data to those top genes
-  d <- d[, c(Top200genes, 'usedTrainGroup1')]
+  sel.genes = sample(setdiff(colnames(data),  "usedTrainGroup1"), 200)
+  data = data[, c(sel.genes, "usedTrainGroup1")]
   
   # subset the validation data
-  valData <- Validation[ , c(Top200genes)]
+  Validation <- Validation[ , c(sel.genes)]
   
   # subset the testing data
-  TestData <- Testing[ , c(Top200genes)]
+  Testing <- Testing[ , c(sel.genes)]
   
-  # scaling the positive class 
+  
+  d <- data[indices, ] # allows boot to select sample
   Train_label <- as.integer(d$usedTrainGroup1)-1
   # Scale weight (to compensate for un-balanced class sizes)
-  Progression <- sum(Train_label == 1)
-  NoProgression <- sum(Train_label == 0)
+  No_Mets <- sum(Train_label == 0)
+  Mets <- sum(Train_label == 1)
   d$usedTrainGroup1 <- NULL
-  
-  # convert to DMatrix
   d2 <- xgb.DMatrix(as.matrix(d), label = Train_label)
-  DataVal_Agnostic <- xgb.DMatrix(as.matrix(valData), label = Val_label)
-  DataTest_Agnostic <- xgb.DMatrix(as.matrix(TestData), label = Test_label)
   
-  # add the watch list
+  DataVal_Agnostic <- xgb.DMatrix(as.matrix(Validation), label = Val_label)
+  DataTest_Agnostic <- xgb.DMatrix(as.matrix(Testing), label = Test_label)
   watchlist <- list(train  = d2, test = DataVal_Agnostic)
-  # train the model
-  XGB <- xgb.train(parameters, data = d2, nrounds = 500, watchlist,  early_stopping_rounds = 50, scale_pos_weight = NoProgression/Progression)
   
+  XGB <- xgb.train(parameters, data = d2, nrounds = 500, watchlist,  early_stopping_rounds = 50, scale_pos_weight = No_Mets/Mets)
   Importance_Agnostic <- xgb.importance(model = XGB)
   Importance_Agnostic <- Importance_Agnostic[order(Importance_Agnostic$Gain, decreasing = TRUE), ]
   Importance_Agnostic <- Importance_Agnostic[Importance_Agnostic$Gain > 0, ]
@@ -721,7 +688,7 @@ XGBStrap <- function(data, indices) {
   return(c(ROCTrainAgnostic$auc, ROCTestAgnostic$auc, N_ImportanVariables))
 }
 
-
+print("D")
 set.seed(333)
 bootobjectAgnostic_200 <- boot(data= Data_train_Agnostic, statistic= XGBStrap, R= 1000, parallel = "multicore", ncpus = 15) 
 
@@ -729,119 +696,113 @@ bootobjectAgnostic_200 <- boot(data= Data_train_Agnostic, statistic= XGBStrap, R
 #########################################################################3
 
 # Agnostic
-## Top 500 DEGs
+## 500 Random genes
 
 ## Load data
-# load("./Objs/ProgressionDataGood2.rda")
-# load("./Objs/Correlation/RGenes.rda")
-# 
-# ### Quantile normalize
-# usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")[RGenes, ]
-# usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")[RGenes, ]
-# 
-# ### Associated groups
-# usedTrainGroup <- mixTrainGroup
-# usedTestGroup <- mixTestGroup
-# 
-# #names(usedTrainGroup) <- colnames(usedTrainMat)
-# all(names(usedTrainGroup) == colnames(usedTrainMat))
-# 
-# #names(usedTestGroup) <- colnames(usedTestMat)
-# all(names(usedTestGroup) ==colnames(usedTestMat))
-# 
-# #########
-# ## Detect Top DE genes
-# TopDEgenes <- SWAP.Filter.Wilcoxon(phenoGroup = usedTrainGroup, inputMat = usedTrainMat, featureNo = 500)
-# 
-# ## Subset the expression matrix to the top DE genes only
-# usedTrainMat <- usedTrainMat[TopDEgenes, ]
-# usedTestMat <- usedTestMat[TopDEgenes, ]
-# 
-# 
-# Training <- t(usedTrainMat)
-# 
-# #####################
-# ## Here, WE divide the training data into "actual training" and another validation
-# # This validation data will be used in the "WatchList" parameter. It is independent of the testing data.
-# set.seed(333)
-# inds <- createDataPartition(usedTrainGroup, p = 0.7, list = F)
-# Training1 <- Training[inds, ]
-# Validation <- Training[-inds, ]
-# 
-# usedTrainGroup1 <- usedTrainGroup[inds]
-# usedValGroup <- usedTrainGroup[-inds]
-# 
-# table(usedTrainGroup1)
-# table(usedValGroup)
-# 
-# 
-# 
-# ## Making sure that sample names are identical in both Training and usedTrainGroup
-# #names(usedTrainGroup1) <- rownames(Training1)
-# all(rownames(Training1) == names(usedTrainGroup1))
-# 
-# #names(usedValGroup) <- rownames(Validation) 
-# all(rownames(Validation) == names(usedValGroup))
-# 
-# 
-# ## Combining the expression matrix and the phenotype in one data frame
-# Training <- as.data.frame(Training1)
-# #usedTrainGroup <- as.data.frame(usedTrainGroup)
-# Data_train_Agnostic <- cbind(Training, usedTrainGroup1)
-# 
-# ## The same for validation
-# Validation <- as.data.frame(Validation)
-# #usedTrainGroup <- as.data.frame(usedTrainGroup)
-# Data_val_Agnostic <- cbind(Validation, usedValGroup)
-# 
-# ########################################################
-# # Transpose usedTestMat and make the sample names identical 
-# Testing <- t(usedTestMat)
-# 
-# #names(usedTestGroup) <- rownames(Testing)
-# all(rownames(Testing) == names(usedTestGroup))
-# 
-# ###########################################################
-# ## Converting classes from Progression/NoProgression Format to 0-1 Format
-# table(Data_train_Agnostic$usedTrainGroup1)  
-# levels(Data_train_Agnostic$usedTrainGroup1) <- c(0,1) 
-# Data_train_Agnostic$usedTrainGroup1 <- factor(Data_train_Agnostic$usedTrainGroup1, levels = c(0,1)) # 0=No,1= Yes 
-# Train_label <- Data_train_Agnostic$usedTrainGroup1
-# Train_label <- as.vector(Train_label)
-# table(Train_label)
-# 
-# ## The same for validation
-# table(Data_val_Agnostic$usedValGroup)  
-# levels(Data_val_Agnostic$usedValGroup) <- c(0,1) 
-# Data_val_Agnostic$usedValGroup <- factor(Data_val_Agnostic$usedValGroup, levels = c(0,1)) # 0=No,1= Yes 
-# Val_label <- Data_val_Agnostic$usedValGroup
-# Val_label <- as.vector(Val_label)
-# table(Val_label)
-# 
-# 
-# ## Combine both the Expression matrix and the phenotype into one matrix
-# Testing <- as.data.frame(Testing)
-# Data_test_Agnostic <- cbind(Testing, usedTestGroup)
-# 
-# ## Converting classes from Progression/NoProgression Format to 0-1 Format
-# table(Data_test_Agnostic$usedTestGroup)  
-# levels(Data_test_Agnostic$usedTestGroup) <- c(0,1)
-# Data_test_Agnostic$usedTestGroup <- factor(Data_test_Agnostic$usedTestGroup, levels = c(0,1)) #0=No, 1=Yes
-# Test_label <- Data_test_Agnostic$usedTestGroup
-# Test_label <- as.vector(Test_label)
-# table(Test_label)
-# 
-# 
-# 
-# ## Convert to xgb.DMatrix
-# DataTrain_Agnostic <- xgb.DMatrix(as.matrix(Training), label = Train_label)
-# DataVal_Agnostic <- xgb.DMatrix(as.matrix(Validation), label = Val_label)
-# DataTest_Agnostic <- xgb.DMatrix(as.matrix(Testing), label = Test_label)
-# 
-# ## Creat a watch list
-# watchlist <- list(train  = DataTrain_Agnostic, test = DataVal_Agnostic)
-# 
-# ##########################
+load("../../Objs/MetastasisDataGood.rda")
+load("../../Objs/Correlation/RGenes.rda")
+
+### Normalization
+usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")[RGenes, ]
+usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")[RGenes, ]
+
+####
+usedTrainGroup <- mixTrainGroup
+usedTestGroup <- mixTestGroup
+
+
+#names(usedTrainGroup) <- colnames(usedTrainMat)
+all(names(usedTrainGroup) == colnames(usedTrainMat))
+
+#names(usedTestGroup) <- colnames(usedTestMat)
+all(names(usedTestGroup) ==colnames(usedTestMat))
+
+#########
+
+Training <- t(usedTrainMat)
+
+#####################
+## Here, WE divide the training data into "actual training" and another validation
+# This validation data will be used in the "WatchList" parameter. It is independent of the testing data.
+set.seed(333)
+inds <- createDataPartition(usedTrainGroup, p = 0.7, list = F)
+Training1 <- Training[inds, ]
+Validation <- Training[-inds, ]
+
+usedTrainGroup1 <- usedTrainGroup[inds]
+usedValGroup <- usedTrainGroup[-inds]
+
+table(usedTrainGroup1)
+table(usedValGroup)
+
+
+
+## Making sure that sample names are identical in both Training and usedTrainGroup
+#names(usedTrainGroup1) <- rownames(Training1)
+all(rownames(Training1) == names(usedTrainGroup1))
+
+#names(usedValGroup) <- rownames(Validation) 
+all(rownames(Validation) == names(usedValGroup))
+
+
+## Combining the expression matrix and the phenotype in one data frame
+Training <- as.data.frame(Training1)
+#usedTrainGroup <- as.data.frame(usedTrainGroup)
+Data_train_Agnostic <- cbind(Training, usedTrainGroup1)
+
+## The same for validation
+Validation <- as.data.frame(Validation)
+#usedTrainGroup <- as.data.frame(usedTrainGroup)
+Data_val_Agnostic <- cbind(Validation, usedValGroup)
+
+########################################################
+# Transpose usedTestMat and make the sample names identical 
+Testing <- t(usedTestMat)
+
+#names(usedTestGroup) <- rownames(Testing)
+all(rownames(Testing) == names(usedTestGroup))
+
+###########################################################
+## Converting classes from Progression/NoProgression Format to 0-1 Format
+table(Data_train_Agnostic$usedTrainGroup1)  
+levels(Data_train_Agnostic$usedTrainGroup1) <- c(0,1) 
+Data_train_Agnostic$usedTrainGroup1 <- factor(Data_train_Agnostic$usedTrainGroup1, levels = c(0,1)) # 0=No,1= Yes 
+Train_label <- Data_train_Agnostic$usedTrainGroup1
+Train_label <- as.vector(Train_label)
+table(Train_label)
+
+## The same for validation
+table(Data_val_Agnostic$usedValGroup)  
+levels(Data_val_Agnostic$usedValGroup) <- c(0,1) 
+Data_val_Agnostic$usedValGroup <- factor(Data_val_Agnostic$usedValGroup, levels = c(0,1)) # 0=No,1= Yes 
+Val_label <- Data_val_Agnostic$usedValGroup
+Val_label <- as.vector(Val_label)
+table(Val_label)
+
+
+## Combine both the Expression matrix and the phenotype into one matrix
+Testing <- as.data.frame(Testing)
+Data_test_Agnostic <- cbind(Testing, usedTestGroup)
+
+## Converting classes from Progression/NoProgression Format to 0-1 Format
+table(Data_test_Agnostic$usedTestGroup)  
+levels(Data_test_Agnostic$usedTestGroup) <- c(0,1)
+Data_test_Agnostic$usedTestGroup <- factor(Data_test_Agnostic$usedTestGroup, levels = c(0,1)) #0=No, 1=Yes
+Test_label <- Data_test_Agnostic$usedTestGroup
+Test_label <- as.vector(Test_label)
+table(Test_label)
+
+
+
+## Convert to xgb.DMatrix
+DataTrain_Agnostic <- xgb.DMatrix(as.matrix(Training), label = Train_label)
+DataVal_Agnostic <- xgb.DMatrix(as.matrix(Validation), label = Val_label)
+DataTest_Agnostic <- xgb.DMatrix(as.matrix(Testing), label = Test_label)
+
+## Creat a watch list
+watchlist <- list(train  = DataTrain_Agnostic, test = DataVal_Agnostic)
+
+##########################
 
 ## Make a list of model parameters
 set.seed(333)
@@ -851,53 +812,46 @@ parameters <- list(
   booster            = "gbtree",          # default = "gbtree"
   silent             = 1,                 # default = 0
   # Booster Parameters
-  eta                = 0.1,           #0.1    # default = 0.3, range: [0,1]
+  eta                = 0.1,           #0.3    # default = 0.3, range: [0,1]
   gamma              = 0,             #0   # default = 0,   range: [0,∞]
-  max_depth          = 1,             # 1
+  max_depth          = 1,             # 2
   min_child_weight   = 1,             #1    # default = 1,   range: [0,∞]
-  subsample          = 0.4,           # 0.4      # default = 1,   range: (0,1]
-  colsample_bytree   = 0.5,           # 0.5      # default = 1,   range: (0,1]
-  colsample_bylevel  = 0.3,              # 0.3   # default = 1,   range: (0,1]
-  lambda             = 3,             # 3 # default = 1
-  alpha              = 0,           # 0    # default = 0
+  subsample          = 0.4,             #0.5  # default = 1,   range: (0,1]
+  colsample_bytree   = 1,             #1    # default = 1,   range: (0,1]
+  colsample_bylevel  = 1,             #1    # default = 1,   range: (0,1]
+  lambda             = 0,             # 0  # default = 1
+  alpha              = 0,             # 0    # default = 0
   # Task Parameters
   objective          = "binary:logistic",   # default = "reg:linear"
   eval_metric        = "auc"
 )
 
-# the function for bootstrap
+
+# The function for bootstraping
 XGBStrap <- function(data, indices) {
-  d <- data[indices, ] # allows boot to select sample
   
-  # get the top 500 DEGs
-  Top500genes <- SWAP.Filter.Wilcoxon(phenoGroup = d[,"usedTrainGroup1"], inputMat = as.matrix(t(d[,!colnames(d) == "usedTrainGroup1"])), featureNo = 500)
-  
-  # subset the training data to those top genes
-  d <- d[, c(Top500genes, 'usedTrainGroup1')]
+  sel.genes = sample(setdiff(colnames(data),  "usedTrainGroup1"), 500)
+  data = data[, c(sel.genes, "usedTrainGroup1")]
   
   # subset the validation data
-  valData <- Validation[ , c(Top500genes)]
+  Validation <- Validation[ , c(sel.genes)]
   
   # subset the testing data
-  TestData <- Testing[ , c(Top500genes)]
+  Testing <- Testing[ , c(sel.genes)]
   
-  # scaling the positive class 
+  d <- data[indices, ] # allows boot to select sample
   Train_label <- as.integer(d$usedTrainGroup1)-1
   # Scale weight (to compensate for un-balanced class sizes)
-  Progression <- sum(Train_label == 1)
-  NoProgression <- sum(Train_label == 0)
+  No_Mets <- sum(Train_label == 0)
+  Mets <- sum(Train_label == 1)
   d$usedTrainGroup1 <- NULL
-  
-  # convert to DMatrix
   d2 <- xgb.DMatrix(as.matrix(d), label = Train_label)
-  DataVal_Agnostic <- xgb.DMatrix(as.matrix(valData), label = Val_label)
-  DataTest_Agnostic <- xgb.DMatrix(as.matrix(TestData), label = Test_label)
   
-  # add the watch list
+  DataVal_Agnostic <- xgb.DMatrix(as.matrix(Validation), label = Val_label)
+  DataTest_Agnostic <- xgb.DMatrix(as.matrix(Testing), label = Test_label)
   watchlist <- list(train  = d2, test = DataVal_Agnostic)
-  # train the model
-  XGB <- xgb.train(parameters, data = d2, nrounds = 500, watchlist,  early_stopping_rounds = 50, scale_pos_weight = NoProgression/Progression)
   
+  XGB <- xgb.train(parameters, data = d2, nrounds = 500, watchlist,  early_stopping_rounds = 50, scale_pos_weight = No_Mets/Mets)
   Importance_Agnostic <- xgb.importance(model = XGB)
   Importance_Agnostic <- Importance_Agnostic[order(Importance_Agnostic$Gain, decreasing = TRUE), ]
   Importance_Agnostic <- Importance_Agnostic[Importance_Agnostic$Gain > 0, ]
@@ -909,7 +863,7 @@ XGBStrap <- function(data, indices) {
   return(c(ROCTrainAgnostic$auc, ROCTestAgnostic$auc, N_ImportanVariables))
 }
 
-
+print("E")
 set.seed(333)
 bootobjectAgnostic_500 <- boot(data= Data_train_Agnostic, statistic= XGBStrap, R= 1000, parallel = "multicore", ncpus = 15) 
 
@@ -917,28 +871,26 @@ bootobjectAgnostic_500 <- boot(data= Data_train_Agnostic, statistic= XGBStrap, R
 ################################################################################################
 
 ### Save boot objects
-save(bootobjectMech, bootobjectAgnostic_74, bootobjectAgnostic_100, bootobjectAgnostic_200, bootobjectAgnostic_500, file = "./Objs/XGB/XGBBootObjects_new.rda")
+save(bootobjectMech, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_200, bootobjectAgnostic_500, file = "../../Objs/XGB/XGBBootObjects_AdhesionActivationO2response_RAND.rda")
 
 # Load
-load("./Objs/XGB/XGBBootObjects_new.rda")
+load("../../Objs/XGB/XGBBootObjects_AdhesionActivationO2response_RAND.rda")
 
 ################################################################################################
 ################################################################################################
 
-## Work with Agnostic bootobject 74 vs mechanistic
+## Work with Agnostic bootobject 50 vs mechanistic
 
-
-AUCs_XGB_Agnostic_74 <- bootobjectAgnostic_74$t
-colnames(AUCs_XGB_Agnostic_74) <- c("AUC_Train", "AUC_Test", "N_ImportanVariables")
+AUCs_XGB_Agnostic_50 <- bootobjectAgnostic_50$t
+colnames(AUCs_XGB_Agnostic_50) <- c("AUC_Train", "AUC_Test", "N_ImportanVariables")
 
 AUCs_XG_Mech <- bootobjectMech$t
 colnames(AUCs_XG_Mech) <- c("AUC_Train", "AUC_Test", "N_ImportanVariables")
 
 # Calculate the difference and the CI of the difference in the training data
-DiffAgnostic_74 <- AUCs_XGB_Agnostic_74[, "AUC_Train"] - AUCs_XGB_Agnostic_74[, "AUC_Test"]
-range(DiffAgnostic_74)
-quantile(DiffAgnostic_74, c(0.025, 0.975))
-#colnames(Diff) <- "Diff"
+DiffAgnostic_50 <- AUCs_XGB_Agnostic_50[, "AUC_Train"] - AUCs_XGB_Agnostic_50[, "AUC_Test"]
+range(DiffAgnostic_50)
+quantile(DiffAgnostic_50, c(0.025, 0.975))
 
 # Calculate the difference and the CI of the difference in the testing data
 DiffMech <- AUCs_XG_Mech[, "AUC_Train"] - AUCs_XG_Mech[, "AUC_Test"]
@@ -947,38 +899,37 @@ quantile(DiffMech, c(0.025, 0.975))
 
 ## Plot the distributions of the AUCs from both methods in the training data
 MechanisticAUC_Train <- data.frame(AUC = AUCs_XG_Mech[, "AUC_Train"])
-AgnosticAUC_Train_74 <- data.frame(AUC = AUCs_XGB_Agnostic_74[, "AUC_Train"])
+AgnosticAUC_Train_50 <- data.frame(AUC = AUCs_XGB_Agnostic_50[, "AUC_Train"])
 
 MechanisticAUC_Train$modelType <- "Mechanistic"
-AgnosticAUC_Train_74$modelType <- "Agnostic_DEGs"
+AgnosticAUC_Train_50$modelType <- "Random_genes"
 
-ModelCompareAUC_Train_74 <- rbind(MechanisticAUC_Train, AgnosticAUC_Train_74)
+ModelCompareAUC_Train_50 <- rbind(MechanisticAUC_Train, AgnosticAUC_Train_50)
 
 ## Plot the distributions of the AUCs from both methods in the testing data
 MechanisticAUC_Test <- data.frame(AUC = AUCs_XG_Mech[, "AUC_Test"])
-AgnosticAUC_Test_74 <- data.frame(AUC = AUCs_XGB_Agnostic_74[, "AUC_Test"])
+AgnosticAUC_Test_50 <- data.frame(AUC = AUCs_XGB_Agnostic_50[, "AUC_Test"])
 
 MechanisticAUC_Test$modelType <- "Mechanistic"
-AgnosticAUC_Test_74$modelType <- "Agnostic_DEGs"
+AgnosticAUC_Test_50$modelType <- "Random_genes"
 
-ModelCompareAUC_Test_74 <- rbind(MechanisticAUC_Test, AgnosticAUC_Test_74)
+ModelCompareAUC_Test_50 <- rbind(MechanisticAUC_Test, AgnosticAUC_Test_50)
 
 ## Save the AUCs in the training and testing data
-ModelCompareAUC_Train_74$data_type <- "Training"
-ModelCompareAUC_Test_74$data_type <- "Testing"
+ModelCompareAUC_Train_50$data_type <- "Training"
+ModelCompareAUC_Test_50$data_type <- "Testing"
 
-ModelCompareAUC_Train_74$NofFeatAgn <- "74_Genes"
-ModelCompareAUC_Test_74$NofFeatAgn <- "74_Genes"
+ModelCompareAUC_Train_50$NofFeatAgn <- "50_Genes"
+ModelCompareAUC_Test_50$NofFeatAgn <- "50_Genes"
 
-save(ModelCompareAUC_Train_74, ModelCompareAUC_Test_74, file = "./Objs/XGB/ModelCompareAUC_74_new.rda")
+save(ModelCompareAUC_Train_50, ModelCompareAUC_Test_50, file = "../../Objs/XGB/ModelCompare_RAND_AUC_50.rda")
 
-#########################################################################
+######################
 ## Save for the main figure
-ModelCompare_XGB <- rbind(ModelCompareAUC_Train_74, ModelCompareAUC_Test_74)
+ModelCompare_XGB <- rbind(ModelCompareAUC_Train_50, ModelCompareAUC_Test_50)
 ModelCompare_XGB$algorithm <- "XGB"
-save(ModelCompare_XGB, file = "./Objs/XGB/ModelCompare_XGB_new.rda")
+save(ModelCompare_XGB, file = "../../Objs/XGB/ModelCompare_XGB_RAND.rda")
 
-#########################################################################
 ################################################################################################
 ################################################################################################
 
@@ -987,32 +938,52 @@ save(ModelCompare_XGB, file = "./Objs/XGB/ModelCompare_XGB_new.rda")
 AUCs_XGB_Agnostic_100 <- bootobjectAgnostic_100$t
 colnames(AUCs_XGB_Agnostic_100) <- c("AUC_Train", "AUC_Test", "N_ImportanVariables")
 
+AUCs_XG_Mech <- bootobjectMech$t
+colnames(AUCs_XG_Mech) <- c("AUC_Train", "AUC_Test", "N_ImportanVariables")
+
 # Calculate the difference and the CI of the difference in the training data
 DiffAgnostic_100 <- AUCs_XGB_Agnostic_100[, "AUC_Train"] - AUCs_XGB_Agnostic_100[, "AUC_Test"]
 range(DiffAgnostic_100)
 quantile(DiffAgnostic_100, c(0.025, 0.975))
-#colnames(Diff) <- "Diff"
+
+# Calculate the difference and the CI of the difference in the testing data
+DiffMech <- AUCs_XG_Mech[, "AUC_Train"] - AUCs_XG_Mech[, "AUC_Test"]
+range(DiffMech)
+quantile(DiffMech, c(0.025, 0.975))
 
 
 ## Plot the distributions of the AUCs from both methods in the training data
+MechanisticAUC_Train <- data.frame(AUC = AUCs_XG_Mech[, "AUC_Train"])
 AgnosticAUC_Train_100 <- data.frame(AUC = AUCs_XGB_Agnostic_100[, "AUC_Train"])
 
-AgnosticAUC_Train_100$modelType <- "Agnostic_DEGs"
+MechanisticAUC_Train$modelType <- "Mechanistic"
+AgnosticAUC_Train_100$modelType <- "Random_genes"
 
 ModelCompareAUC_Train_100 <- rbind(MechanisticAUC_Train, AgnosticAUC_Train_100)
 
 ## Plot the distributions of the AUCs from both methods in the testing data
+MechanisticAUC_Test <- data.frame(AUC = AUCs_XG_Mech[, "AUC_Test"])
 AgnosticAUC_Test_100 <- data.frame(AUC = AUCs_XGB_Agnostic_100[, "AUC_Test"])
 
-AgnosticAUC_Test_100$modelType <- "Agnostic_DEGs"
-
+MechanisticAUC_Test$modelType <- "Mechanistic"
+AgnosticAUC_Test_100$modelType <- "Random_genes"
 
 ModelCompareAUC_Test_100 <- rbind(MechanisticAUC_Test, AgnosticAUC_Test_100)
+
+## Save the AUCs in the training and testing data
+ModelCompareAUC_Train_100$data_type <- "Training"
+ModelCompareAUC_Test_100$data_type <- "Testing"
 
 ModelCompareAUC_Train_100$NofFeatAgn <- "100_Genes"
 ModelCompareAUC_Test_100$NofFeatAgn <- "100_Genes"
 
-save(ModelCompareAUC_Train_100, ModelCompareAUC_Test_100, file = "./Objs/XGB/ModelCompareAUC_100_new.rda")
+save(ModelCompareAUC_Train_100, ModelCompareAUC_Test_100, file = "../../Objs/XGB/ModelCompare_RAND_AUC_100.rda")
+
+######################
+## Save for the main figure
+# ModelCompare_XGB <- rbind(ModelCompareAUC_Train_100, ModelCompareAUC_Test_100)
+# ModelCompare_XGB$algorithm <- "XGB"
+# save(ModelCompare_XGB, file = "./Objs/XGB/ModelCompare_XGB.rda")
 
 ################################################################################################
 ################################################################################################
@@ -1032,21 +1003,25 @@ quantile(DiffAgnostic_200, c(0.025, 0.975))
 ## Plot the distributions of the AUCs from both methods in the training data
 AgnosticAUC_Train_200 <- data.frame(AUC = AUCs_XGB_Agnostic_200[, "AUC_Train"])
 
-AgnosticAUC_Train_200$modelType <- "Agnostic_DEGs"
+AgnosticAUC_Train_200$modelType <- "Random_genes"
 
 ModelCompareAUC_Train_200 <- rbind(MechanisticAUC_Train, AgnosticAUC_Train_200)
 
 ## Plot the distributions of the AUCs from both methods in the testing data
 AgnosticAUC_Test_200 <- data.frame(AUC = AUCs_XGB_Agnostic_200[, "AUC_Test"])
 
-AgnosticAUC_Test_200$modelType <- "Agnostic_DEGs"
+AgnosticAUC_Test_200$modelType <- "Random_genes"
 
 ModelCompareAUC_Test_200 <- rbind(MechanisticAUC_Test, AgnosticAUC_Test_200)
+
+## Save the AUCs in the training and testing data
+ModelCompareAUC_Train_200$data_type <- "Training"
+ModelCompareAUC_Test_200$data_type <- "Testing"
 
 ModelCompareAUC_Train_200$NofFeatAgn <- "200_Genes"
 ModelCompareAUC_Test_200$NofFeatAgn <- "200_Genes"
 
-save(ModelCompareAUC_Train_200, ModelCompareAUC_Test_200, file = "./Objs/XGB/ModelCompareAUC_200_new.rda")
+save(ModelCompareAUC_Train_200, ModelCompareAUC_Test_200, file = "../../Objs/XGB/ModelCompare_RAND_AUC_200.rda")
 
 ################################################################################################
 ################################################################################################
@@ -1066,20 +1041,23 @@ quantile(DiffAgnostic_500, c(0.025, 0.975))
 ## Plot the distributions of the AUCs from both methods in the training data
 AgnosticAUC_Train_500 <- data.frame(AUC = AUCs_XGB_Agnostic_500[, "AUC_Train"])
 
-AgnosticAUC_Train_500$modelType <- "Agnostic_DEGs"
+AgnosticAUC_Train_500$modelType <- "Random_genes"
 
 ModelCompareAUC_Train_500 <- rbind(MechanisticAUC_Train, AgnosticAUC_Train_500)
 
 ## Plot the distributions of the AUCs from both methods in the testing data
 AgnosticAUC_Test_500 <- data.frame(AUC = AUCs_XGB_Agnostic_500[, "AUC_Test"])
 
-AgnosticAUC_Test_500$modelType <- "Agnostic_DEGs"
+AgnosticAUC_Test_500$modelType <- "Random_genes"
 
 ModelCompareAUC_Test_500 <- rbind(MechanisticAUC_Test, AgnosticAUC_Test_500)
+
+## Save the AUCs in the training and testing data
+ModelCompareAUC_Train_500$data_type <- "Training"
+ModelCompareAUC_Test_500$data_type <- "Testing"
 
 ModelCompareAUC_Train_500$NofFeatAgn <- "500_Genes"
 ModelCompareAUC_Test_500$NofFeatAgn <- "500_Genes"
 
-save(ModelCompareAUC_Train_500, ModelCompareAUC_Test_500, file = "./Objs/XGB/ModelCompareAUC_500_new.rda")
-
+save(ModelCompareAUC_Train_500, ModelCompareAUC_Test_500, file = "../../Objs/XGB/ModelCompare_RAND_AUC_500.rda")
 

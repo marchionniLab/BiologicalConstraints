@@ -413,10 +413,10 @@ bootobjectAgnostic_250 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, 
 ########################################################################################
 ########################################################################################
 ## Save all Objects
-save(bootobjectMech, bootobjectAgnostic_25, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_250, file= "./Objs/SVM/SVMBootObjects_AgnPairs.rda")
+save(bootobjectMech, bootobjectAgnostic_25, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_250, file= "./Objs/SVM/SVMBootObjects_AgnPairs_new.rda")
 
 ## Load
-#load("./Objs/SVM/SVMBootObjects_AgnPairs.rda")
+load("./Objs/SVM/SVMBootObjects_AgnPairs_new.rda")
 
 ########################################################################################
 ########################################################################################
@@ -468,12 +468,12 @@ ModelCompareAUCTest_25$NofFeatAgn <- "25_Pairs"
 ## Save for the main figure
 ModelCompare_SVM <- rbind(ModelCompareAUCTrain_25, ModelCompareAUCTest_25)
 ModelCompare_SVM$algorithm <- "SVM"
-save(ModelCompare_SVM, file = "./Objs/SVM/ModelCompare_SVM_AgnPairs.rda")
+save(ModelCompare_SVM, file = "./Objs/SVM/ModelCompare_SVM_AgnPairs_new.rda")
 
 # #########################################################################
 # ############################################################
 # # Load the AUC comparisons from the indivdial genes and combine them with pairs
-load("./Objs/SVM/ModelCompareAUC_50.rda")
+load("./Objs/SVM/ModelCompareAUC_50_new.rda")
 
 # Combine
 ModelCompareAUC_Train_25_50 <- rbind(ModelCompareAUCTrain_25, ModelCompareAUCTrain_50)
@@ -523,16 +523,10 @@ ModelCompareAUCTest_50$data_type <- "Testing"
 ModelCompareAUCTrain_50$NofFeatAgn <- "50_Pairs"
 ModelCompareAUCTest_50$NofFeatAgn <- "50_Pairs"
 
-#############################################################################
-## Save for the main figure
-#ModelCompare_SVM <- rbind(ModelCompareAUCTrain_50, ModelCompareAUCTest_50)
-#ModelCompare_SVM$algorithm <- "SVM"
-#save(ModelCompare_SVM, file = "./Objs/SVM/ModelCompare_SVM_AgnPairs.rda")
-
 #########################################################################
 ############################################################
 # Load the AUC comparisons from the indivdial genes and combine them with pairs
-load("./Objs/SVM/ModelCompareAUC_100.rda")
+load("./Objs/SVM/ModelCompareAUC_100_new.rda")
 
 # Combine
 ModelCompareAUC_Train_50_100 <- rbind(ModelCompareAUCTrain_50, ModelCompareAUCTrain_100)
@@ -576,7 +570,7 @@ ModelCompareAUCTest_100$NofFeatAgn <- "100_Pairs"
 #########################################################################
 ############################################################
 # Load the AUC comparisons from the indivdial genes and combine them with pairs
-load("./Objs/SVM/ModelCompareAUC_200.rda")
+load("./Objs/SVM/ModelCompareAUC_200_new.rda")
 
 # Combine
 ModelCompareAUC_Train_100_200 <- rbind(ModelCompareAUCTrain_100, ModelCompareAUCTrain_200)
@@ -620,7 +614,7 @@ ModelCompareAUCTest_250$NofFeatAgn <- "250_Pairs"
 #########################################################################
 ############################################################
 # Load the AUC comparisons from the indivdial genes and combine them with pairs
-load("./Objs/SVM/ModelCompareAUC_500.rda")
+load("./Objs/SVM/ModelCompareAUC_500_new.rda")
 
 # Combine
 ModelCompareAUC_Train_250_500 <- rbind(ModelCompareAUCTrain_250, ModelCompareAUCTrain_500)
@@ -641,7 +635,7 @@ ModelCompare_SVM_DiffNoFeat <- rbind(ModelCompareAUC_Train_25_50,
                                      ModelCompareAUC_Test_250_500
 )
 
-save(ModelCompare_SVM_DiffNoFeat, file = "./Objs/SVM/ModelCompare_SVM_DiffNoFeat.rda")
+save(ModelCompare_SVM_DiffNoFeat, file = "./Objs/SVM/ModelCompare_SVM_DiffNoFeat_new.rda")
 
 ####################################################################################
 ####################################################################################

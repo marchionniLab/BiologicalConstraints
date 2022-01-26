@@ -1,7 +1,6 @@
 rm(list = ls())
 
 library(ggplot2)
-library(hrbrthemes)
 library(viridis)
 library(ggridges)
 library(ggsci)
@@ -10,9 +9,9 @@ library(wesanderson)
 
 ## Load model comparisons: mechanistic vs agnostic (as genes) 
 load("./Objs/KTSP/ModelCompare_KTSP_DiffNoFeat.rda")
-load("./Objs/RF/ModelCompare_RF_DiffNoFeat.rda")
-load("./Objs/SVM/ModelCompare_SVM_DiffNoFeat.rda")
-load("./Objs/XGB/ModelCompare_XGB_DiffNoFeat.rda")
+load("./Objs/RF/ModelCompare_RF_DiffNoFeat_new.rda")
+load("./Objs/SVM/ModelCompare_SVM_DiffNoFeat_new.rda")
+load("./Objs/XGB/ModelCompare_XGB_DiffNoFeat_new.rda")
 
 #########
 ModelCompare_KTSP_DiffNoFeat$algorithm <- "K-TSPs"
@@ -64,7 +63,7 @@ My_Theme = theme(
 
 
 ## Density plot
-png(filename = "./Figs/ICB_BS_AllModels_Density_DiffNoFeatAndPairs.png", width = 3000, height = 1500, res = 200)
+png(filename = "./Figs/ICB_BS_AllModels_Density_DiffNoFeatAndPairs_new.png", width = 3000, height = 1500, res = 200)
 BS_AUC_ModelCompare <- ggplot(AllModelCompare_ICB_DiffNoFeat, aes(x = AUC, y = modelType, fill = NofFeatAgn, height = ..ndensity..)) + 
   geom_density_ridges(stat = "density", alpha = 0.9, bw = 0.8, adjust= 0.01, scale=1.2) +
   scale_x_continuous(limits = c(0.35, 0.9), breaks = seq(0.5, 0.9, by = 0.1), expand = c(0, 0)) +

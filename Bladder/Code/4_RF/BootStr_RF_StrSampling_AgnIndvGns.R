@@ -172,16 +172,8 @@ all(names(usedTrainGroup) == colnames(usedTrainMat))
 names(usedTestGroup) <- colnames(usedTestMat)
 all(names(usedTestGroup) ==colnames(usedTestMat))
 
-#########
-## Detect Top DE genes
-# TopDEgenes <- SWAP.Filter.Wilcoxon(phenoGroup = usedTrainGroup, inputMat = usedTrainMat, featureNo = 100)
-# 
-# ## Subset the expression matrix to the top DE genes only
-# usedTrainMat <- usedTrainMat[TopDEgenes, ]
-# usedTestMat <- usedTestMat[TopDEgenes, ]
-########################
 
-
+#################
 predictor_data_Train_Agnostic <- t(usedTrainMat)
 predictor_data_Test_Agnostic <- t(usedTestMat)
 
@@ -189,11 +181,6 @@ DataAgnostic_Train <- cbind(predictor_data_Train_Agnostic, usedTrainGroup)
 DataAgnostic_Train <- as.data.frame(DataAgnostic_Train)
 DataAgnostic_Train$usedTrainGroup <- as.factor(DataAgnostic_Train$usedTrainGroup)
 levels(DataAgnostic_Train[, "usedTrainGroup"]) <- c("NoProgression", "Progression")
-
-#names(DataAgnostic_Train) <- make.names(names(DataAgnostic_Train))
-
-#colnames(predictor_data_Train_Agnostic) <- make.names(colnames(predictor_data_Train_Agnostic))
-#colnames(predictor_data_Test_Agnostic) <- make.names(colnames(predictor_data_Test_Agnostic))
 
 ## Finally we run the RF algorithm. 
 

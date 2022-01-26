@@ -25,12 +25,12 @@ library(boot)
 library(patchwork)
 
 ### Load expression and phenotype data
-load("./Objs/ChemoDataNew.rda")
+load("../../Objs/ChemoDataNew.rda")
 
 #########
 ## Load the selected genes *(Notch pairs)
-load("./Objs/NotchPairs.rda")
-load("./Objs/MycPairs.rda")
+load("../../Objs/NotchPairs.rda")
+load("../../Objs/MycPairs.rda")
 
 myTSPs <- rbind(NotchPairs, MycPairs)
 colnames(myTSPs) <- c("BadGene", "GoodGene")
@@ -66,15 +66,18 @@ levels(Data[, "usedTrainGroup"]) <- c("Sensitive", "Resistant")
 
 
 ######################################################
-## Mechanistic and agnostic using top 50 DEGs
+## Mechanistic and agnostic using 50 random genes
 
 SWAP.Train.KTSPStrap <- function(data, indices) {
   d = data[indices, ]
   Pheno <- d$usedTrainGroup
   d$usedTrainGroup <- NULL
   ExprMat = t(data.matrix(d, rownames.force = T)) # transpose the matrix so that rows are genes and columns are samples
+  
+  sel.genes = sample(rownames(ExprMat), 50)
+  
   # Finally the function
-  KTSP_Train_Agnostic <- SWAP.Train.KTSP(inputMat=ExprMat, phenoGroup = Pheno, krange=ktsp, FilterFunc = SWAP.Filter.Wilcoxon, featureNo=50)
+  KTSP_Train_Agnostic <- SWAP.Train.KTSP(inputMat=ExprMat[sel.genes, ], phenoGroup = Pheno, krange=ktsp, FilterFunc = NULL)
   KTSP_Train_Mech <- SWAP.Train.KTSP(inputMat=ExprMat, phenoGroup = Pheno, krange=ktsp, FilterFunc = SWAP.Filter.Wilcoxon, featureNo=featNo, RestrictedPairs = myTSPs)
   N_Pairs_Agnostic <- nrow(KTSP_Train_Agnostic$TSPs)
   N_Pairs_Mech <- nrow(KTSP_Train_Mech$TSPs)
@@ -95,19 +98,24 @@ SWAP.Train.KTSPStrap <- function(data, indices) {
   return(c(N_Pairs_Agnostic, AUC_Train_Agnostic, AUC_Test_Agnostic, N_Pairs_Mech, AUC_Train_Mech, AUC_Test_Mech, Diff_Agnostic, Diff_Mechanistic))
 }
 
+print("A")
+
 set.seed(333)
 bootobject_50 <- boot(data= Data, statistic= SWAP.Train.KTSPStrap, R= 1000, parallel = "multicore", ncpus = 15)
 
 ######################################################
-## Mechanistic and agnostic using top 100 DEGs
+## Mechanistic and agnostic using 100 random genes
 
 SWAP.Train.KTSPStrap <- function(data, indices) {
   d = data[indices, ]
   Pheno <- d$usedTrainGroup
   d$usedTrainGroup <- NULL
   ExprMat = t(data.matrix(d, rownames.force = T)) # transpose the matrix so that rows are genes and columns are samples
+  
+  sel.genes = sample(rownames(ExprMat), 100)
+  
   # Finally the function
-  KTSP_Train_Agnostic <- SWAP.Train.KTSP(inputMat=ExprMat, phenoGroup = Pheno, krange=ktsp, FilterFunc = SWAP.Filter.Wilcoxon, featureNo=100)
+  KTSP_Train_Agnostic <- SWAP.Train.KTSP(inputMat=ExprMat[sel.genes, ], phenoGroup = Pheno, krange=ktsp, FilterFunc = NULL)
   KTSP_Train_Mech <- SWAP.Train.KTSP(inputMat=ExprMat, phenoGroup = Pheno, krange=ktsp, FilterFunc = SWAP.Filter.Wilcoxon, featureNo=featNo, RestrictedPairs = myTSPs)  
   N_Pairs_Agnostic <- nrow(KTSP_Train_Agnostic$TSPs)
   N_Pairs_Mech <- nrow(KTSP_Train_Mech$TSPs)
@@ -128,20 +136,24 @@ SWAP.Train.KTSPStrap <- function(data, indices) {
   return(c(N_Pairs_Agnostic, AUC_Train_Agnostic, AUC_Test_Agnostic, N_Pairs_Mech, AUC_Train_Mech, AUC_Test_Mech, Diff_Agnostic, Diff_Mechanistic))
 }
 
+print("B")
 
 set.seed(333)
 bootobject_100 <- boot(data= Data, statistic= SWAP.Train.KTSPStrap, R= 1000, parallel = "multicore", ncpus = 15) 
 
 ######################################################
-## Mechanistic and agnostic using top 200 DEGs
+## Mechanistic and agnostic using 200 random genes
 
 SWAP.Train.KTSPStrap <- function(data, indices) {
   d = data[indices, ]
   Pheno <- d$usedTrainGroup
   d$usedTrainGroup <- NULL
   ExprMat = t(data.matrix(d, rownames.force = T)) # transpose the matrix so that rows are genes and columns are samples
+  
+  sel.genes = sample(rownames(ExprMat), 200)
+  
   # Finally the function
-  KTSP_Train_Agnostic <- SWAP.Train.KTSP(inputMat=ExprMat, phenoGroup = Pheno, krange=ktsp, FilterFunc = SWAP.Filter.Wilcoxon, featureNo=200)
+  KTSP_Train_Agnostic <- SWAP.Train.KTSP(inputMat=ExprMat[sel.genes, ], phenoGroup = Pheno, krange=ktsp, FilterFunc = NULL)
   KTSP_Train_Mech <- SWAP.Train.KTSP(inputMat=ExprMat, phenoGroup = Pheno, krange=ktsp, FilterFunc = SWAP.Filter.Wilcoxon, featureNo=featNo, RestrictedPairs = myTSPs)  
   N_Pairs_Agnostic <- nrow(KTSP_Train_Agnostic$TSPs)
   N_Pairs_Mech <- nrow(KTSP_Train_Mech$TSPs)
@@ -162,12 +174,13 @@ SWAP.Train.KTSPStrap <- function(data, indices) {
   return(c(N_Pairs_Agnostic, AUC_Train_Agnostic, AUC_Test_Agnostic, N_Pairs_Mech, AUC_Train_Mech, AUC_Test_Mech, Diff_Agnostic, Diff_Mechanistic))
 }
 
+print("C")
 
 set.seed(333)
 bootobject_200 <- boot(data= Data, statistic= SWAP.Train.KTSPStrap, R= 1000, parallel = "multicore", ncpus = 15) 
 
 ######################################################
-## Mechanistic and agnostic using top 500 DEGs
+## Mechanistic and agnostic using 500 random genes
 
 SWAP.Train.KTSPStrap <- function(data, indices) {
   d = data[indices, ]
@@ -175,7 +188,11 @@ SWAP.Train.KTSPStrap <- function(data, indices) {
   d$usedTrainGroup <- NULL
   ExprMat = t(data.matrix(d, rownames.force = T)) # transpose the matrix so that rows are genes and columns are samples
   # Finally the function
-  KTSP_Train_Agnostic <- SWAP.Train.KTSP(inputMat=ExprMat, phenoGroup = Pheno, krange=ktsp, FilterFunc = SWAP.Filter.Wilcoxon, featureNo=500)
+  
+  sel.genes = sample(rownames(ExprMat), 500)
+  
+  # Finally the function
+  KTSP_Train_Agnostic <- SWAP.Train.KTSP(inputMat=ExprMat[sel.genes, ], phenoGroup = Pheno, krange=ktsp, FilterFunc = NULL)
   KTSP_Train_Mech <- SWAP.Train.KTSP(inputMat=ExprMat, phenoGroup = Pheno, krange=ktsp, FilterFunc = SWAP.Filter.Wilcoxon, featureNo=featNo, RestrictedPairs = myTSPs)  
   N_Pairs_Agnostic <- nrow(KTSP_Train_Agnostic$TSPs)
   N_Pairs_Mech <- nrow(KTSP_Train_Mech$TSPs)
@@ -196,15 +213,16 @@ SWAP.Train.KTSPStrap <- function(data, indices) {
   return(c(N_Pairs_Agnostic, AUC_Train_Agnostic, AUC_Test_Agnostic, N_Pairs_Mech, AUC_Train_Mech, AUC_Test_Mech, Diff_Agnostic, Diff_Mechanistic))
 }
 
+print("D")
 
 set.seed(333)
 bootobject_500 <- boot(data= Data, statistic= SWAP.Train.KTSPStrap, R= 1000, parallel = "multicore", ncpus = 15) 
 
 ############################################################
 ## Save all
-save(bootobject_50, bootobject_100, bootobject_200, bootobject_500, file = "./Objs/KTSP/bootobjectKTSP_NotchAndMYC.rda")
+save(bootobject_50, bootobject_100, bootobject_200, bootobject_500, file = "../../Objs/KTSP/bootobjectKTSP_NotchAndMYC_RAND.rda")
 
-load("./Objs/KTSP/bootobjectKTSP_NotchAndMYC.rda")
+load("../../Objs/KTSP/bootobjectKTSP_NotchAndMYC_RAND.rda")
 
 
 ##############################################################
@@ -232,7 +250,7 @@ MechanisticAUCTrain_50 <- data.frame(AUC = All_50[, "AUC_Train_Mech"])
 AgnosticAUCTrain_50 <- data.frame(AUC = All_50[, "AUC_Train_Agnostic"])
 
 MechanisticAUCTrain_50$modelType <- "Mechanistic"
-AgnosticAUCTrain_50$modelType <- "Agnostic_DEGs"
+AgnosticAUCTrain_50$modelType <- "Random_genes"
 
 ModelCompareAUCTrain_50 <- rbind(MechanisticAUCTrain_50, AgnosticAUCTrain_50)
 
@@ -241,7 +259,7 @@ MechanisticAUCTest_50 <- data.frame(AUC = All_50[, "AUC_Test_Mech"])
 AgnosticAUCTest_50 <- data.frame(AUC = All_50[, "AUC_Test_Agnostic"])
 
 MechanisticAUCTest_50$modelType <- "Mechanistic"
-AgnosticAUCTest_50$modelType <- "Agnostic_DEGs"
+AgnosticAUCTest_50$modelType <- "Random_genes"
 
 ModelCompareAUCTest_50 <- rbind(MechanisticAUCTest_50, AgnosticAUCTest_50)
 
@@ -257,7 +275,7 @@ ModelCompareAUCTest_50$NofFeatAgn <- "50_Genes"
 ## Save for the main figure
 ModelCompare_KTSP <- rbind(ModelCompareAUCTrain_50, ModelCompareAUCTest_50)
 ModelCompare_KTSP$algorithm <- "KTSP"
-save(ModelCompare_KTSP, file = "./Objs/KTSP/ModelCompare_KTSP.rda")
+save(ModelCompare_KTSP, file = "../../Objs/KTSP/ModelCompare_KTSP.rda")
 
 ##############################################################
 ### Work with boot object 100  
@@ -284,7 +302,7 @@ MechanisticAUCTrain_100 <- data.frame(AUC = All_100[, "AUC_Train_Mech"])
 AgnosticAUCTrain_100 <- data.frame(AUC = All_100[, "AUC_Train_Agnostic"])
 
 MechanisticAUCTrain_100$modelType <- "Mechanistic"
-AgnosticAUCTrain_100$modelType <- "Agnostic_DEGs"
+AgnosticAUCTrain_100$modelType <- "Random_genes"
 
 ModelCompareAUCTrain_100 <- rbind(MechanisticAUCTrain_100, AgnosticAUCTrain_100)
 
@@ -293,7 +311,7 @@ MechanisticAUCTest_100 <- data.frame(AUC = All_100[, "AUC_Test_Mech"])
 AgnosticAUCTest_100 <- data.frame(AUC = All_100[, "AUC_Test_Agnostic"])
 
 MechanisticAUCTest_100$modelType <- "Mechanistic"
-AgnosticAUCTest_100$modelType <- "Agnostic_DEGs"
+AgnosticAUCTest_100$modelType <- "Random_genes"
 
 ModelCompareAUCTest_100 <- rbind(MechanisticAUCTest_100, AgnosticAUCTest_100)
 
@@ -336,7 +354,7 @@ MechanisticAUCTrain_200 <- data.frame(AUC = All_200[, "AUC_Train_Mech"])
 AgnosticAUCTrain_200 <- data.frame(AUC = All_200[, "AUC_Train_Agnostic"])
 
 MechanisticAUCTrain_200$modelType <- "Mechanistic"
-AgnosticAUCTrain_200$modelType <- "Agnostic_DEGs"
+AgnosticAUCTrain_200$modelType <- "Random_genes"
 
 ModelCompareAUCTrain_200 <- rbind(MechanisticAUCTrain_200, AgnosticAUCTrain_200)
 
@@ -345,7 +363,7 @@ MechanisticAUCTest_200 <- data.frame(AUC = All_200[, "AUC_Test_Mech"])
 AgnosticAUCTest_200 <- data.frame(AUC = All_200[, "AUC_Test_Agnostic"])
 
 MechanisticAUCTest_200$modelType <- "Mechanistic"
-AgnosticAUCTest_200$modelType <- "Agnostic_DEGs"
+AgnosticAUCTest_200$modelType <- "Random_genes"
 
 ModelCompareAUCTest_200 <- rbind(MechanisticAUCTest_200, AgnosticAUCTest_200)
 
@@ -382,7 +400,7 @@ MechanisticAUCTrain_500 <- data.frame(AUC = All_500[, "AUC_Train_Mech"])
 AgnosticAUCTrain_500 <- data.frame(AUC = All_500[, "AUC_Train_Agnostic"])
 
 MechanisticAUCTrain_500$modelType <- "Mechanistic"
-AgnosticAUCTrain_500$modelType <- "Agnostic_DEGs"
+AgnosticAUCTrain_500$modelType <- "Random_genes"
 
 ModelCompareAUCTrain_500 <- rbind(MechanisticAUCTrain_500, AgnosticAUCTrain_500)
 
@@ -391,7 +409,7 @@ MechanisticAUCTest_500 <- data.frame(AUC = All_500[, "AUC_Test_Mech"])
 AgnosticAUCTest_500 <- data.frame(AUC = All_500[, "AUC_Test_Agnostic"])
 
 MechanisticAUCTest_500$modelType <- "Mechanistic"
-AgnosticAUCTest_500$modelType <- "Agnostic_DEGs"
+AgnosticAUCTest_500$modelType <- "Random_genes"
 
 ModelCompareAUCTest_500 <- rbind(MechanisticAUCTest_500, AgnosticAUCTest_500)
 
@@ -417,7 +435,7 @@ ModelCompare_KTSP_DiffNoFeat <- rbind(ModelCompareAUCTrain_50,
                                       ModelCompareAUCTest_500
 )
 
-save(ModelCompare_KTSP_DiffNoFeat, file = "./Objs/KTSP/ModelCompare_KTSP_DiffNoFeat.rda")
+save(ModelCompare_KTSP_DiffNoFeat, file = "../../Objs/KTSP/ModelCompare_KTSP_RAND_DiffNoFeat.rda")
 
 ####################################################################################
 ####################################################################################

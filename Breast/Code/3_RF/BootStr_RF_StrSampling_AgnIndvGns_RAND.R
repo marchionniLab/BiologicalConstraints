@@ -10,7 +10,7 @@ library(switchBox)
 library(limma)
 library(pROC)
 library(genefilter)
-library(DMwR)
+# library(DMwR)
 library(randomForest)
 library(patchwork)
 library(boot)
@@ -20,8 +20,8 @@ library(boot)
 
 
 ## Load data
-load("./Objs/KTSP/KTSP_STATs_Mechanistic.rda")
-load("./Objs/icbData.rda")
+load("../../Objs/KTSP/TNBC_KTSP_STATs_Mechanistic_NotchAndMyc2_100.rda")
+load("../../Objs/ChemoDataNew.rda")
 
 
 ### Quantile normalize
@@ -39,7 +39,7 @@ predictor_data_Test_Mech <- t(KTSP_STATs_Test_Mechanistic)
 DataMech_Train <- cbind(predictor_data_Train_Mech, usedTrainGroup)
 DataMech_Train <- as.data.frame(DataMech_Train)
 DataMech_Train$usedTrainGroup <- as.factor(DataMech_Train$usedTrainGroup)
-levels(DataMech_Train[, "usedTrainGroup"]) <- c("NR", "R")
+levels(DataMech_Train[, "usedTrainGroup"]) <- c("Sensitive", "Resistant")
 
 names(DataMech_Train) <- make.names(names(DataMech_Train))
 
@@ -54,7 +54,7 @@ RF_Strap <- function(data, indices) {
   num_classes <- length(tmp)
   min_size <- tmp[order(tmp,decreasing=FALSE)[1]]
   sampsizes <- rep(min_size,num_classes)
-  RF <- tuneRF(x = d[,!colnames(d) == "usedTrainGroup"], y = d$usedTrainGroup, mtryStart = 1, ntreeTry=50, stepFactor = 1, improve=0.05, trace=F, plot=F, doBest=T, sampsize = sampsizes)
+  RF <- tuneRF(x = d[,!colnames(d) == "usedTrainGroup"], y = d$usedTrainGroup, mtryStart = 1, ntreeTry=500, stepFactor = 1, improve=0.05, trace=F, plot=F, doBest=T, sampsize = sampsizes)
   Importance_Mech <- randomForest::importance(RF, scale=FALSE, type = 2)
   Importance_Mech <- Importance_Mech[order(Importance_Mech, decreasing = TRUE), ]
   Importance_Mech <- Importance_Mech[Importance_Mech > 0]
@@ -64,8 +64,8 @@ RF_Strap <- function(data, indices) {
   PredictorTrainData$usedTrainGroup <- NULL
   train_preds <- predict(RF, newdata = PredictorTrainData, type = "vote")
   test_preds <- predict(RF, newdata = predictor_data_Test_Mech, type = "vote")
-  ROCTrainMech <- roc(PhenoTrain, train_preds[,2], plot = F, print.auc = TRUE, levels = c("NR", "R"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
-  ROCTestMech <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("NR", "R"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTrainMech <- roc(PhenoTrain, train_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTestMech <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
   return(c(ROCTrainMech$auc, ROCTestMech$auc, N_ImportanVariables))
 }
 
@@ -75,15 +75,13 @@ bootobjectMech <- boot(data= DataMech_Train, statistic= RF_Strap, R= 1000, paral
 AUCs_RF_Mech <- bootobjectMech$t
 colnames(AUCs_RF_Mech) <- c("AUC_Train", "AUC_Test", "N_ImportanVariables")
 
-save(bootobjectMech, file = './objs/RF/RF_bootobjectMech.rda')
-
 ###################################################
 ## RF
-# Agnostic top 50 DEGs
+# Random 50 genes
 
 
 ## Load the data
-load("./Objs/icbData.rda")
+load("../../Objs/ChemoDataNew.rda")
 
 ### Quantile normalize
 usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
@@ -97,7 +95,7 @@ all(names(usedTrainGroup) == colnames(usedTrainMat))
 
 all(names(usedTestGroup) ==colnames(usedTestMat))
 
-########################
+#########
 
 predictor_data_Train_Agnostic <- t(usedTrainMat)
 predictor_data_Test_Agnostic <- t(usedTestMat)
@@ -105,28 +103,27 @@ predictor_data_Test_Agnostic <- t(usedTestMat)
 DataAgnostic_Train <- cbind(predictor_data_Train_Agnostic, usedTrainGroup)
 DataAgnostic_Train <- as.data.frame(DataAgnostic_Train)
 DataAgnostic_Train$usedTrainGroup <- as.factor(DataAgnostic_Train$usedTrainGroup)
-levels(DataAgnostic_Train[, "usedTrainGroup"]) <- c("NR", "R")
+levels(DataAgnostic_Train[, "usedTrainGroup"]) <- c("Sensitive", "Resistant")
 
+#names(DataAgnostic_Train) <- make.names(names(DataAgnostic_Train))
+
+#colnames(predictor_data_Train_Agnostic) <- make.names(colnames(predictor_data_Train_Agnostic))
+#colnames(predictor_data_Test_Agnostic) <- make.names(colnames(predictor_data_Test_Agnostic))
+
+## Finally we run the RF algorithm.
 
 # The function for bootstraping
 RF_Strap <- function(data, indices) {
   d <- data[indices, ] # allows boot to select sample
-  
-  # get the top 50 DEGs
-  Top50genes <- SWAP.Filter.Wilcoxon(phenoGroup = d[,"usedTrainGroup"], inputMat = as.matrix(t(d[,!colnames(d) == "usedTrainGroup"])), featureNo = 50)
-  
-  # subset the data to those top genes
-  d <- d[, c(Top50genes, 'usedTrainGroup')]
-  
   # Select the minimum sample size
   tmp <- as.vector(table(d$usedTrainGroup))
   num_classes <- length(tmp)
   min_size <- tmp[order(tmp,decreasing=FALSE)[1]]
   sampsizes <- rep(min_size,num_classes)
   
-  # train the model
-  RF <- tuneRF(x = d[,!colnames(d) == "usedTrainGroup"], y = d$usedTrainGroup, mtryStart = 1, ntreeTry=500, stepFactor = 1, improve=0.05, trace=F, plot=F, doBest=T, sampsize = sampsizes)
+  sel.genes = sample(setdiff(colnames(d), "usedTrainGroup"), 50)
   
+  RF <- tuneRF(x = d[, sel.genes], y = d$usedTrainGroup, mtryStart = 1, ntreeTry=500, stepFactor = 1, improve=0.05, trace=F, plot=F, doBest=T, sampsize = sampsizes)
   Importance_Agnostic <- randomForest::importance(RF, scale=FALSE, type = 2)
   Importance_Agnostic <- Importance_Agnostic[order(Importance_Agnostic, decreasing = TRUE), ]
   Importance_Agnostic <- Importance_Agnostic[Importance_Agnostic > 0]
@@ -136,8 +133,8 @@ RF_Strap <- function(data, indices) {
   PredictorTrainData$usedTrainGroup <- NULL
   train_preds <- predict(RF, newdata = PredictorTrainData, type = "vote")
   test_preds <- predict(RF, newdata = predictor_data_Test_Agnostic, type = "vote")
-  ROCTrainAgnostic <- roc(PhenoTrain, train_preds[,2], plot = F, print.auc = TRUE, levels = c("NR", "R"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
-  ROCTestAgnostic <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("NR", "R"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTrainAgnostic <- roc(PhenoTrain, train_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTestAgnostic <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
   return(c(ROCTrainAgnostic$auc, ROCTestAgnostic$auc, N_ImportanVariables))
 }
 
@@ -146,10 +143,10 @@ set.seed(333)
 bootobjectAgnostic_50 <- boot(data= DataAgnostic_Train, statistic= RF_Strap, R= 1000, parallel = "multicore", ncpus = 15)
 
 ################################################################################
-# Agnostic top 100 DEGs
+# 100 Random genes
 
 ## Load the data
-load("./Objs/icbData.rda")
+load("../../Objs/ChemoDataNew.rda")
 
 ### Quantile normalize
 usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
@@ -163,8 +160,7 @@ all(names(usedTrainGroup) == colnames(usedTrainMat))
 
 all(names(usedTestGroup) ==colnames(usedTestMat))
 
-########################
-
+#########
 
 predictor_data_Train_Agnostic <- t(usedTrainMat)
 predictor_data_Test_Agnostic <- t(usedTestMat)
@@ -172,27 +168,27 @@ predictor_data_Test_Agnostic <- t(usedTestMat)
 DataAgnostic_Train <- cbind(predictor_data_Train_Agnostic, usedTrainGroup)
 DataAgnostic_Train <- as.data.frame(DataAgnostic_Train)
 DataAgnostic_Train$usedTrainGroup <- as.factor(DataAgnostic_Train$usedTrainGroup)
-levels(DataAgnostic_Train[, "usedTrainGroup"]) <- c("NR", "R")
+levels(DataAgnostic_Train[, "usedTrainGroup"]) <- c("Sensitive", "Resistant")
+
+#names(DataAgnostic_Train) <- make.names(names(DataAgnostic_Train))
+
+#colnames(predictor_data_Train_Agnostic) <- make.names(colnames(predictor_data_Train_Agnostic))
+#colnames(predictor_data_Test_Agnostic) <- make.names(colnames(predictor_data_Test_Agnostic))
+
+## Finally we run the RF algorithm. 
 
 # The function for bootstraping
 RF_Strap <- function(data, indices) {
   d <- data[indices, ] # allows boot to select sample
-  
-  # get the top 100 DEGs
-  Top100genes <- SWAP.Filter.Wilcoxon(phenoGroup = d[,"usedTrainGroup"], inputMat = as.matrix(t(d[,!colnames(d) == "usedTrainGroup"])), featureNo = 100)
-  
-  # subset the data to those top genes
-  d <- d[, c(Top100genes, 'usedTrainGroup')]
-  
   # Select the minimum sample size
   tmp <- as.vector(table(d$usedTrainGroup))
   num_classes <- length(tmp)
   min_size <- tmp[order(tmp,decreasing=FALSE)[1]]
   sampsizes <- rep(min_size,num_classes)
   
-  # train the model
-  RF <- tuneRF(x = d[,!colnames(d) == "usedTrainGroup"], y = d$usedTrainGroup, mtryStart = 1, ntreeTry=500, stepFactor = 1, improve=0.05, trace=F, plot=F, doBest=T, sampsize = sampsizes)
+  sel.genes = sample(setdiff(colnames(d), "usedTrainGroup"), 100)
   
+  RF <- tuneRF(x = d[, sel.genes], y = d$usedTrainGroup, mtryStart = 1, ntreeTry=500, stepFactor = 1, improve=0.05, trace=F, plot=F, doBest=T, sampsize = sampsizes)
   Importance_Agnostic <- randomForest::importance(RF, scale=FALSE, type = 2)
   Importance_Agnostic <- Importance_Agnostic[order(Importance_Agnostic, decreasing = TRUE), ]
   Importance_Agnostic <- Importance_Agnostic[Importance_Agnostic > 0]
@@ -202,8 +198,8 @@ RF_Strap <- function(data, indices) {
   PredictorTrainData$usedTrainGroup <- NULL
   train_preds <- predict(RF, newdata = PredictorTrainData, type = "vote")
   test_preds <- predict(RF, newdata = predictor_data_Test_Agnostic, type = "vote")
-  ROCTrainAgnostic <- roc(PhenoTrain, train_preds[,2], plot = F, print.auc = TRUE, levels = c("NR", "R"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
-  ROCTestAgnostic <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("NR", "R"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTrainAgnostic <- roc(PhenoTrain, train_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTestAgnostic <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
   return(c(ROCTrainAgnostic$auc, ROCTestAgnostic$auc, N_ImportanVariables))
 }
 
@@ -212,10 +208,10 @@ set.seed(333)
 bootobjectAgnostic_100 <- boot(data= DataAgnostic_Train, statistic= RF_Strap, R= 1000, parallel = "multicore", ncpus = 15) 
 
 ################################################################################
-# Agnostic top 200 DEGs
+# 200 Random genes
 
 ## Load the data
-load("./Objs/icbData.rda")
+load("../../Objs/ChemoDataNew.rda")
 
 ### Quantile normalize
 usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
@@ -229,35 +225,35 @@ all(names(usedTrainGroup) == colnames(usedTrainMat))
 
 all(names(usedTestGroup) ==colnames(usedTestMat))
 
-###############################
+#########
+
 predictor_data_Train_Agnostic <- t(usedTrainMat)
 predictor_data_Test_Agnostic <- t(usedTestMat)
 
 DataAgnostic_Train <- cbind(predictor_data_Train_Agnostic, usedTrainGroup)
 DataAgnostic_Train <- as.data.frame(DataAgnostic_Train)
 DataAgnostic_Train$usedTrainGroup <- as.factor(DataAgnostic_Train$usedTrainGroup)
-levels(DataAgnostic_Train[, "usedTrainGroup"]) <- c("NR", "R")
+levels(DataAgnostic_Train[, "usedTrainGroup"]) <- c("Sensitive", "Resistant")
 
+#names(DataAgnostic_Train) <- make.names(names(DataAgnostic_Train))
+
+#colnames(predictor_data_Train_Agnostic) <- make.names(colnames(predictor_data_Train_Agnostic))
+#colnames(predictor_data_Test_Agnostic) <- make.names(colnames(predictor_data_Test_Agnostic))
+
+## Finally we run the RF algorithm. 
 
 # The function for bootstraping
 RF_Strap <- function(data, indices) {
   d <- data[indices, ] # allows boot to select sample
-  
-  # get the top 200 DEGs
-  Top200genes <- SWAP.Filter.Wilcoxon(phenoGroup = d[,"usedTrainGroup"], inputMat = as.matrix(t(d[,!colnames(d) == "usedTrainGroup"])), featureNo = 200)
-  
-  # subset the data to those top genes
-  d <- d[, c(Top200genes, 'usedTrainGroup')]
-  
   # Select the minimum sample size
   tmp <- as.vector(table(d$usedTrainGroup))
   num_classes <- length(tmp)
   min_size <- tmp[order(tmp,decreasing=FALSE)[1]]
   sampsizes <- rep(min_size,num_classes)
   
-  # train the model
-  RF <- tuneRF(x = d[,!colnames(d) == "usedTrainGroup"], y = d$usedTrainGroup, mtryStart = 1, ntreeTry=500, stepFactor = 1, improve=0.05, trace=F, plot=F, doBest=T, sampsize = sampsizes)
+  sel.genes = sample(setdiff(colnames(d), "usedTrainGroup"), 200)
   
+  RF <- tuneRF(x = d[, sel.genes], y = d$usedTrainGroup, mtryStart = 1, ntreeTry=500, stepFactor = 1, improve=0.05, trace=F, plot=F, doBest=T, sampsize = sampsizes)
   Importance_Agnostic <- randomForest::importance(RF, scale=FALSE, type = 2)
   Importance_Agnostic <- Importance_Agnostic[order(Importance_Agnostic, decreasing = TRUE), ]
   Importance_Agnostic <- Importance_Agnostic[Importance_Agnostic > 0]
@@ -267,8 +263,8 @@ RF_Strap <- function(data, indices) {
   PredictorTrainData$usedTrainGroup <- NULL
   train_preds <- predict(RF, newdata = PredictorTrainData, type = "vote")
   test_preds <- predict(RF, newdata = predictor_data_Test_Agnostic, type = "vote")
-  ROCTrainAgnostic <- roc(PhenoTrain, train_preds[,2], plot = F, print.auc = TRUE, levels = c("NR", "R"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
-  ROCTestAgnostic <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("NR", "R"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTrainAgnostic <- roc(PhenoTrain, train_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTestAgnostic <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
   return(c(ROCTrainAgnostic$auc, ROCTestAgnostic$auc, N_ImportanVariables))
 }
 
@@ -278,10 +274,10 @@ bootobjectAgnostic_200 <- boot(data= DataAgnostic_Train, statistic= RF_Strap, R=
 
 
 ################################################################################
-# Agnostic top 500 DEGs
+# 500 Random genes
 
 ## Load the data
-load("./Objs/icbData.rda")
+load("../../Objs/ChemoDataNew.rda")
 
 ### Quantile normalize
 usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
@@ -295,7 +291,7 @@ all(names(usedTrainGroup) == colnames(usedTrainMat))
 
 all(names(usedTestGroup) ==colnames(usedTestMat))
 
-########################
+#########
 
 predictor_data_Train_Agnostic <- t(usedTrainMat)
 predictor_data_Test_Agnostic <- t(usedTestMat)
@@ -303,30 +299,27 @@ predictor_data_Test_Agnostic <- t(usedTestMat)
 DataAgnostic_Train <- cbind(predictor_data_Train_Agnostic, usedTrainGroup)
 DataAgnostic_Train <- as.data.frame(DataAgnostic_Train)
 DataAgnostic_Train$usedTrainGroup <- as.factor(DataAgnostic_Train$usedTrainGroup)
-levels(DataAgnostic_Train[, "usedTrainGroup"]) <- c("NR", "R")
+levels(DataAgnostic_Train[, "usedTrainGroup"]) <- c("Sensitive", "Resistant")
 
+#names(DataAgnostic_Train) <- make.names(names(DataAgnostic_Train))
+
+#colnames(predictor_data_Train_Agnostic) <- make.names(colnames(predictor_data_Train_Agnostic))
+#colnames(predictor_data_Test_Agnostic) <- make.names(colnames(predictor_data_Test_Agnostic))
 
 ## Finally we run the RF algorithm. 
 
 # The function for bootstraping
 RF_Strap <- function(data, indices) {
   d <- data[indices, ] # allows boot to select sample
-  
-  # get the top 500 DEGs
-  Top500genes <- SWAP.Filter.Wilcoxon(phenoGroup = d[,"usedTrainGroup"], inputMat = as.matrix(t(d[,!colnames(d) == "usedTrainGroup"])), featureNo = 500)
-  
-  # subset the data to those top genes
-  d <- d[, c(Top500genes, 'usedTrainGroup')]
-  
   # Select the minimum sample size
   tmp <- as.vector(table(d$usedTrainGroup))
   num_classes <- length(tmp)
   min_size <- tmp[order(tmp,decreasing=FALSE)[1]]
   sampsizes <- rep(min_size,num_classes)
   
-  # train the model
-  RF <- tuneRF(x = d[,!colnames(d) == "usedTrainGroup"], y = d$usedTrainGroup, mtryStart = 1, ntreeTry=500, stepFactor = 1, improve=0.05, trace=F, plot=F, doBest=T, sampsize = sampsizes)
+  sel.genes = sample(setdiff(colnames(d), "usedTrainGroup"), 500)
   
+  RF <- tuneRF(x = d[, sel.genes], y = d$usedTrainGroup, mtryStart = 1, ntreeTry=500, stepFactor = 1, improve=0.05, trace=F, plot=F, doBest=T, sampsize = sampsizes)
   Importance_Agnostic <- randomForest::importance(RF, scale=FALSE, type = 2)
   Importance_Agnostic <- Importance_Agnostic[order(Importance_Agnostic, decreasing = TRUE), ]
   Importance_Agnostic <- Importance_Agnostic[Importance_Agnostic > 0]
@@ -336,8 +329,8 @@ RF_Strap <- function(data, indices) {
   PredictorTrainData$usedTrainGroup <- NULL
   train_preds <- predict(RF, newdata = PredictorTrainData, type = "vote")
   test_preds <- predict(RF, newdata = predictor_data_Test_Agnostic, type = "vote")
-  ROCTrainAgnostic <- roc(PhenoTrain, train_preds[,2], plot = F, print.auc = TRUE, levels = c("NR", "R"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
-  ROCTestAgnostic <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("NR", "R"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTrainAgnostic <- roc(PhenoTrain, train_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
+  ROCTestAgnostic <- roc(usedTestGroup, test_preds[,2], plot = F, print.auc = TRUE, levels = c("Sensitive", "Resistant"), direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
   return(c(ROCTrainAgnostic$auc, ROCTestAgnostic$auc, N_ImportanVariables))
 }
 
@@ -348,10 +341,10 @@ bootobjectAgnostic_500 <- boot(data= DataAgnostic_Train, statistic= RF_Strap, R=
 ################################################################################
 
 ## Save all bootobjects
-save(bootobjectMech, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_200, bootobjectAgnostic_500, file = "./Objs/RF/RFBootObjects_new.rda")
+save(bootobjectMech, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_200, bootobjectAgnostic_500, file = "../../Objs/RF/RFBootObjects_NotchAndMyc_mech100pairs_RAND.rda")
 
 ## load
-load("./Objs/RF/RFBootObjects_new.rda")
+load("../../Objs/RF/RFBootObjects_NotchAndMyc_mech100pairs_RAND.rda")
 
 ##################################################################################
 ##################################################################################
@@ -373,15 +366,12 @@ quantile(DiffAgnostic_50, c(0.025, 0.975))
 DiffMech <- AUCs_RF_Mech[, "AUC_Train"] - AUCs_RF_Mech[, "AUC_Test"]
 quantile(DiffMech, c(0.025, 0.975))
 
-range(AUCs_RF_Mech[, 'AUC_Test'])
-range(AUCs_RF_Agnostic_50[, 'AUC_Test'])
-
 ## Plot the distributions of the AUCs from both methods in the training data
 MechanisticAUC_Train <- data.frame(AUC = AUCs_RF_Mech[, "AUC_Train"])
 AgnosticAUC_Train_50 <- data.frame(AUC = AUCs_RF_Agnostic_50[, "AUC_Train"])
 
 MechanisticAUC_Train$modelType <- "Mechanistic"
-AgnosticAUC_Train_50$modelType <- "Agnostic_DEGs"
+AgnosticAUC_Train_50$modelType <- "Random_genes"
 
 ModelCompareAUC_Train_50 <- rbind(MechanisticAUC_Train, AgnosticAUC_Train_50)
 
@@ -390,7 +380,7 @@ MechanisticAUC_Test <- data.frame(AUC = AUCs_RF_Mech[, "AUC_Test"])
 AgnosticAUC_Test_50 <- data.frame(AUC = AUCs_RF_Agnostic_50[, "AUC_Test"])
 
 MechanisticAUC_Test$modelType <- "Mechanistic"
-AgnosticAUC_Test_50$modelType <- "Agnostic_DEGs"
+AgnosticAUC_Test_50$modelType <- "Random_genes"
 
 ModelCompareAUC_Test_50 <- rbind(MechanisticAUC_Test, AgnosticAUC_Test_50)
 
@@ -401,13 +391,13 @@ ModelCompareAUC_Test_50$data_type <- "Testing"
 ModelCompareAUC_Train_50$NofFeatAgn <- "50_Genes"
 ModelCompareAUC_Test_50$NofFeatAgn <- "50_Genes"
 
-save(ModelCompareAUC_Train_50, ModelCompareAUC_Test_50, file = "./Objs/RF/ModelCompareAUC_50_new.rda")
+save(ModelCompareAUC_Train_50, ModelCompareAUC_Test_50, file = "../../Objs/RF/ModelCompare_RAND_AUC_50_mech100pairs.rda")
 
 #############################################################################
 ## Save for the main figure
 ModelCompare_RF <- rbind(ModelCompareAUC_Train_50, ModelCompareAUC_Test_50)
 ModelCompare_RF$algorithm <- "RF"
-save(ModelCompare_RF, file = "./Objs/RF/ModelCompare_RF_new.rda")
+save(ModelCompare_RF, file = "../../Objs/RF/ModelCompare_RF_mech100pairs_RAND.rda")
 
 ###################################################################################3
 ###################################################################################
@@ -432,7 +422,7 @@ MechanisticAUC_Train <- data.frame(AUC = AUCs_RF_Mech[, "AUC_Train"])
 AgnosticAUC_Train_100 <- data.frame(AUC = AUCs_RF_Agnostic_100[, "AUC_Train"])
 
 MechanisticAUC_Train$modelType <- "Mechanistic"
-AgnosticAUC_Train_100$modelType <- "Agnostic_DEGs"
+AgnosticAUC_Train_100$modelType <- "Random_genes"
 
 ModelCompareAUC_Train_100 <- rbind(MechanisticAUC_Train, AgnosticAUC_Train_100)
 
@@ -440,7 +430,7 @@ ModelCompareAUC_Train_100 <- rbind(MechanisticAUC_Train, AgnosticAUC_Train_100)
 MechanisticAUC_Test <- data.frame(AUC = AUCs_RF_Mech[, "AUC_Test"])
 AgnosticAUC_Test_100 <- data.frame(AUC = AUCs_RF_Agnostic_100[, "AUC_Test"])
 
-AgnosticAUC_Test_100$modelType <- "Agnostic_DEGs"
+AgnosticAUC_Test_100$modelType <- "Random_genes"
 MechanisticAUC_Test$modelType <- "Mechanistic"
 
 ModelCompareAUC_Test_100 <- rbind(MechanisticAUC_Test, AgnosticAUC_Test_100)
@@ -452,7 +442,7 @@ ModelCompareAUC_Test_100$data_type <- "Testing"
 ModelCompareAUC_Train_100$NofFeatAgn <- "100_Genes"
 ModelCompareAUC_Test_100$NofFeatAgn <- "100_Genes"
 
-save(ModelCompareAUC_Train_100, ModelCompareAUC_Test_100, file = "./Objs/RF/ModelCompareAUC_100_new.rda")
+save(ModelCompareAUC_Train_100, ModelCompareAUC_Test_100, file = "../../Objs/RF/ModelCompare_RAND_AUC_100_mech100pairs.rda")
 
 #############################################################################
 ###################################################################################
@@ -469,14 +459,14 @@ quantile(DiffAgnostic_200, c(0.025, 0.975))
 ## Plot the distributions of the AUCs from both methods in the training data
 AgnosticAUC_Train_200 <- data.frame(AUC = AUCs_RF_Agnostic_200[, "AUC_Train"])
 
-AgnosticAUC_Train_200$modelType <- "Agnostic_DEGs"
+AgnosticAUC_Train_200$modelType <- "Random_genes"
 
 ModelCompareAUC_Train_200 <- rbind(MechanisticAUC_Train, AgnosticAUC_Train_200)
 
 ## Plot the distributions of the AUCs from both methods in the testing data
 AgnosticAUC_Test_200 <- data.frame(AUC = AUCs_RF_Agnostic_200[, "AUC_Test"])
 
-AgnosticAUC_Test_200$modelType <- "Agnostic_DEGs"
+AgnosticAUC_Test_200$modelType <- "Random_genes"
 
 ModelCompareAUC_Test_200 <- rbind(MechanisticAUC_Test, AgnosticAUC_Test_200)
 
@@ -487,7 +477,7 @@ ModelCompareAUC_Test_200$data_type <- "Testing"
 ModelCompareAUC_Train_200$NofFeatAgn <- "200_Genes"
 ModelCompareAUC_Test_200$NofFeatAgn <- "200_Genes"
 
-save(ModelCompareAUC_Train_200, ModelCompareAUC_Test_200, file = "./Objs/RF/ModelCompareAUC_200_new.rda")
+save(ModelCompareAUC_Train_200, ModelCompareAUC_Test_200, file = "../../Objs/RF/ModelCompare_RAND_AUC_200_mech100pairs.rda")
 
 ############
 ###################################################################################3
@@ -505,14 +495,14 @@ quantile(DiffAgnostic_500, c(0.025, 0.975))
 ## Plot the distributions of the AUCs from both methods in the training data
 AgnosticAUC_Train_500 <- data.frame(AUC = AUCs_RF_Agnostic_500[, "AUC_Train"])
 
-AgnosticAUC_Train_500$modelType <- "Agnostic_DEGs"
+AgnosticAUC_Train_500$modelType <- "Random_genes"
 
 ModelCompareAUC_Train_500 <- rbind(MechanisticAUC_Train, AgnosticAUC_Train_500)
 
 ## Plot the distributions of the AUCs from both methods in the testing data
 AgnosticAUC_Test_500 <- data.frame(AUC = AUCs_RF_Agnostic_500[, "AUC_Test"])
 
-AgnosticAUC_Test_500$modelType <- "Agnostic_DEGs"
+AgnosticAUC_Test_500$modelType <- "Random_genes"
 
 ModelCompareAUC_Test_500 <- rbind(MechanisticAUC_Test, AgnosticAUC_Test_500)
 
@@ -523,5 +513,5 @@ ModelCompareAUC_Test_500$data_type <- "Testing"
 ModelCompareAUC_Train_500$NofFeatAgn <- "500_Genes"
 ModelCompareAUC_Test_500$NofFeatAgn <- "500_Genes"
 
-save(ModelCompareAUC_Train_500, ModelCompareAUC_Test_500, file = "./Objs/RF/ModelCompareAUC_500_new.rda")
+save(ModelCompareAUC_Train_500, ModelCompareAUC_Test_500, file = "../../Objs/RF/ModelCompare_RAND_AUC_500_mech100pairs.rda")
 
