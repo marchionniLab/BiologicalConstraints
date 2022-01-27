@@ -1,0 +1,151 @@
+---
+title: 'Results'
+author: Wikum Dinalankara
+geometry: margin=.7cm
+header-includes:
+   - \usepackage{tabularx, longtable, graphicx, csquotes, hyperref, color}
+output:
+  html_document:
+    toc: true
+    number_sections: true
+---
+```{r opts, echo = FALSE}
+knitr::opts_chunk$set(
+  dev = "png",
+  fig.path = "fig/"
+)
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.process = function(x) {
+  x2 = sub('-\\d+([.][a-z]+)$', '\\1', x)
+  if (file.rename(x, x2)) x2 else x
+})
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+set.seed(1)
+
+library(knitr)
+library(ggplot2)
+library(gridExtra)
+library(grid)
+library(cowplot)
+library(rutils)
+library(tidyr)
+library(gplots)
+library(ggrepel)
+library(reshape2)
+library(RColorBrewer)
+require(switchBox)
+require(Biobase)
+require(limma)
+require(pROC)
+require(caret)
+require(reshape)
+require(plotROC)
+library(enrichR)
+library(mltools)
+library(xtable)
+library(boot)
+library(patchwork)
+
+```
+
+
+# Cross-Mechanism runs
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+
+l1 = load("../Objs/list.data.rda")
+
+```
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+
+df = data.frame(Reduce(rbind, utils.lapply_i(list.data, function(x, i, y){
+  
+  u = levels(as.factor(x$trainGroup))
+  
+  c(
+    y,
+    nrow(x$trainMat),
+    length(x$trainGroup),
+    length(x$testGroup),
+    u[1],
+    u[2],
+    sum(x$trainGroup == u[1]),
+    sum(x$trainGroup == u[2]),
+    sum(x$testGroup == u[1]),
+    sum(x$testGroup == u[2])
+  )
+  
+})))
+colnames(df) = c("Problem", "genes", "n train", "n test", "class 1", "class 2", "train class 1", "train class 2",
+                 "test class 1", "test class 2")
+
+kable(df, row.names=FALSE, caption="Problem stats")
+
+```
+
+## KTSP
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+
+
+l2 = load("../Objs/list.run.ktsp.rda")
+
+```
+
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+
+kable(list.run$Bladder, caption="Bladder")
+
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+
+kable(list.run$Breast, caption="Breast")
+
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+
+kable(list.run$Prostate, caption="Prostate")
+
+```
+
+## RF
+
+Input here is mechanistic genes (not pairs)
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+
+
+l3 = load("../Objs/list.run.rf.rda")
+
+```
+
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+
+kable(list.run$Bladder, caption="Bladder")
+
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+
+kable(list.run$Breast, caption="Breast")
+
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+
+kable(list.run$Prostate, caption="Prostate")
+
+```

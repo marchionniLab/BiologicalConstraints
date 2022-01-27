@@ -12,7 +12,7 @@ library(caret)
 library(sampling)
 library(org.Hs.eg.db)
 library(AnnotationDbi)
-library(illuminaHumanv4.db)
+
 
 ### Getting the data 
 # dataset_GSE78220 <- getGEO("GSE78220", GSEMatrix = TRUE, AnnotGPL = TRUE)
@@ -23,18 +23,14 @@ library(illuminaHumanv4.db)
 # 
 # dataset_GSE91061 <- getGEO("GSE91061", GSEMatrix = TRUE, AnnotGPL = TRUE)
 # dataset_GSE91061 <- dataset_GSE91061$GSE91061_series_matrix.txt.gz
- 
+# 
 # dataset_GSE115821 <- getGEO("GSE115821", GSEMatrix = TRUE, AnnotGPL = TRUE)
 # dataset_GSE115821_GPL11154 <- dataset_GSE115821$`GSE115821-GPL11154_series_matrix.txt.gz`
 # dataset_GSE115821_GPL18573 <- dataset_GSE115821$`GSE115821-GPL18573_series_matrix.txt.gz`
-
-#dataset_GSE122220 <- getGEO('GSE122220', GSEMatrix = TRUE, AnnotGPL = TRUE)
-#dataset_GSE122220 <- dataset_GSE122220$GSE122220_series_matrix.txt.gz
-
-#save(dataset_GSE78220, dataset_GSE93157, dataset_GSE91061, dataset_GSE115821_GPL11154, dataset_GSE115821_GPL18573, dataset_GSE122220, file = "./Data/datasets.rda")
+# 
+# save(dataset_GSE78220, dataset_GSE93157, dataset_GSE91061, dataset_GSE115821_GPL11154, dataset_GSE115821_GPL18573, file = "./Data/datasets.rda")
 
 load("./Data/datasets.rda")
-
 ###################################################
 
 ## Get the phenotype
@@ -46,7 +42,6 @@ Pheno_GSE115821_GPL18573 <- pData(dataset_GSE115821_GPL18573)
 Pheno_GSE115821 <- rbind(Pheno_GSE115821_GPL11154, Pheno_GSE115821_GPL18573)
 Pheno_TCGA <- read.delim("./Data/skcm_mskcc_2014/skcm_mskcc_2014_clinical_data.tsv")
 Pheno_VanAllen <- read.delim("./Data/VanAllen/skcm_dfci_2015_clinical_data.tsv")
-Pheno_GSE122220 <- pData(dataset_GSE122220)
 
 ## Get the expression matrices
 Expr_GSE78220 <- read.delim("./Data/HUGO/HUGO_Expr.csv", header = TRUE, row.names = 1, sep = ",")
@@ -55,7 +50,6 @@ Expr_GSE91061 <- read.delim("./Data/RIAZ_Expr2.txt", header = TRUE, row.names = 
 Expr_GSE115821 <- read.delim("./Data/MGH_Expr.csv", header = TRUE, sep = ",")
 Expr_TCGA <-  read.delim("./Data/skcm_mskcc_2014/data_RNA_Seq_expression_median.txt")
 Expr_VanAllen <-  read.delim("./Data/VanAllen/data_RNA_Seq_expression_median.txt")
-Expr_GSE122220 <- exprs(dataset_GSE122220)
 
 ## Get the feature data
 #FeatData_GSE93157 <- fData(dataset_GSE93157)
@@ -84,9 +78,9 @@ Expr_GSE78220 <- Expr_GSE78220[-MiRNA, ]
 # thresh <- mycpm > 1
 # keep <- rowSums(thresh) >= round(ncol(Expr_GSE78220)/2)
 # table(keep)
-
-#Expr_GSE78220 <- Expr_GSE78220[keep,]
-#dim(Expr_GSE78220)
+# 
+# Expr_GSE78220 <- Expr_GSE78220[keep,]
+# dim(Expr_GSE78220)
 
 # Normalize
 #Expr_GSE78220 <- DGEList(Expr_GSE78220)
@@ -99,11 +93,6 @@ Expr_GSE78220 <- Expr_GSE78220[sel, ]
 Expr_GSE78220 <- Expr_GSE78220[!is.na(rownames(Expr_GSE78220)),]
 Expr_GSE78220 <- Expr_GSE78220[!(rownames(Expr_GSE78220) == ""), ] 
 dim(Expr_GSE78220)
-
-# Normalize
-# Expr_GSE78220 <- DGEList(Expr_GSE78220)
-# Expr_GSE78220 <- calcNormFactors(Expr_GSE78220, method = c("TMM"))
-# Expr_GSE78220 <- cpm(Expr_GSE78220, log = TRUE, prior.count = 1, normalized.lib.sizes = TRUE)
 
 ## Filtering
 # ffun <- kOverA(round(ncol(Expr_GSE78220)*0.2), 10)
@@ -126,10 +115,10 @@ Expr_GSE78220 <- t(scale(t(Expr_GSE78220), center = TRUE, scale = TRUE))
 # Mapping Entrez ID to gene symbols
 tmp <- as.character(rownames(Expr_GSE91061))
 Expr_GSE91061$GeneSymbol<- mapIds(org.Hs.eg.db,
-                              keys=tmp,
-                              column="SYMBOL",
-                              keytype="ENTREZID",
-                              multiVals="first")
+                                  keys=tmp,
+                                  column="SYMBOL",
+                                  keytype="ENTREZID",
+                                  multiVals="first")
 
 Expr_GSE91061 <- Expr_GSE91061[!duplicated(Expr_GSE91061$GeneSymbol), ] 
 Expr_GSE91061 <- Expr_GSE91061[!is.na(Expr_GSE91061$GeneSymbol), ] 
@@ -143,18 +132,18 @@ MiR <- grep("^MIR", rownames(Expr_GSE91061))
 Expr_GSE91061 <- Expr_GSE91061[-MiR, ]
 
 # filtering
-#mycpm <- cpm(Expr_GSE91061)
-#thresh <- mycpm > 1
-#keep <- rowSums(thresh) >= round(ncol(Expr_GSE91061)/2)
-#table(keep)
+# mycpm <- cpm(Expr_GSE91061)
+# thresh <- mycpm > 1
+# keep <- rowSums(thresh) >= round(ncol(Expr_GSE91061)/2)
+# table(keep)
 
-# Expr_GSE91061 <- Expr_GSE91061[keep,]
-# dim(Expr_GSE91061)
+#Expr_GSE91061 <- Expr_GSE91061[keep,]
+#dim(Expr_GSE91061)
 
 # Normalize
-# Expr_GSE91061 <- DGEList(Expr_GSE91061)
-# Expr_GSE91061 <- calcNormFactors(Expr_GSE91061, method = c("TMM"))
-# Expr_GSE91061 <- cpm(Expr_GSE91061, log = TRUE, prior.count = 1, normalized.lib.sizes = TRUE)
+#Expr_GSE91061 <- DGEList(Expr_GSE91061)
+#Expr_GSE91061 <- calcNormFactors(Expr_GSE91061, method = c("TMM"))
+#Expr_GSE91061 <- cpm(Expr_GSE91061, log = TRUE, prior.count = 1, normalized.lib.sizes = TRUE)
 
 # remove genes with missing values and empty gene symbols
 sel <- which(apply(Expr_GSE91061, 1, function(x) all(is.finite(x)) ))
@@ -162,11 +151,6 @@ Expr_GSE91061 <- Expr_GSE91061[sel, ]
 Expr_GSE91061 <- Expr_GSE91061[!is.na(rownames(Expr_GSE91061)), ]
 Expr_GSE91061 <- Expr_GSE91061[!(rownames(Expr_GSE91061) == ""), ] 
 dim(Expr_GSE91061)
-
-# Normalize
-# Expr_GSE91061 <- DGEList(Expr_GSE91061)
-# Expr_GSE91061 <- calcNormFactors(Expr_GSE91061, method = c("TMM"))
-# Expr_GSE91061 <- cpm(Expr_GSE91061, log = TRUE, prior.count = 1, normalized.lib.sizes = TRUE)
 
 # ## Filtering
 # ffun <- kOverA(round(ncol(Expr_GSE91061)*0.2), 200)
@@ -198,14 +182,18 @@ Expr_GSE115821 <- Expr_GSE115821[-miR, ]
 # thresh <- mycpm > 1
 # keep <- rowSums(thresh) >= round(ncol(Expr_GSE115821)/2)
 # table(keep)
-
-#Expr_GSE115821 <- Expr_GSE115821[keep,]
-#dim(Expr_GSE115821)
+# 
+# Expr_GSE115821 <- Expr_GSE115821[keep,]
+# dim(Expr_GSE115821)
 
 # Normalize
-Expr_GSE115821 <- DGEList(Expr_GSE115821)
-Expr_GSE115821 <- calcNormFactors(Expr_GSE115821, method = c("TMM"))
-Expr_GSE115821 <- cpm(Expr_GSE115821, log = TRUE, prior.count = 1, normalized.lib.sizes = TRUE)
+# Expr_GSE115821 <- DGEList(Expr_GSE115821)
+# Expr_GSE115821 <- calcNormFactors(Expr_GSE115821, method = c("TMM"))
+# Expr_GSE115821 <- cpm(Expr_GSE115821, log = TRUE, prior.count = 1, normalized.lib.sizes = TRUE)
+
+# # Log2_transform
+range(Expr_GSE115821)
+Expr_GSE115821 <- log2(Expr_GSE115821 + 1)
 
 # z-score
 Expr_GSE115821 <- t(scale(t(Expr_GSE115821), center = TRUE, scale = TRUE))
@@ -249,8 +237,8 @@ Expr_TCGA <- Expr_TCGA[-H19, ]
 # 
 # Expr_TCGA <- Expr_TCGA[keep,]
 # dim(Expr_TCGA)
-
-# Normalize
+# 
+# # Normalize
 # Expr_TCGA <- DGEList(Expr_TCGA)
 # Expr_TCGA <- calcNormFactors(Expr_TCGA, method = c("TMM"))
 # Expr_TCGA <- cpm(Expr_TCGA, log = TRUE, prior.count = 1, normalized.lib.sizes = TRUE)
@@ -303,23 +291,23 @@ Expr_VanAllen <- Expr_VanAllen[keep,]
 dim(Expr_VanAllen)
 
 # filtering
-# mycpm <- cpm(Expr_VanAllen)
-# thresh <- mycpm > 1
-# keep <- rowSums(thresh) >= round(ncol(Expr_VanAllen)/2)
-# table(keep)
-# 
-# Expr_VanAllen <- Expr_VanAllen[keep,]
-# dim(Expr_VanAllen)
+#mycpm <- cpm(Expr_VanAllen)
+#thresh <- mycpm > 1
+#keep <- rowSums(thresh) >= round(ncol(Expr_VanAllen)/2)
+#table(keep)
+
+#Expr_VanAllen <- Expr_VanAllen[keep,]
+#dim(Expr_VanAllen)
 
 # Normalize
-# Expr_VanAllen <- DGEList(Expr_VanAllen)
-# Expr_VanAllen <- calcNormFactors(Expr_VanAllen, method = c("TMM"))
-# Expr_VanAllen <- cpm(Expr_VanAllen, log = TRUE, prior.count = 1, normalized.lib.sizes = TRUE)
+#Expr_VanAllen <- DGEList(Expr_VanAllen)
+#Expr_VanAllen <- calcNormFactors(Expr_VanAllen, method = c("TMM"))
+#Expr_VanAllen <- cpm(Expr_VanAllen, log = TRUE, prior.count = 1, normalized.lib.sizes = TRUE)
 
 # Log2transform
 range(Expr_VanAllen)
 Expr_VanAllen <- log2(Expr_VanAllen + 1)
-# 
+ 
 # ## Filtering
 # ffun <- pOverA(p = 0.1, A = 10)
 # X <- Expr_VanAllen
@@ -330,66 +318,6 @@ Expr_VanAllen <- log2(Expr_VanAllen + 1)
 
 Expr_VanAllen <- t(scale(t(Expr_VanAllen), center = TRUE, scale = TRUE))
 
-#######################
-## Process Expr_GSE122220
-
-# Mapping the illumina probe IDs to Gene Symbols
-Expr_GSE122220 <- as.data.frame(Expr_GSE122220)
-ids <- rownames(Expr_GSE122220)
-
-Expr_GSE122220$GeneSymbol <- mapIds(illuminaHumanv4.db, 
-       keys = ids, 
-       column = "SYMBOL", 
-       keytype = "PROBEID", 
-       multiVals = 'first')
-
-
-Expr_GSE122220 <- Expr_GSE122220[!duplicated(Expr_GSE122220$GeneSymbol), ] 
-Expr_GSE122220 <- Expr_GSE122220[!is.na(Expr_GSE122220$GeneSymbol), ] 
-rownames(Expr_GSE122220) <- Expr_GSE122220$GeneSymbol
-Expr_GSE122220$Entrez_Gene_Id <- NULL
-Expr_GSE122220$GeneSymbol <- NULL
-
-H19 <- grep("^H19", rownames(Expr_GSE122220))
-Expr_GSE122220 <- Expr_GSE122220[-H19, ]
-MiR <- grep("^MIR", rownames(Expr_GSE122220))
-Expr_GSE122220 <- Expr_GSE122220[-MiR, ]
-
-keep <- rowSums(Expr_GSE122220) > 0
-table(keep)
-
-Expr_GSE122220 <- Expr_GSE122220[keep,]
-dim(Expr_GSE122220)
-
-# filtering
-# mycpm <- cpm(Expr_VanAllen)
-# thresh <- mycpm > 1
-# keep <- rowSums(thresh) >= round(ncol(Expr_VanAllen)/2)
-# table(keep)
-# 
-# Expr_VanAllen <- Expr_VanAllen[keep,]
-# dim(Expr_VanAllen)
-
-# Normalize
-# Expr_VanAllen <- DGEList(Expr_VanAllen)
-# Expr_VanAllen <- calcNormFactors(Expr_VanAllen, method = c("TMM"))
-# Expr_VanAllen <- cpm(Expr_VanAllen, log = TRUE, prior.count = 1, normalized.lib.sizes = TRUE)
-
-# Log2transform
-range(Expr_GSE122220)
-Expr_GSE122220 <- log2(Expr_GSE122220 + 1)
- 
-# ## Filtering
-# ffun <- pOverA(p = 0.1, A = 10)
-# X <- Expr_VanAllen
-# Filt <- genefilter(2^X, ffun)
-# summary(Filt)
-# Expr_VanAllen <- Expr_VanAllen[Filt, ]
-# dim(Expr_VanAllen)
-
-Expr_GSE122220 <- t(scale(t(Expr_GSE122220), center = TRUE, scale = TRUE))
-
-##############################################
 ###########################################
 ### Modify the phenotypes
 
@@ -401,13 +329,13 @@ rownames(Pheno_GSE78220) <- Pheno_GSE78220$title
 all(rownames(Pheno_GSE78220) == colnames(Expr_GSE78220))
 
 # Keep only pre-treatment samples
-#Pheno_GSE78220 <- Pheno_GSE78220[Pheno_GSE78220$`biopsy time:ch1` == 'pre-treatment', ]
+Pheno_GSE78220 <- Pheno_GSE78220[Pheno_GSE78220$`biopsy time:ch1` == 'pre-treatment', ]
 
 # Get the response variable and convert to factor
 Pheno_GSE78220$Response <- as.factor(Pheno_GSE78220$`anti-pd-1 response:ch1`)
 table(Pheno_GSE78220$Response)
 levels(Pheno_GSE78220$Response) <- c("R", "R", "NR")
-Pheno_GSE78220$Response <- ordered(Pheno_GSE78220$Response, levels = c("NR", "R"))
+Pheno_GSE78220$Response <- factor(Pheno_GSE78220$Response, levels = c("NR", "R"))
 
 # subset the expression
 Expr_GSE78220 <- Expr_GSE78220[, colnames(Expr_GSE78220) %in% rownames(Pheno_GSE78220)]
@@ -425,21 +353,18 @@ Pheno_GSE91061 <- Pheno_GSE91061[!(Pheno_GSE91061$geo_accession == 'GSM2420320')
 rownames(Pheno_GSE91061) <- Pheno_GSE91061$title
 
 # Keep only pre-treatment samples
-#Pheno_GSE91061 <- Pheno_GSE91061[Pheno_GSE91061$`visit (pre or on treatment):ch1` == 'Pre', ]
+Pheno_GSE91061 <- Pheno_GSE91061[Pheno_GSE91061$`visit (pre or on treatment):ch1` == 'Pre', ]
 
 # remove samples with unknown response
 Pheno_GSE91061 <- Pheno_GSE91061[!(Pheno_GSE91061$`response:ch1` == 'UNK'), ]
-
-# Check if sample names are identical
-all(rownames(Pheno_GSE91061) == colnames(Expr_GSE91061))
 
 # Get the response variable
 Pheno_GSE91061$Response <- as.factor(Pheno_GSE91061$`response:ch1`)
 table(Pheno_GSE91061$Response)
 
 # Re-name the levels 
-levels(Pheno_GSE91061$Response) <- c("NR", "R", "R") 
-Pheno_GSE91061$Response <- ordered(Pheno_GSE91061$Response, levels = c("NR", "R"))
+levels(Pheno_GSE91061$Response) <- c("NR", "R", "NR") 
+Pheno_GSE91061$Response <- factor(Pheno_GSE91061$Response, levels = c("NR", "R"))
 
 #Remove unwanted samples from the expression
 Keep <- intersect(rownames(Pheno_GSE91061), colnames(Expr_GSE91061))
@@ -461,7 +386,7 @@ Pheno_GSE115821 <- Pheno_GSE115821[order(rownames(Pheno_GSE115821)), ]
 all(rownames(Pheno_GSE115821) == colnames(Expr_GSE115821))
 
 # Keep only pre-treatment samples
-#Pheno_GSE115821 <- Pheno_GSE115821[Pheno_GSE115821$`treatment state:ch1` %in% c('PRE Immune Checkpoint Blockade Therapy', 'PRE Immune Checkpoint Blockade Therapy (On dabrafenib+trametinib)'), ]
+Pheno_GSE115821 <- Pheno_GSE115821[Pheno_GSE115821$`treatment state:ch1` %in% c('PRE Immune Checkpoint Blockade Therapy', 'PRE Immune Checkpoint Blockade Therapy (On dabrafenib+trametinib)'), ]
 
 # Remove duplicate samples
 Pheno_GSE115821 <- Pheno_GSE115821[!(Pheno_GSE115821$geo_accession %in% c('GSM3190470', 'GSM3190484', 'GSM3190485', 'GSM3190487', 'GSM3190494', 'GSM3190495')), ]
@@ -520,7 +445,7 @@ all(rownames(Pheno_VanAllen) == colnames(Expr_VanAllen))
 Pheno_VanAllen$Response <- as.factor(Pheno_VanAllen$Durable.Clinical.Benefit)
 table(Pheno_VanAllen$Response)
 levels(Pheno_VanAllen$Response) <- c("R", "NR", "R", "R", NA)
-Pheno_VanAllen$Response <- ordered(Pheno_VanAllen$Response, levels = c("NR", "R"))
+Pheno_VanAllen$Response <- factor(Pheno_VanAllen$Response, levels = c("NR", "R"))
 Pheno_VanAllen <- Pheno_VanAllen[!is.na(Pheno_VanAllen$Response), ]
 
 # subset the expression
@@ -528,27 +453,6 @@ Expr_VanAllen <- Expr_VanAllen[, colnames(Expr_VanAllen) %in% rownames(Pheno_Van
 
 # Check for consistency
 all(rownames(Pheno_VanAllen) == colnames(Expr_VanAllen))
-
-#####################
-## Modify Pheno_GSE122220
-
-# Check consistency
-all(rownames(Pheno_GSE122220) == colnames(Expr_GSE122220))
-
-# all samples are pre-treatment
-
-# Get the response variable
-Pheno_GSE122220$Response <- as.factor(Pheno_GSE122220$`response (pd = progressive disease; sd = stable disease; pr = partial response; cr = complete response):ch1`)
-table(Pheno_GSE122220$Response)
-levels(Pheno_GSE122220$Response) <- c("R", "NR", "R", "R")
-Pheno_GSE122220$Response <- ordered(Pheno_GSE122220$Response, levels = c("NR", "R"))
-Pheno_GSE122220 <- Pheno_GSE122220[!is.na(Pheno_GSE122220$Response), ]
-
-# subset the expression
-Pheno_GSE122220 <- Pheno_GSE122220[, colnames(Expr_GSE122220) %in% rownames(Pheno_GSE122220)]
-
-# Check for consistency
-all(rownames(Pheno_GSE122220) == colnames(Expr_GSE122220))
 
 #########################################################################################
 #########################################################################################
@@ -603,7 +507,7 @@ levels(testGroup) <- c("NR", "R")
 table(testGroup)
 
 # Save for cross-study validation
-save(trainMat, trainGroup, testMat, testGroup, file = "./Objs/icbData_GSE78220Out.rda")
+save(trainMat, trainGroup, testMat, testGroup, file = "./Objs/icbData_GSE78220Out_pre.rda")
 
 ##########################
 # Leave GSE91061 out
@@ -623,7 +527,7 @@ levels(testGroup) <- c("NR", "R")
 table(testGroup)
 
 # Save for cross-study validation
-save(trainMat, trainGroup, testMat, testGroup, file = "./Objs/icbData_GSE91061Out.rda")
+save(trainMat, trainGroup, testMat, testGroup, file = "./Objs/icbData_GSE91061Out_pre.rda")
 
 ##########################
 # Leave GSE115821 out
@@ -643,7 +547,7 @@ levels(testGroup) <- c("NR", "R")
 table(testGroup)
 
 # Save for cross-study validation
-save(trainMat, trainGroup, testMat, testGroup, file = "./Objs/icbData_GSE115821Out.rda")
+save(trainMat, trainGroup, testMat, testGroup, file = "./Objs/icbData_GSE115821Out_pre.rda")
 
 ##########################
 # Leave TCGA out
@@ -663,7 +567,7 @@ levels(testGroup) <- c("NR", "R")
 table(testGroup)
 
 # Save for cross-study validation
-save(trainMat, trainGroup, testMat, testGroup, file = "./Objs/icbData_TCGAOut.rda")
+save(trainMat, trainGroup, testMat, testGroup, file = "./Objs/icbData_TCGAOut_pre.rda")
 
 ##########################
 # Leave VanAllen out
@@ -683,27 +587,7 @@ levels(testGroup) <- c("NR", "R")
 table(testGroup)
 
 # Save for cross-study validation
-save(trainMat, trainGroup, testMat, testGroup, file = "./Objs/icbData_VanAllenOut.rda")
-
-##########################
-# Leave VanAllen out
-# train <- c("GSE78220", "GSE91061", "GSE115821", "TCGA", "VanAllen")
-# test <- c("GSE122220")
-# 
-# ## Training
-# trainMat <- do.call("cbind", exprsICB[train])
-# trainGroup <- factor(do.call("c", ICB_Response_ALL[train]))
-# levels(trainGroup) <- c("NR", "R")
-# table(trainGroup)
-# 
-# ## Testing
-# testMat <- exprsICB$VanAllen
-# testGroup <- factor(do.call("c", ICB_Response_ALL[test]))
-# levels(testGroup) <- c("NR", "R")
-# table(testGroup)
-# 
-# # Save for cross-study validation
-# save(trainMat, trainGroup, testMat, testGroup, file = "./Objs/icbData_GSE122220Out.rda")
+save(trainMat, trainGroup, testMat, testGroup, file = "./Objs/icbData_VanAllenOut_pre.rda")
 
 ##################################################################################
 #####################
@@ -721,29 +605,29 @@ all(colnames(allMat) == names(allGroup))
 #############################################################
 ### Pre or on
 
-allPheno$GSE115821$BiopsyTiming <- as.factor(allPheno$GSE115821$`treatment state:ch1`)
-levels(allPheno$GSE115821$BiopsyTiming) <- c('on', 'pre', 'pre')
-
-allPheno$GSE91061$BiopsyTiming <- as.factor(allPheno$GSE91061$`visit (pre or on treatment):ch1`)
-levels(allPheno$GSE91061$BiopsyTiming) <- c('on', 'pre')
-
-allPheno$GSE78220$BiopsyTiming <- as.factor(allPheno$GSE78220$`biopsy time:ch1`)
-levels(allPheno$GSE78220$BiopsyTiming) <- c('on', 'pre')
-
-allPheno$TCGA$BiopsyTiming <- as.factor(allPheno$TCGA$Biopsy.Time)
-levels(allPheno$TCGA$BiopsyTiming) <- c('pre')
-
-allPheno$VanAllen$BiopsyTiming <- as.factor(rep('pre', nrow(allPheno$VanAllen)))
-
-### Covariates of relevance select complete cases: GRADE
-allBioposyTiming <- lapply(allPheno, function(x) {
-  i <- grep("BiopsyTiming", colnames(x))
-  if (length(i) == 0) out <- factor(rep("NA", nrow(x)))
-  else x <- factor(x[, i  ])
-})
-
-allBioposyTiming <- factor(unlist(allBioposyTiming))
-table(allBioposyTiming)
+# allPheno$GSE115821$BiopsyTiming <- as.factor(allPheno$GSE115821$`treatment state:ch1`)
+# levels(allPheno$GSE115821$BiopsyTiming) <- c('on', 'pre', 'pre')
+# 
+# allPheno$GSE91061$BiopsyTiming <- as.factor(allPheno$GSE91061$`visit (pre or on treatment):ch1`)
+# levels(allPheno$GSE91061$BiopsyTiming) <- c('on', 'pre')
+# 
+# allPheno$GSE78220$BiopsyTiming <- as.factor(allPheno$GSE78220$`biopsy time:ch1`)
+# levels(allPheno$GSE78220$BiopsyTiming) <- c('on', 'pre')
+# 
+# allPheno$TCGA$BiopsyTiming <- as.factor(allPheno$TCGA$Biopsy.Time)
+# levels(allPheno$TCGA$BiopsyTiming) <- c('pre')
+# 
+# allPheno$VanAllen$BiopsyTiming <- as.factor(rep('pre', nrow(allPheno$VanAllen)))
+# 
+# ### Covariates of relevance select complete cases: GRADE
+# allBioposyTiming <- lapply(allPheno, function(x) {
+#   i <- grep("BiopsyTiming", colnames(x))
+#   if (length(i) == 0) out <- factor(rep("NA", nrow(x)))
+#   else x <- factor(x[, i  ])
+# })
+# 
+# allBioposyTiming <- factor(unlist(allBioposyTiming))
+# table(allBioposyTiming)
 
 #############################################################
 ### gender
@@ -798,7 +682,6 @@ summary(allAGE)
 ### Assemble in one data.frame and turn numeric
 covs <- data.frame(STUDIES=allStudies,
                    GENDER=allGender,
-                   BiopsyTiming= allBioposyTiming,
                    AGE=allAGE)
 
 ### Prepare vocs for sampling
@@ -835,5 +718,5 @@ table(mixTestGroup)
 save(exprsICB, 
      mixTrainMat, mixTrainGroup, mixTrainStudy,
      mixTestMat, mixTestGroup, mixTestStudy,
-     file="./Objs/icbData.rda")
+     file="./Objs/icbData_pre.rda")
 

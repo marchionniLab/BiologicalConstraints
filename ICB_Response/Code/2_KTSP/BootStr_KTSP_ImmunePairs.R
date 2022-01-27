@@ -25,7 +25,7 @@ library(boot)
 library(patchwork)
 
 ### Load expression and phenotype data
-load("./Objs/icbData.rda")
+load("./Objs/icbData_filt.rda")
 
 #########
 load("./Objs/ImmunePairs.rda")
