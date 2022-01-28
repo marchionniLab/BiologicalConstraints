@@ -354,7 +354,10 @@ pre code {
 <ul>
 <li><a href="#cross-mechanism-runs"><span class="toc-section-number">1</span> Cross-Mechanism runs</a><ul>
 <li><a href="#ktsp"><span class="toc-section-number">1.1</span> KTSP</a></li>
-<li><a href="#rf"><span class="toc-section-number">1.2</span> RF</a></li>
+<li><a href="#rf"><span class="toc-section-number">1.2</span> RF</a><ul>
+<li><a href="#gene-level"><span class="toc-section-number">1.2.1</span> Gene level</a></li>
+<li><a href="#pair-level"><span class="toc-section-number">1.2.2</span> Pair level</a></li>
+</ul></li>
 </ul></li>
 </ul>
 </div>
@@ -428,8 +431,41 @@ pre code {
 </tr>
 </tbody>
 </table>
+<table>
+<caption>Mechanistic pair sets</caption>
+<thead>
+<tr class="header">
+<th align="left">mechanism</th>
+<th align="left">pairs</th>
+<th align="left">genes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">TF_MIR</td>
+<td align="left">985</td>
+<td align="left">286</td>
+</tr>
+<tr class="even">
+<td align="left">NOTCH_MYC</td>
+<td align="left">78684</td>
+<td align="left">802</td>
+</tr>
+<tr class="odd">
+<td align="left">GO</td>
+<td align="left">5214835</td>
+<td align="left">3230</td>
+</tr>
+</tbody>
+</table>
 <div id="ktsp" class="section level2">
 <h2><span class="header-section-number">1.1</span> KTSP</h2>
+<p>For a given set of mechanistic pairs:</p>
+<ul>
+<li>Take all mechanistic pairs available in the given dataset</li>
+<li>No statistical filtering used (no Wilcoxon test applied in KTSP training)</li>
+<li>krange <span class="math inline">\(=50\)</span>, so the classifier will attempt to add upto 50 pairs</li>
+</ul>
 <table>
 <caption>Bladder</caption>
 <thead>
@@ -550,7 +586,14 @@ pre code {
 </div>
 <div id="rf" class="section level2">
 <h2><span class="header-section-number">1.2</span> RF</h2>
-<p>Input here is mechanistic genes (not pairs)</p>
+<div id="gene-level" class="section level3">
+<h3><span class="header-section-number">1.2.1</span> Gene level</h3>
+<p>For a given set of mechanistic pairs:</p>
+<ul>
+<li>Take all mechanistic pairs available in the given dataset, take the genes forming these pairs</li>
+<li>Take the gene expression data for these genes and supply them for random forest training and testing</li>
+<li>parameters: <code>mtryStart = 1, ntreeTry=500, stepFactor = 1, improve=0.05</code></li>
+</ul>
 <table>
 <caption>Bladder</caption>
 <thead>
@@ -644,6 +687,110 @@ pre code {
 </tr>
 </tbody>
 </table>
+</div>
+<div id="pair-level" class="section level3">
+<h3><span class="header-section-number">1.2.2</span> Pair level</h3>
+<p>For a given set of mechanistic pairs:</p>
+<ul>
+<li>Take all mechanistic pairs available in the given dataset, take the genes forming these pairs</li>
+<li>Use these pairs to train a KTSP classifier with no statistical filtering (except for “GO” mechanism where top 100 DE genes are selected); allow upto 50 pairs to be selected (i.e. <code>krange=50</code>)</li>
+<li>For the pairs, compute binary votes using <code>SWAP.KTSP.Statistics</code> for both training and testing data.</li>
+<li>parameters: <code>mtryStart = 1, ntreeTry=500, stepFactor = 1, improve=0.05</code></li>
+</ul>
+<table>
+<caption>Bladder</caption>
+<thead>
+<tr class="header">
+<th align="left">mechanism</th>
+<th align="right">candidatePairs</th>
+<th align="right">auc_train</th>
+<th align="right">auc_test</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">TF_MIR</td>
+<td align="right">126</td>
+<td align="right">0.807</td>
+<td align="right">0.754</td>
+</tr>
+<tr class="even">
+<td align="left">NOTCH_MYC</td>
+<td align="right">9176</td>
+<td align="right">0.990</td>
+<td align="right">0.679</td>
+</tr>
+<tr class="odd">
+<td align="left">GO</td>
+<td align="right">216153</td>
+<td align="right">0.900</td>
+<td align="right">0.685</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption>Breast</caption>
+<thead>
+<tr class="header">
+<th align="left">mechanism</th>
+<th align="right">candidatePairs</th>
+<th align="right">auc_train</th>
+<th align="right">auc_test</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">TF_MIR</td>
+<td align="right">925</td>
+<td align="right">0.807</td>
+<td align="right">0.696</td>
+</tr>
+<tr class="even">
+<td align="left">NOTCH_MYC</td>
+<td align="right">55888</td>
+<td align="right">0.550</td>
+<td align="right">0.503</td>
+</tr>
+<tr class="odd">
+<td align="left">GO</td>
+<td align="right">3098805</td>
+<td align="right">0.824</td>
+<td align="right">0.750</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption>Prostate</caption>
+<thead>
+<tr class="header">
+<th align="left">mechanism</th>
+<th align="right">candidatePairs</th>
+<th align="right">auc_train</th>
+<th align="right">auc_test</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">TF_MIR</td>
+<td align="right">99</td>
+<td align="right">0.622</td>
+<td align="right">0.625</td>
+</tr>
+<tr class="even">
+<td align="left">NOTCH_MYC</td>
+<td align="right">9163</td>
+<td align="right">0.801</td>
+<td align="right">0.723</td>
+</tr>
+<tr class="odd">
+<td align="left">GO</td>
+<td align="right">409965</td>
+<td align="right">0.775</td>
+<td align="right">0.710</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 </div>
 

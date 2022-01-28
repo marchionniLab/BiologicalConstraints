@@ -25,7 +25,7 @@ library(boot)
 library(patchwork)
 
 ### Load expression and phenotype data
-load("./Objs/icbData.rda")
+load("./Objs/icbData_withNP.rda")
 
 #########
 load("./Objs/ImmunePairs.rda")
@@ -33,12 +33,12 @@ load("./Objs/ImmunePairs.rda")
 myTSPs <- ImmunePairs
 
 ### Quantile normalize
-usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
-usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")
+usedTrainMat <- trainMat
+usedTestMat <- normalizeBetweenArrays(testMat, method = "quantile")
 
 ####
-usedTrainGroup <- mixTrainGroup
-usedTestGroup <- mixTestGroup
+usedTrainGroup <- trainGroup
+usedTestGroup <- testGroup
 
 ### Common genes
 keepGns <- intersect(as.vector(myTSPs), rownames(usedTrainMat))
@@ -218,12 +218,12 @@ Diff_Mechanistic_50 <- All_50[,"Diff_Mechanistic"]
 range(Diff_Mechanistic_50)
 quantile(Diff_Mechanistic_50, c(0.025, 0.975))
 
+range(All_50[, 'AUC_Test_Agnostic'])
 range(All_50[, 'AUC_Test_Mech'])
 
 ## Calculate the difference and CI of the difference
 #Diff <- MechKTSP_AUC_Test - AgnosticKTSP_AUC_Test
 #quantile(Diff, c(0.025, 0.975))
-
 
 ## Plot the distributions of the AUCs from both methods in the training data
 MechanisticAUCTrain_50 <- data.frame(AUC = All_50[, "AUC_Train_Mech"])
