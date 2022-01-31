@@ -18,7 +18,7 @@ library(xtable)
 
 ###########################################################################
 ### Load expression and phenotype data
-load("./Objs/icbData_GSE115821Out.rda")
+load("./Objs/icbData_GSE115821Out_Pre.rda")
 
 ############################################################################
 ### Load the selected genes
@@ -58,7 +58,8 @@ set.seed(333)
 
 ktspPredictorRes <- SWAP.Train.KTSP(
   usedTrainMat, usedTrainGroup, krange=ktsp,
-  FilterFunc = SWAP.Filter.Wilcoxon, featureNo=featNo, RestrictedPairs = myTSPs)
+  FilterFunc = SWAP.Filter.Wilcoxon, featureNo=featNo, RestrictedPairs = myTSPs,
+  disjoint = F)
 
 ktspPredictorRes
 

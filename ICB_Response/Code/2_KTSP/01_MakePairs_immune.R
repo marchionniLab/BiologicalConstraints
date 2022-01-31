@@ -15,7 +15,7 @@ library(GSEABase)
 
 #########################################################################
 #### Retrieve the Lists Needed
-nms <- lapply(geneSetCollectionSet.msigdb, function(x) grep('T_CELL', names(x), value=TRUE))
+nms <- lapply(geneSetCollectionSet.msigdb, function(x) grep('T_CELL|EXHAUS', names(x), value=TRUE))
 nms <- nms[sapply(nms,  length) > 0]
 
 
@@ -56,7 +56,7 @@ rownames(ProImmune) <- allGns
 table(rowSums(ProImmune))
 
 #### Get the Consensus Genes from ProAngiogenesis
-ConsensusPI <- names(which(rowSums(ProImmune) > 0))
+ConsensusPI <- names(which(rowSums(ProImmune) > 2))
 length(ConsensusPI)
 
 
@@ -83,7 +83,7 @@ rownames(AntiImmune) <- allGns
 table(rowSums(AntiImmune))
 
 #### Get the Consensus Genes from AntiAgenesis
-ConsensusAI <- names(which(rowSums(AntiImmune) > 0))
+ConsensusAI <- names(which(rowSums(AntiImmune) > 2))
 length(ConsensusAI)
 
 
@@ -124,13 +124,3 @@ ImmunePairs <- as.matrix(Pairs)
 save(ImmuneList, file="./Objs/ImmuneListConsensus.v6.1.rda")
 save(ImmunePairs,file="./Objs/ImmunePairs2.rda")
 
-
-#####################################################################
-### Session information
-date()
-sessionInfo()
-
-#####################################################################
-### Quitting in a clean way
-rm(list=ls())
-q("no")

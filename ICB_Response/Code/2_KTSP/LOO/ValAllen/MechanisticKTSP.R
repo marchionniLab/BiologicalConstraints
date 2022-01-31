@@ -18,7 +18,7 @@ library(xtable)
 
 ###########################################################################
 ### Load expression and phenotype data
-load("./Objs/icbData_VanAllenOut.rda")
+load("./Objs/icbData_VanAllenOut_Pre.rda")
 
 ############################################################################
 ### Load the selected genes

@@ -25,7 +25,7 @@ library(boot)
 library(patchwork)
 
 ### Load expression and phenotype data
-load("./Objs/icbData.rda")
+load("./Objs/icbData_Pre.rda")
 
 #########
 load("./Objs/ImmunePairs.rda")
@@ -218,6 +218,7 @@ Diff_Mechanistic_50 <- All_50[,"Diff_Mechanistic"]
 range(Diff_Mechanistic_50)
 quantile(Diff_Mechanistic_50, c(0.025, 0.975))
 
+range(All_50[, 'AUC_Test_Agnostic'])
 range(All_50[, 'AUC_Test_Mech'])
 
 ## Calculate the difference and CI of the difference

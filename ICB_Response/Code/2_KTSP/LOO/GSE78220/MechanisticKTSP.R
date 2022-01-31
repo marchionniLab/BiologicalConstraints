@@ -18,7 +18,7 @@ library(xtable)
 
 ###########################################################################
 ### Load expression and phenotype data
-load("./Objs/icbData_GSE78220Out.rda")
+load("./Objs/icbData_GSE78220Out_Pre.rda")
 
 ############################################################################
 ### Load the selected genes
@@ -33,8 +33,8 @@ usedTestMat <- testMat
 ### Common genes
 keepGns <- intersect(as.vector(myTSPs), rownames(usedTrainMat))
 
-usedTrainMat <- usedTrainMat[keepGns, ]
-usedTestMat <- usedTestMat[keepGns, ]
+# usedTrainMat <- usedTrainMat[keepGns, ]
+# usedTestMat <- usedTestMat[keepGns, ]
 
 ### Associated groups
 usedTrainGroup <- trainGroup
@@ -56,7 +56,8 @@ set.seed(333)
 
 ktspPredictorRes <- SWAP.Train.KTSP(
   usedTrainMat, usedTrainGroup, krange=ktsp,
-  FilterFunc = SWAP.Filter.Wilcoxon, featureNo=featNo, RestrictedPairs = myTSPs)
+  FilterFunc = SWAP.Filter.Wilcoxon, featureNo=featNo, RestrictedPairs = myTSPs,
+  disjoint = F)
 
 ktspPredictorRes
 
