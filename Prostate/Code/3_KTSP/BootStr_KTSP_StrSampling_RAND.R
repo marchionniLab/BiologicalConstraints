@@ -226,7 +226,7 @@ bootobject_500 <- boot(data= Data, statistic= SWAP.Train.KTSPStrap, R= 1000, par
 save(bootobject_50, bootobject_100, bootobject_200, bootobject_500, file = "../../Objs/KTSP/bootobjectKTSP_AdhesionActivationO2response_RAND.rda")
 
 #load("./Objs/KTSP/bootobjectKTSP_AdhesionActivationO2response.rda")
-load("../../Objs/KTSP/bootobjectKTSP_AdhesionActivationO2response_RAND.rda")
+load("Objs/KTSP/bootobjectKTSP_AdhesionActivationO2response_RAND.rda")
 
 ##############################################################
 ### Work with boot object 50  
@@ -438,7 +438,7 @@ ModelCompare_KTSP_DiffNoFeat <- rbind(ModelCompareAUCTrain_50,
                                       ModelCompareAUCTest_500
 )
 
-save(ModelCompare_KTSP_DiffNoFeat, file = "../../Objs/KTSP/ModelCompare_KTSP_DiffNoFeat_RAND.rda")
+save(ModelCompare_KTSP_DiffNoFeat, file = "Objs/KTSP/ModelCompare_KTSP_DiffNoFeat_RAND.rda")
 
 ####################################################################################
 ####################################################################################

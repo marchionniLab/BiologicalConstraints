@@ -33,8 +33,7 @@ names(GeneList) <- gsub(".+\\.",  "",  names(GeneList))
 #### Pro Diabetes
 ProDiabetes <- GeneList[c("GSE9006_TYPE_1_DIABETES_AT_DX_VS_1MONTH_POST_DX_PBMC_UP",
                         'GSE9006_TYPE_1_DIABETES_AT_DX_VS_4MONTH_POST_DX_PBMC_UP'
-                        
-                        
+
 )]
 
 
@@ -47,7 +46,7 @@ rownames(ProDiabetes) <- allGns
 table(rowSums(ProDiabetes))
 
 #### Get the Consensus Genes from ProAngiogenesis
-ConsensusPI <- names(which(rowSums(ProDiabetes) > 0))
+ConsensusPI <- names(which(rowSums(ProDiabetes) > 1))
 length(ConsensusPI)
 
 
@@ -67,7 +66,7 @@ rownames(AntiDiabetes) <- allGns
 table(rowSums(AntiDiabetes))
 
 #### Get the Consensus Genes from AntiAgenesis
-ConsensusAI <- names(which(rowSums(AntiDiabetes) > 0))
+ConsensusAI <- names(which(rowSums(AntiDiabetes) > 1))
 length(ConsensusAI)
 
 
@@ -102,35 +101,35 @@ DiabetesPairs <- expand.grid(DiabetesList)
 #filt <- which(DiabetesPairs[,1] %in% myTSPs[,1] & DiabetesPairs[,2] %in% myTSPs[,2])
 #DiabetesPairs <- DiabetesPairs[-filt, ]
 
-#####
-# subset the NOTCH-MYC targets
-Notch = load("../Breast/Objs/NotchPairs.rda")
-MYC = load("../Breast/Objs/MycPairs.rda")
-myTSPs <- rbind(NotchPairs, MycPairs)
-filt <- which(DiabetesPairs[,1] %in% myTSPs[,1] & DiabetesPairs[,2] %in% myTSPs[,2])
-DiabetesPairs <- DiabetesPairs[-filt, ]
-
-######
-# subset the adhesion, activation and O2 response pairs
-Genes1 <- read.delim("../Prostate/objs/GO_Adhesion.txt")
-Genes1 <- as.matrix(Genes1)
-Genes1 <- Genes1[-1,]
-
-Genes2 <- read.delim("../Prostate/objs/GO_Activation.txt")
-Genes2 <- as.matrix(Genes2)
-Genes2 <- Genes2[-1,]
-
-Genes3 <- read.delim("../Prostate/objs/GO_O2Response.txt")
-Genes3 <- as.matrix(Genes3)
-Genes3 <- Genes3[-1,]
-
-Genes <- c(Genes1,Genes2, Genes3)
-Genes <- Genes[!duplicated(Genes)]
-
-myTSPs <- t(combn(Genes,2))
-
-filt <- which(DiabetesPairs[,1] %in% myTSPs[,1] & DiabetesPairs[,2] %in% myTSPs[,2])
-DiabetesPairs <- DiabetesPairs[-filt, ]
+# #####
+# # subset the NOTCH-MYC targets
+# Notch = load("../Breast/Objs/NotchPairs.rda")
+# MYC = load("../Breast/Objs/MycPairs.rda")
+# myTSPs <- rbind(NotchPairs, MycPairs)
+# filt <- which(DiabetesPairs[,1] %in% myTSPs[,1] & DiabetesPairs[,2] %in% myTSPs[,2])
+# DiabetesPairs <- DiabetesPairs[-filt, ]
+# 
+# ######
+# # subset the adhesion, activation and O2 response pairs
+# Genes1 <- read.delim("../Prostate/objs/GO_Adhesion.txt")
+# Genes1 <- as.matrix(Genes1)
+# Genes1 <- Genes1[-1,]
+# 
+# Genes2 <- read.delim("../Prostate/objs/GO_Activation.txt")
+# Genes2 <- as.matrix(Genes2)
+# Genes2 <- Genes2[-1,]
+# 
+# Genes3 <- read.delim("../Prostate/objs/GO_O2Response.txt")
+# Genes3 <- as.matrix(Genes3)
+# Genes3 <- Genes3[-1,]
+# 
+# Genes <- c(Genes1,Genes2, Genes3)
+# Genes <- Genes[!duplicated(Genes)]
+# 
+# myTSPs <- t(combn(Genes,2))
+# 
+# filt <- which(DiabetesPairs[,1] %in% myTSPs[,1] & DiabetesPairs[,2] %in% myTSPs[,2])
+# DiabetesPairs <- DiabetesPairs[-filt, ]
 
 #####
 # subset the T-cell activation pairs
@@ -146,7 +145,7 @@ DiabetesPairs <- as.matrix(DiabetesPairs)
 
 ######################################################################
 ####Save Results
-save(DiabetesPairs,file="./Objs/DiabetesPairs2.rda")
+save(DiabetesPairs,file="./Objs/DiabetesPairs.rda")
 
 
 #####################################################################

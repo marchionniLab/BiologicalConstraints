@@ -32,18 +32,18 @@ names(GeneList) <- gsub(".+\\.",  "",  names(GeneList))
 ######################################################
 #### Pro Notch
 ProImmune <- GeneList[c('POSITIVE_REGULATION_OF_T_CELL_ACTIVATION',
-                        #'GO_POSITIVE_REGULATION_OF_T_CELL_PROLIFERATION',
-                        #'POSITIVE_REGULATION_OF_T_CELL_PROLIFERATION',
                         'GO_T_CELL_ACTIVATION_INVOLVED_IN_IMMUNE_RESPONSE',
                         'GO_POSITIVE_REGULATION_OF_T_CELL_MEDIATED_CYTOTOXICITY',
                         'GO_POSITIVE_REGULATION_OF_T_CELL_CYTOKINE_PRODUCTION',
                         'GO_POSITIVE_REGULATION_OF_ACTIVATED_T_CELL_PROLIFERATION',
                         'GO_POSITIVE_REGULATION_OF_T_CELL_MEDIATED_IMMUNITY',
                         'GO_POSITIVE_REGULATION_OF_ALPHA_BETA_T_CELL_ACTIVATION',
-                        'GO_POSITIVE_REGULATION_OF_CD4_POSITIVE_ALPHA_BETA_T_CELL_ACTIVATION'
-                        #'GO_POSITIVE_REGULATION_OF_ALPHA_BETA_T_CELL_PROLIFERATION',
-                        #'GO_POSITIVE_REGULATION_OF_ALPHA_BETA_T_CELL_DIFFERENTIATION'
-                        
+                        'GO_POSITIVE_REGULATION_OF_CD4_POSITIVE_ALPHA_BETA_T_CELL_ACTIVATION',
+                        #######
+                        "GSE9650_NAIVE_VS_EXHAUSTED_CD8_TCELL_UP", 
+                        "GSE9650_EFFECTOR_VS_EXHAUSTED_CD8_TCELL_UP",
+                        "GSE9650_EXHAUSTED_VS_MEMORY_CD8_TCELL_DN"
+            
 )]
 
 
@@ -66,11 +66,11 @@ AntiImmune <- GeneList[c("GO_NEGATIVE_REGULATION_OF_T_CELL_RECEPTOR_SIGNALING_PA
                         "GO_REGULATION_OF_T_CELL_CYTOKINE_PRODUCTION",
                         "GO_NEGATIVE_REGULATION_OF_T_CELL_MEDIATED_IMMUNITY",
                         'GO_NEGATIVE_REGULATION_OF_ALPHA_BETA_T_CELL_ACTIVATION',
-                        'GO_NEGATIVE_REGULATION_OF_CD4_POSITIVE_ALPHA_BETA_T_CELL_ACTIVATION'
-                        #'GO_NEGATIVE_REGULATION_OF_T_CELL_PROLIFERATION',
-                        #'GO_NEGATIVE_REGULATION_OF_T_CELL_DIFFERENTIATION'
-                        #'GO_NEGATIVE_REGULATION_OF_ALPHA_BETA_T_CELL_DIFFERENTIATION'
-                        
+                        'GO_NEGATIVE_REGULATION_OF_CD4_POSITIVE_ALPHA_BETA_T_CELL_ACTIVATION',
+                        #####
+                        'GSE9650_NAIVE_VS_EXHAUSTED_CD8_TCELL_DN',
+                        'GSE9650_EFFECTOR_VS_EXHAUSTED_CD8_TCELL_DN',
+                        'GSE9650_EXHAUSTED_VS_MEMORY_CD8_TCELL_UP'
 )]
 
 
