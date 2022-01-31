@@ -2,7 +2,7 @@
 rm(list = ls())
 gc()
 
-## Run RF
+## Run XGB
 
 ############################################################################
 ### Load library
@@ -22,6 +22,8 @@ library(boot)
 library(patchwork)
 library(randomForest)
 library(rutils)
+library(genefilter)
+library(xgboost)
 
 ## ---------------------
 
@@ -30,13 +32,38 @@ l2 = load("../Objs/list.mech.rda")
 
 
 ## ---------------------------------------------
-## run RF at the gene level
+## run XGB at the gene level
 
-run_RF_genes = function(trainMat, testMat, trainGroup, testGroup, mechTSPs, filter=FALSE, classes=NULL){
+xgb_param <- list(
+  # General Parameters
+  booster            = "gbtree",          # default = "gbtree"
+  silent             = 1,                 # default = 0
+  # Booster Parameters
+  eta                = 0.1,           #0.1   # default = 0.3, range: [0,1]
+  gamma              = 0,             #0  # default = 0,   range: [0,∞]
+  max_depth          = 1,             # 1
+  min_child_weight   = 1,             #1   # default = 1,   range: [0,∞]
+  subsample          = 0.4,           #0.4     # default = 1,   range: (0,1]
+  colsample_bytree   = 1,           #1      # default = 1,   range: (0,1]
+  colsample_bylevel  = 1,    #1  # default = 1,   range: (0,1]
+  lambda             = 0,             #0  # default = 1
+  alpha              = 0,           # 0    # default = 0
+  # Task Parameters
+  objective          = "binary:logistic",   # default = "reg:linear"
+  eval_metric        = "auc"
+)
+
+run_XGB_genes = function(trainMat, testMat, trainGroup, testGroup, mechTSPs, filter=FALSE, classes=NULL){
   
   if(is.null(classes)){
     classes = levels(as.factor(trainGroup))
   }
+  
+  trainGroup.bin = factor(trainGroup, levels=classes, labels=0:1)
+  testGroup.bin = factor(testGroup, levels=classes, labels=0:1)
+  
+  trainGroup.bin = as.numeric(as.character(trainGroup.bin))
+  testGroup.bin = as.numeric(as.character(testGroup.bin))
   
   genes = intersect(rownames(trainMat), rownames(testMat))
   
@@ -54,48 +81,61 @@ run_RF_genes = function(trainMat, testMat, trainGroup, testGroup, mechTSPs, filt
   trainMat = trainMat[genes, ]
   testMat = testMat[genes, ]
   
-  tmp <- as.vector(table(trainGroup))
-  num_classes <- length(tmp)
-  min_size <- tmp[order(tmp,decreasing=FALSE)[1]]
-  sampsizes <- rep(min_size,num_classes)
+  idsplit = createDataPartition(trainGroup.bin, p=0.7, list=F)[, 1]
   
-  fit.rf = tuneRF(x=t(trainMat), 
-                  y=trainGroup, 
-                  mtryStart = 1, ntreeTry=500, stepFactor = 1, improve=0.05, trace=F, plot=F, doBest=T, 
-                  sampsize = sampsizes)
+  dat.train.xgb = xgb.DMatrix(t(trainMat[, idsplit]), label=trainGroup.bin[idsplit])
+  dat.validate.xgb = xgb.DMatrix(t(trainMat[, -idsplit]), label=trainGroup.bin[-idsplit])
+  dat.test.xgb = xgb.DMatrix(t(testMat), label=testGroup.bin)
   
-  irf = randomForest::importance(fit.rf, scale=FALSE, type = 2)
-  irf = irf[order(irf, decreasing=TRUE), ]
-  irf = irf[irf > 0]
+  watchlist = list(train=dat.train.xgb, test=dat.validate.xgb)
   
-  nvar = length(irf)
-  
-  pred_train = predict(fit.rf, newdata=t(trainMat), type="vote")
-  pred_test = predict(fit.rf, newdata=t(testMat), type="vote")
+  fit.xgb = xgb.train(xgb_param, data=dat.train.xgb, watchlist=watchlist, 
+                      nrounds = 500, early_stopping_rounds = 50, 
+                      scale_pos_weight = sum(trainGroup.bin == 0)/sum(trainGroup.bin == 1))
 
-  roc.train = roc(trainGroup, pred_train[, 2], 
+  nvar = -1
+  tryCatch({
+    
+    imp = xgb.importance(model=fit.xgb)
+    imp = imp[order(imp$Gain, decreasing=TRUE), ]
+    imp = imp[imp$Gain > 0, ]
+    nvar = length(imp$Gain)
+    
+  }, error = function(e){ })
+
+  pred_train = predict(fit.xgb, dat.train.xgb)
+  pred_test = predict(fit.xgb, dat.test.xgb)
+  
+  roc.train = roc(trainGroup[idsplit], pred_train, 
                   plot = F, print.auc = TRUE, 
                   levels = classes, 
                   direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
-  roc.test = roc(testGroup, pred_test[, 2], 
+  roc.test = roc(testGroup, pred_test, 
                  plot = F, print.auc = TRUE, 
                  levels = classes, 
                  direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
   
-  list(mechTSPs=mechTSPs, mechGenes=mechGenes, fit=fit.rf, pred.train=pred_train, pred.test=pred_test,
+  list(mechTSPs=mechTSPs, mechGenes=mechGenes, idsplit=idsplit, fit=fit.xgb, 
+       pred.train=pred_train, pred.test=pred_test,
        roc.train=roc.train, roc.test=roc.test, nvar=nvar)
   
 }
 
 
 ## ---------------------------------------------
-## run RF at the pair level
+## run XGB at the pair level
 
-run_RF_pairs = function(trainMat, testMat, trainGroup, testGroup, mechTSPs, filter=FALSE, classes=NULL){
+run_XGB_pairs = function(trainMat, testMat, trainGroup, testGroup, mechTSPs, filter=FALSE, classes=NULL){
   
   if(is.null(classes)){
     classes = levels(as.factor(trainGroup))
   }
+  
+  trainGroup.bin = factor(trainGroup, levels=classes, labels=0:1)
+  testGroup.bin = factor(testGroup, levels=classes, labels=0:1)
+  
+  trainGroup.bin = as.numeric(as.character(trainGroup.bin))
+  testGroup.bin = as.numeric(as.character(testGroup.bin))
   
   genes = intersect(rownames(trainMat), rownames(testMat))
   
@@ -107,14 +147,6 @@ run_RF_pairs = function(trainMat, testMat, trainGroup, testGroup, mechTSPs, filt
   if(! nrow(mechTSPs) > 0){
     stop("ERROR: no mechanistic pairs found in data")
   }
-  
-  P = mechTSPs
-  colnames(P) = c("gene1", "gene2")
-  rownames(P) = apply(P, 1, function(p) paste(p, collapse=","))
-  
-  fit.ktsp = list(TSPs=P)
-  
-  # if(nrow(mechTSPs) < )
   
   print(length(unique(as.vector(mechTSPs))))
   
@@ -139,40 +171,44 @@ run_RF_pairs = function(trainMat, testMat, trainGroup, testGroup, mechTSPs, filt
   
   trainV = 1 * SWAP.KTSP.Statistics(trainMat, fit.ktsp)$comparisons ## samples x pairs
   testV = 1 * SWAP.KTSP.Statistics(testMat, fit.ktsp)$comparisons
+
+  idsplit = createDataPartition(trainGroup.bin, p=0.7, list=F)[, 1]
   
-  # if(ncol(trainV) != nrow(P)){
-  #   stop("ERROR: not all pairs converted to votes")
-  # }
+  dat.train.xgb = xgb.DMatrix(trainV[idsplit, ], label=trainGroup.bin[idsplit])
+  dat.validate.xgb = xgb.DMatrix(trainV[-idsplit, ], label=trainGroup.bin[-idsplit])
+  dat.test.xgb = xgb.DMatrix(testV, label=testGroup.bin)
   
-  tmp <- as.vector(table(trainGroup))
-  num_classes <- length(tmp)
-  min_size <- tmp[order(tmp,decreasing=FALSE)[1]]
-  sampsizes <- rep(min_size,num_classes)
+  watchlist = list(train=dat.train.xgb, test=dat.validate.xgb)
   
-  fit.rf = tuneRF(x=trainV, 
-                  y=trainGroup, 
-                  mtryStart = 1, ntreeTry=500, stepFactor = 1, improve=0.05, trace=F, plot=F, doBest=T, 
-                  sampsize = sampsizes)
+  fit.xgb = xgb.train(xgb_param, data=dat.train.xgb, watchlist=watchlist, 
+                      nrounds = 500, early_stopping_rounds = 50, 
+                      scale_pos_weight = sum(trainGroup.bin == 0)/sum(trainGroup.bin == 1))
   
-  irf = randomForest::importance(fit.rf, scale=FALSE, type = 2)
-  irf = irf[order(irf, decreasing=TRUE), ]
-  irf = irf[irf > 0]
   
-  nvar = length(irf)
+  nvar = -1
+  tryCatch({
+    
+    imp = xgb.importance(model=fit.xgb)
+    imp = imp[order(imp$Gain, decreasing=TRUE), ]
+    imp = imp[imp$Gain > 0, ]
+    nvar = length(imp$Gain)
+    
+  }, error = function(e){ })
   
-  pred_train = predict(fit.rf, newdata=trainV, type="vote")
-  pred_test = predict(fit.rf, newdata=testV, type="vote")
+  pred_train = predict(fit.xgb, dat.train.xgb)
+  pred_test = predict(fit.xgb, dat.test.xgb)
   
-  roc.train = roc(trainGroup, pred_train[, 2], 
+  roc.train = roc(trainGroup[idsplit], pred_train, 
                   plot = F, print.auc = TRUE, 
                   levels = classes, 
                   direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
-  roc.test = roc(testGroup, pred_test[, 2], 
+  roc.test = roc(testGroup, pred_test, 
                  plot = F, print.auc = TRUE, 
                  levels = classes, 
                  direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
   
-  list(mechTSPs=mechTSPs, fit.ktsp=fit.ktsp, trainV=trainV, testV=testV, fit=fit.rf, pred.train=pred_train, pred.test=pred_test,
+  list(mechTSPs=mechTSPs, fit.ktsp=fit.ktsp, idsplit=idsplit, trainV=trainV, testV=testV, 
+       fit=fit.xgb, pred.train=pred_train, pred.test=pred_test,
        roc.train=roc.train, roc.test=roc.test, nvar=nvar)
   
 }
@@ -189,7 +225,7 @@ list.R.genes =  utils.lapply_i(list.data, function(x, i, data_title){
     
     print(sprintf("[%s]", mech_title))
     
-    run_RF_genes(trainMat=x$trainMat, 
+    run_XGB_genes(trainMat=x$trainMat, 
                      testMat=x$testMat, 
                      trainGroup=x$trainGroup, 
                      testGroup=x$testGroup, 
@@ -206,7 +242,8 @@ list.run.genes = utils.lapply_i(list.R.genes, function(Rlist, i, data_title){
     c(
       candidateGenes=length(R$mechGenes),
       auc_train=round(as.numeric(R$roc.train$auc), 3),
-      auc_test=round(as.numeric(R$roc.test$auc), 3)
+      auc_test=round(as.numeric(R$roc.test$auc), 3),
+      variables=R$nvar
     )
     
   }))
@@ -229,7 +266,7 @@ list.R.pairs = utils.lapply_i(list.data, function(x, i, data_title){
     
     print(sprintf("[%s]", mech_title))
     
-    run_RF_pairs(trainMat=x$trainMat, 
+    run_XGB_pairs(trainMat=x$trainMat, 
                      testMat=x$testMat, 
                      trainGroup=x$trainGroup, 
                      testGroup=x$testGroup, 
@@ -248,7 +285,8 @@ list.run.pairs = utils.lapply_i(list.R.pairs, function(Rlist, i, data_title){
       candidatePairs=nrow(R$mechTSPs),
       selPairs=nrow(R$fit.ktsp$TSPs),
       auc_train=round(as.numeric(R$roc.train$auc), 3),
-      auc_test=round(as.numeric(R$roc.test$auc), 3)
+      auc_test=round(as.numeric(R$roc.test$auc), 3),
+      variables=R$nvar
     )
     
   }))
@@ -263,8 +301,8 @@ list.run.pairs = utils.lapply_i(list.R.pairs, function(Rlist, i, data_title){
 
 ## save
 
-save(list.R.genes, list.R.pairs, file="../Objs/list.R.rf.rda")
-save(list.run.genes, list.run.pairs, file="../Objs/list.run.rf.rda")
+save(list.R.genes, list.R.pairs, file="../Objs/list.R.xgb.rda")
+save(list.run.genes, list.run.pairs, file="../Objs/list.run.xgb.rda")
 
 
 

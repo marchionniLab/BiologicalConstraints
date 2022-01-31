@@ -358,6 +358,14 @@ pre code {
 <li><a href="#gene-level"><span class="toc-section-number">1.2.1</span> Gene level</a></li>
 <li><a href="#pair-level"><span class="toc-section-number">1.2.2</span> Pair level</a></li>
 </ul></li>
+<li><a href="#svm"><span class="toc-section-number">1.3</span> SVM</a><ul>
+<li><a href="#gene-level-1"><span class="toc-section-number">1.3.1</span> Gene level</a></li>
+<li><a href="#pair-level-1"><span class="toc-section-number">1.3.2</span> Pair level</a></li>
+</ul></li>
+<li><a href="#xgb"><span class="toc-section-number">1.4</span> XGB</a><ul>
+<li><a href="#gene-level-2"><span class="toc-section-number">1.4.1</span> Gene level</a></li>
+<li><a href="#pair-level-2"><span class="toc-section-number">1.4.2</span> Pair level</a></li>
+</ul></li>
 </ul></li>
 </ul>
 </div>
@@ -456,6 +464,21 @@ pre code {
 <td align="left">5214835</td>
 <td align="left">3230</td>
 </tr>
+<tr class="even">
+<td align="left">Alzheimer</td>
+<td align="left">1978800</td>
+<td align="left">2849</td>
+</tr>
+<tr class="odd">
+<td align="left">Diabetes</td>
+<td align="left">100776</td>
+<td align="left">635</td>
+</tr>
+<tr class="even">
+<td align="left">Viral</td>
+<td align="left">84294</td>
+<td align="left">601</td>
+</tr>
 </tbody>
 </table>
 <div id="ktsp" class="section level2">
@@ -503,6 +526,30 @@ pre code {
 <td align="right">0.893</td>
 <td align="right">0.729</td>
 </tr>
+<tr class="even">
+<td align="left">Alzheimer</td>
+<td align="right">128700</td>
+<td align="right">39</td>
+<td align="right">78</td>
+<td align="right">0.916</td>
+<td align="right">0.757</td>
+</tr>
+<tr class="odd">
+<td align="left">Diabetes</td>
+<td align="right">7680</td>
+<td align="right">48</td>
+<td align="right">96</td>
+<td align="right">0.894</td>
+<td align="right">0.744</td>
+</tr>
+<tr class="even">
+<td align="left">Viral</td>
+<td align="right">6237</td>
+<td align="right">48</td>
+<td align="right">96</td>
+<td align="right">0.891</td>
+<td align="right">0.696</td>
+</tr>
 </tbody>
 </table>
 <table>
@@ -541,6 +588,30 @@ pre code {
 <td align="right">86</td>
 <td align="right">0.881</td>
 <td align="right">0.794</td>
+</tr>
+<tr class="even">
+<td align="left">Alzheimer</td>
+<td align="right">1755432</td>
+<td align="right">41</td>
+<td align="right">82</td>
+<td align="right">0.870</td>
+<td align="right">0.819</td>
+</tr>
+<tr class="odd">
+<td align="left">Diabetes</td>
+<td align="right">84952</td>
+<td align="right">33</td>
+<td align="right">66</td>
+<td align="right">0.836</td>
+<td align="right">0.776</td>
+</tr>
+<tr class="even">
+<td align="left">Viral</td>
+<td align="right">71994</td>
+<td align="right">50</td>
+<td align="right">100</td>
+<td align="right">0.817</td>
+<td align="right">0.757</td>
 </tr>
 </tbody>
 </table>
@@ -581,6 +652,30 @@ pre code {
 <td align="right">0.803</td>
 <td align="right">0.725</td>
 </tr>
+<tr class="even">
+<td align="left">Alzheimer</td>
+<td align="right">189312</td>
+<td align="right">46</td>
+<td align="right">92</td>
+<td align="right">0.780</td>
+<td align="right">0.696</td>
+</tr>
+<tr class="odd">
+<td align="left">Diabetes</td>
+<td align="right">7081</td>
+<td align="right">49</td>
+<td align="right">98</td>
+<td align="right">0.729</td>
+<td align="right">0.643</td>
+</tr>
+<tr class="even">
+<td align="left">Viral</td>
+<td align="right">9890</td>
+<td align="right">22</td>
+<td align="right">44</td>
+<td align="right">0.740</td>
+<td align="right">0.660</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -609,19 +704,37 @@ pre code {
 <td align="left">TF_MIR</td>
 <td align="right">67</td>
 <td align="right">1</td>
-<td align="right">0.711</td>
+<td align="right">0.749</td>
 </tr>
 <tr class="even">
 <td align="left">NOTCH_MYC</td>
 <td align="right">264</td>
 <td align="right">1</td>
-<td align="right">0.725</td>
+<td align="right">0.780</td>
 </tr>
 <tr class="odd">
 <td align="left">GO</td>
 <td align="right">658</td>
 <td align="right">1</td>
-<td align="right">0.721</td>
+<td align="right">0.713</td>
+</tr>
+<tr class="even">
+<td align="left">Alzheimer</td>
+<td align="right">720</td>
+<td align="right">1</td>
+<td align="right">0.776</td>
+</tr>
+<tr class="odd">
+<td align="left">Diabetes</td>
+<td align="right">176</td>
+<td align="right">1</td>
+<td align="right">0.709</td>
+</tr>
+<tr class="even">
+<td align="left">Viral</td>
+<td align="right">162</td>
+<td align="right">1</td>
+<td align="right">0.758</td>
 </tr>
 </tbody>
 </table>
@@ -640,19 +753,37 @@ pre code {
 <td align="left">TF_MIR</td>
 <td align="right">264</td>
 <td align="right">1</td>
-<td align="right">0.833</td>
+<td align="right">0.823</td>
 </tr>
 <tr class="even">
 <td align="left">NOTCH_MYC</td>
 <td align="right">670</td>
 <td align="right">1</td>
-<td align="right">0.818</td>
+<td align="right">0.817</td>
 </tr>
 <tr class="odd">
 <td align="left">GO</td>
 <td align="right">2490</td>
 <td align="right">1</td>
+<td align="right">0.836</td>
+</tr>
+<tr class="even">
+<td align="left">Alzheimer</td>
+<td align="right">2682</td>
+<td align="right">1</td>
+<td align="right">0.833</td>
+</tr>
+<tr class="odd">
+<td align="left">Diabetes</td>
+<td align="right">583</td>
+<td align="right">1</td>
 <td align="right">0.834</td>
+</tr>
+<tr class="even">
+<td align="left">Viral</td>
+<td align="right">551</td>
+<td align="right">1</td>
+<td align="right">0.826</td>
 </tr>
 </tbody>
 </table>
@@ -671,19 +802,37 @@ pre code {
 <td align="left">TF_MIR</td>
 <td align="right">74</td>
 <td align="right">1</td>
-<td align="right">0.658</td>
+<td align="right">0.672</td>
 </tr>
 <tr class="even">
 <td align="left">NOTCH_MYC</td>
 <td align="right">269</td>
 <td align="right">1</td>
-<td align="right">0.674</td>
+<td align="right">0.687</td>
 </tr>
 <tr class="odd">
 <td align="left">GO</td>
 <td align="right">906</td>
 <td align="right">1</td>
-<td align="right">0.703</td>
+<td align="right">0.676</td>
+</tr>
+<tr class="even">
+<td align="left">Alzheimer</td>
+<td align="right">877</td>
+<td align="right">1</td>
+<td align="right">0.670</td>
+</tr>
+<tr class="odd">
+<td align="left">Diabetes</td>
+<td align="right">170</td>
+<td align="right">1</td>
+<td align="right">0.653</td>
+</tr>
+<tr class="even">
+<td align="left">Viral</td>
+<td align="right">201</td>
+<td align="right">1</td>
+<td align="right">0.684</td>
 </tr>
 </tbody>
 </table>
@@ -693,9 +842,9 @@ pre code {
 <p>For a given set of mechanistic pairs:</p>
 <ul>
 <li>Take all mechanistic pairs available in the given dataset, take the genes forming these pairs</li>
-<li>Use these pairs to train a KTSP classifier with no statistical filtering (except for “GO” mechanism where top 100 DE genes are selected); allow upto 50 pairs to be selected (i.e. <code>krange=50</code>)</li>
+<li>Use these pairs to train a KTSP classifier with no statistical filtering (except for “GO” mechanism where top 500 DE genes are selected); allow upto 50 pairs to be selected (i.e. <code>krange=50</code>)</li>
 <li>For the pairs, compute binary votes using <code>SWAP.KTSP.Statistics</code> for both training and testing data.</li>
-<li>parameters: <code>mtryStart = 1, ntreeTry=500, stepFactor = 1, improve=0.05</code></li>
+<li>Train and test random forest with the binary votes; parameters: <code>mtryStart = 1, ntreeTry=500, stepFactor = 1, improve=0.05</code></li>
 </ul>
 <table>
 <caption>Bladder</caption>
@@ -703,6 +852,7 @@ pre code {
 <tr class="header">
 <th align="left">mechanism</th>
 <th align="right">candidatePairs</th>
+<th align="right">selPairs</th>
 <th align="right">auc_train</th>
 <th align="right">auc_test</th>
 </tr>
@@ -711,20 +861,44 @@ pre code {
 <tr class="odd">
 <td align="left">TF_MIR</td>
 <td align="right">126</td>
-<td align="right">0.807</td>
-<td align="right">0.754</td>
+<td align="right">6</td>
+<td align="right">0.806</td>
+<td align="right">0.739</td>
 </tr>
 <tr class="even">
 <td align="left">NOTCH_MYC</td>
 <td align="right">9176</td>
-<td align="right">0.990</td>
-<td align="right">0.679</td>
+<td align="right">44</td>
+<td align="right">0.992</td>
+<td align="right">0.683</td>
 </tr>
 <tr class="odd">
 <td align="left">GO</td>
 <td align="right">216153</td>
-<td align="right">0.900</td>
-<td align="right">0.685</td>
+<td align="right">19</td>
+<td align="right">0.944</td>
+<td align="right">0.724</td>
+</tr>
+<tr class="even">
+<td align="left">Alzheimer</td>
+<td align="right">128700</td>
+<td align="right">23</td>
+<td align="right">0.960</td>
+<td align="right">0.749</td>
+</tr>
+<tr class="odd">
+<td align="left">Diabetes</td>
+<td align="right">7680</td>
+<td align="right">48</td>
+<td align="right">0.995</td>
+<td align="right">0.730</td>
+</tr>
+<tr class="even">
+<td align="left">Viral</td>
+<td align="right">6237</td>
+<td align="right">48</td>
+<td align="right">0.996</td>
+<td align="right">0.687</td>
 </tr>
 </tbody>
 </table>
@@ -734,6 +908,7 @@ pre code {
 <tr class="header">
 <th align="left">mechanism</th>
 <th align="right">candidatePairs</th>
+<th align="right">selPairs</th>
 <th align="right">auc_train</th>
 <th align="right">auc_test</th>
 </tr>
@@ -742,20 +917,44 @@ pre code {
 <tr class="odd">
 <td align="left">TF_MIR</td>
 <td align="right">925</td>
-<td align="right">0.807</td>
-<td align="right">0.696</td>
+<td align="right">11</td>
+<td align="right">0.811</td>
+<td align="right">0.693</td>
 </tr>
 <tr class="even">
 <td align="left">NOTCH_MYC</td>
 <td align="right">55888</td>
-<td align="right">0.550</td>
-<td align="right">0.503</td>
+<td align="right">12</td>
+<td align="right">0.841</td>
+<td align="right">0.754</td>
 </tr>
 <tr class="odd">
 <td align="left">GO</td>
 <td align="right">3098805</td>
-<td align="right">0.824</td>
-<td align="right">0.750</td>
+<td align="right">13</td>
+<td align="right">0.880</td>
+<td align="right">0.807</td>
+</tr>
+<tr class="even">
+<td align="left">Alzheimer</td>
+<td align="right">1755432</td>
+<td align="right">25</td>
+<td align="right">0.932</td>
+<td align="right">0.821</td>
+</tr>
+<tr class="odd">
+<td align="left">Diabetes</td>
+<td align="right">84952</td>
+<td align="right">5</td>
+<td align="right">0.739</td>
+<td align="right">0.758</td>
+</tr>
+<tr class="even">
+<td align="left">Viral</td>
+<td align="right">71994</td>
+<td align="right">7</td>
+<td align="right">0.797</td>
+<td align="right">0.730</td>
 </tr>
 </tbody>
 </table>
@@ -765,6 +964,7 @@ pre code {
 <tr class="header">
 <th align="left">mechanism</th>
 <th align="right">candidatePairs</th>
+<th align="right">selPairs</th>
 <th align="right">auc_train</th>
 <th align="right">auc_test</th>
 </tr>
@@ -773,20 +973,762 @@ pre code {
 <tr class="odd">
 <td align="left">TF_MIR</td>
 <td align="right">99</td>
+<td align="right">4</td>
 <td align="right">0.622</td>
 <td align="right">0.625</td>
 </tr>
 <tr class="even">
 <td align="left">NOTCH_MYC</td>
 <td align="right">9163</td>
-<td align="right">0.801</td>
-<td align="right">0.723</td>
+<td align="right">14</td>
+<td align="right">0.803</td>
+<td align="right">0.722</td>
 </tr>
 <tr class="odd">
 <td align="left">GO</td>
 <td align="right">409965</td>
-<td align="right">0.775</td>
+<td align="right">26</td>
+<td align="right">0.908</td>
+<td align="right">0.751</td>
+</tr>
+<tr class="even">
+<td align="left">Alzheimer</td>
+<td align="right">189312</td>
+<td align="right">26</td>
+<td align="right">0.875</td>
+<td align="right">0.716</td>
+</tr>
+<tr class="odd">
+<td align="left">Diabetes</td>
+<td align="right">7081</td>
+<td align="right">49</td>
+<td align="right">0.967</td>
+<td align="right">0.660</td>
+</tr>
+<tr class="even">
+<td align="left">Viral</td>
+<td align="right">9890</td>
+<td align="right">22</td>
+<td align="right">0.865</td>
+<td align="right">0.656</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="svm" class="section level2">
+<h2><span class="header-section-number">1.3</span> SVM</h2>
+<div id="gene-level-1" class="section level3">
+<h3><span class="header-section-number">1.3.1</span> Gene level</h3>
+<p>For a given set of mechanistic pairs:</p>
+<ul>
+<li>Take all mechanistic pairs available in the given dataset, take the genes forming these pairs</li>
+<li>Take the gene expression data for these genes and supply them for SVM training and testing</li>
+<li>parameters: polynomial SVM with <code>degree = 3, scale = 0.01, C = 0.25</code></li>
+</ul>
+<table>
+<caption>Bladder</caption>
+<thead>
+<tr class="header">
+<th align="left">mechanism</th>
+<th align="right">candidateGenes</th>
+<th align="right">auc_train</th>
+<th align="right">auc_test</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">TF_MIR</td>
+<td align="right">67</td>
+<td align="right">1</td>
+<td align="right">0.715</td>
+</tr>
+<tr class="even">
+<td align="left">NOTCH_MYC</td>
+<td align="right">264</td>
+<td align="right">1</td>
+<td align="right">0.715</td>
+</tr>
+<tr class="odd">
+<td align="left">GO</td>
+<td align="right">658</td>
+<td align="right">1</td>
+<td align="right">0.715</td>
+</tr>
+<tr class="even">
+<td align="left">Alzheimer</td>
+<td align="right">720</td>
+<td align="right">1</td>
+<td align="right">0.715</td>
+</tr>
+<tr class="odd">
+<td align="left">Diabetes</td>
+<td align="right">176</td>
+<td align="right">1</td>
+<td align="right">0.715</td>
+</tr>
+<tr class="even">
+<td align="left">Viral</td>
+<td align="right">162</td>
+<td align="right">1</td>
+<td align="right">0.715</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption>Breast</caption>
+<thead>
+<tr class="header">
+<th align="left">mechanism</th>
+<th align="right">candidateGenes</th>
+<th align="right">auc_train</th>
+<th align="right">auc_test</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">TF_MIR</td>
+<td align="right">264</td>
+<td align="right">1</td>
+<td align="right">0.805</td>
+</tr>
+<tr class="even">
+<td align="left">NOTCH_MYC</td>
+<td align="right">670</td>
+<td align="right">1</td>
+<td align="right">0.805</td>
+</tr>
+<tr class="odd">
+<td align="left">GO</td>
+<td align="right">2490</td>
+<td align="right">1</td>
+<td align="right">0.805</td>
+</tr>
+<tr class="even">
+<td align="left">Alzheimer</td>
+<td align="right">2682</td>
+<td align="right">1</td>
+<td align="right">0.805</td>
+</tr>
+<tr class="odd">
+<td align="left">Diabetes</td>
+<td align="right">583</td>
+<td align="right">1</td>
+<td align="right">0.805</td>
+</tr>
+<tr class="even">
+<td align="left">Viral</td>
+<td align="right">551</td>
+<td align="right">1</td>
+<td align="right">0.805</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption>Prostate</caption>
+<thead>
+<tr class="header">
+<th align="left">mechanism</th>
+<th align="right">candidateGenes</th>
+<th align="right">auc_train</th>
+<th align="right">auc_test</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">TF_MIR</td>
+<td align="right">74</td>
+<td align="right">1</td>
+<td align="right">0.736</td>
+</tr>
+<tr class="even">
+<td align="left">NOTCH_MYC</td>
+<td align="right">269</td>
+<td align="right">1</td>
+<td align="right">0.736</td>
+</tr>
+<tr class="odd">
+<td align="left">GO</td>
+<td align="right">906</td>
+<td align="right">1</td>
+<td align="right">0.736</td>
+</tr>
+<tr class="even">
+<td align="left">Alzheimer</td>
+<td align="right">877</td>
+<td align="right">1</td>
+<td align="right">0.736</td>
+</tr>
+<tr class="odd">
+<td align="left">Diabetes</td>
+<td align="right">170</td>
+<td align="right">1</td>
+<td align="right">0.736</td>
+</tr>
+<tr class="even">
+<td align="left">Viral</td>
+<td align="right">201</td>
+<td align="right">1</td>
+<td align="right">0.736</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="pair-level-1" class="section level3">
+<h3><span class="header-section-number">1.3.2</span> Pair level</h3>
+<p>For a given set of mechanistic pairs:</p>
+<ul>
+<li>Take all mechanistic pairs available in the given dataset, take the genes forming these pairs</li>
+<li>Use these pairs to train a KTSP classifier with no statistical filtering (except for “GO” mechanism where top 500 DE genes are selected); allow upto 50 pairs to be selected (i.e. <code>krange=50</code>)</li>
+<li>For the pairs, compute binary votes using <code>SWAP.KTSP.Statistics</code> for both training and testing data.</li>
+<li>Train and test SVM with the binary votes; polynomial SVM with <code>degree = 3, scale = 0.01, C = 0.25</code></li>
+</ul>
+<table>
+<caption>Bladder</caption>
+<thead>
+<tr class="header">
+<th align="left">mechanism</th>
+<th align="right">candidatePairs</th>
+<th align="right">selPairs</th>
+<th align="right">auc_train</th>
+<th align="right">auc_test</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">TF_MIR</td>
+<td align="right">126</td>
+<td align="right">6</td>
+<td align="right">0.766</td>
+<td align="right">0.630</td>
+</tr>
+<tr class="even">
+<td align="left">NOTCH_MYC</td>
+<td align="right">9176</td>
+<td align="right">44</td>
+<td align="right">0.979</td>
+<td align="right">0.644</td>
+</tr>
+<tr class="odd">
+<td align="left">GO</td>
+<td align="right">216153</td>
+<td align="right">19</td>
+<td align="right">0.912</td>
+<td align="right">0.697</td>
+</tr>
+<tr class="even">
+<td align="left">Alzheimer</td>
+<td align="right">128700</td>
+<td align="right">23</td>
+<td align="right">0.908</td>
+<td align="right">0.748</td>
+</tr>
+<tr class="odd">
+<td align="left">Diabetes</td>
+<td align="right">7680</td>
+<td align="right">48</td>
+<td align="right">0.968</td>
+<td align="right">0.646</td>
+</tr>
+<tr class="even">
+<td align="left">Viral</td>
+<td align="right">6237</td>
+<td align="right">48</td>
+<td align="right">0.973</td>
+<td align="right">0.595</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption>Breast</caption>
+<thead>
+<tr class="header">
+<th align="left">mechanism</th>
+<th align="right">candidatePairs</th>
+<th align="right">selPairs</th>
+<th align="right">auc_train</th>
+<th align="right">auc_test</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">TF_MIR</td>
+<td align="right">925</td>
+<td align="right">11</td>
+<td align="right">0.783</td>
+<td align="right">0.667</td>
+</tr>
+<tr class="even">
+<td align="left">NOTCH_MYC</td>
+<td align="right">55888</td>
+<td align="right">12</td>
+<td align="right">0.804</td>
+<td align="right">0.749</td>
+</tr>
+<tr class="odd">
+<td align="left">GO</td>
+<td align="right">3098805</td>
+<td align="right">13</td>
+<td align="right">0.845</td>
+<td align="right">0.788</td>
+</tr>
+<tr class="even">
+<td align="left">Alzheimer</td>
+<td align="right">1755432</td>
+<td align="right">25</td>
+<td align="right">0.883</td>
+<td align="right">0.791</td>
+</tr>
+<tr class="odd">
+<td align="left">Diabetes</td>
+<td align="right">84952</td>
+<td align="right">5</td>
+<td align="right">0.740</td>
+<td align="right">0.736</td>
+</tr>
+<tr class="even">
+<td align="left">Viral</td>
+<td align="right">71994</td>
+<td align="right">7</td>
+<td align="right">0.786</td>
+<td align="right">0.735</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption>Prostate</caption>
+<thead>
+<tr class="header">
+<th align="left">mechanism</th>
+<th align="right">candidatePairs</th>
+<th align="right">selPairs</th>
+<th align="right">auc_train</th>
+<th align="right">auc_test</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">TF_MIR</td>
+<td align="right">99</td>
+<td align="right">4</td>
+<td align="right">0.580</td>
+<td align="right">0.557</td>
+</tr>
+<tr class="even">
+<td align="left">NOTCH_MYC</td>
+<td align="right">9163</td>
+<td align="right">14</td>
+<td align="right">0.769</td>
+<td align="right">0.718</td>
+</tr>
+<tr class="odd">
+<td align="left">GO</td>
+<td align="right">409965</td>
+<td align="right">26</td>
+<td align="right">0.825</td>
+<td align="right">0.732</td>
+</tr>
+<tr class="even">
+<td align="left">Alzheimer</td>
+<td align="right">189312</td>
+<td align="right">26</td>
+<td align="right">0.814</td>
+<td align="right">0.722</td>
+</tr>
+<tr class="odd">
+<td align="left">Diabetes</td>
+<td align="right">7081</td>
+<td align="right">49</td>
+<td align="right">0.888</td>
+<td align="right">0.686</td>
+</tr>
+<tr class="even">
+<td align="left">Viral</td>
+<td align="right">9890</td>
+<td align="right">22</td>
+<td align="right">0.802</td>
+<td align="right">0.653</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="xgb" class="section level2">
+<h2><span class="header-section-number">1.4</span> XGB</h2>
+<div id="gene-level-2" class="section level3">
+<h3><span class="header-section-number">1.4.1</span> Gene level</h3>
+<p>For a given set of mechanistic pairs:</p>
+<ul>
+<li>Take all mechanistic pairs available in the given dataset, take the genes forming these pairs</li>
+<li>Take the gene expression data for these genes and supply them for XGB training and testing</li>
+<li>For training, split the data into training vs validation (<span class="math inline">\(70\%\)</span> vs. <span class="math inline">\(30\%\)</span>)</li>
+<li>parameters: <code>nrounds = 500, early_stopping_rounds = 50</code> and other general XBG parameters</li>
+</ul>
+<table>
+<caption>Bladder</caption>
+<thead>
+<tr class="header">
+<th align="left">mechanism</th>
+<th align="right">candidateGenes</th>
+<th align="right">auc_train</th>
+<th align="right">auc_test</th>
+<th align="right">variables</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">TF_MIR</td>
+<td align="right">67</td>
+<td align="right">0.996</td>
+<td align="right">0.712</td>
+<td align="right">86</td>
+</tr>
+<tr class="even">
+<td align="left">NOTCH_MYC</td>
+<td align="right">264</td>
+<td align="right">0.926</td>
+<td align="right">0.660</td>
+<td align="right">75</td>
+</tr>
+<tr class="odd">
+<td align="left">GO</td>
+<td align="right">658</td>
+<td align="right">0.688</td>
+<td align="right">0.638</td>
+<td align="right">52</td>
+</tr>
+<tr class="even">
+<td align="left">Alzheimer</td>
+<td align="right">720</td>
+<td align="right">0.844</td>
+<td align="right">0.573</td>
+<td align="right">58</td>
+</tr>
+<tr class="odd">
+<td align="left">Diabetes</td>
+<td align="right">176</td>
+<td align="right">0.998</td>
+<td align="right">0.633</td>
+<td align="right">95</td>
+</tr>
+<tr class="even">
+<td align="left">Viral</td>
+<td align="right">162</td>
+<td align="right">0.973</td>
+<td align="right">0.666</td>
+<td align="right">80</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption>Breast</caption>
+<thead>
+<tr class="header">
+<th align="left">mechanism</th>
+<th align="right">candidateGenes</th>
+<th align="right">auc_train</th>
+<th align="right">auc_test</th>
+<th align="right">variables</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">TF_MIR</td>
+<td align="right">264</td>
+<td align="right">0.999</td>
+<td align="right">0.758</td>
+<td align="right">114</td>
+</tr>
+<tr class="even">
+<td align="left">NOTCH_MYC</td>
+<td align="right">670</td>
+<td align="right">0.983</td>
+<td align="right">0.735</td>
+<td align="right">84</td>
+</tr>
+<tr class="odd">
+<td align="left">GO</td>
+<td align="right">2490</td>
+<td align="right">1.000</td>
+<td align="right">0.811</td>
+<td align="right">178</td>
+</tr>
+<tr class="even">
+<td align="left">Alzheimer</td>
+<td align="right">2682</td>
+<td align="right">0.860</td>
+<td align="right">0.723</td>
+<td align="right">58</td>
+</tr>
+<tr class="odd">
+<td align="left">Diabetes</td>
+<td align="right">583</td>
+<td align="right">0.999</td>
+<td align="right">0.823</td>
+<td align="right">141</td>
+</tr>
+<tr class="even">
+<td align="left">Viral</td>
+<td align="right">551</td>
+<td align="right">1.000</td>
+<td align="right">0.786</td>
+<td align="right">185</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption>Prostate</caption>
+<thead>
+<tr class="header">
+<th align="left">mechanism</th>
+<th align="right">candidateGenes</th>
+<th align="right">auc_train</th>
+<th align="right">auc_test</th>
+<th align="right">variables</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">TF_MIR</td>
+<td align="right">74</td>
+<td align="right">0.718</td>
+<td align="right">0.664</td>
+<td align="right">52</td>
+</tr>
+<tr class="even">
+<td align="left">NOTCH_MYC</td>
+<td align="right">269</td>
+<td align="right">0.929</td>
+<td align="right">0.703</td>
+<td align="right">107</td>
+</tr>
+<tr class="odd">
+<td align="left">GO</td>
+<td align="right">906</td>
+<td align="right">0.975</td>
+<td align="right">0.740</td>
+<td align="right">166</td>
+</tr>
+<tr class="even">
+<td align="left">Alzheimer</td>
+<td align="right">877</td>
+<td align="right">0.997</td>
+<td align="right">0.651</td>
+<td align="right">242</td>
+</tr>
+<tr class="odd">
+<td align="left">Diabetes</td>
+<td align="right">170</td>
+<td align="right">0.924</td>
+<td align="right">0.718</td>
+<td align="right">113</td>
+</tr>
+<tr class="even">
+<td align="left">Viral</td>
+<td align="right">201</td>
+<td align="right">0.941</td>
+<td align="right">0.698</td>
+<td align="right">102</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="pair-level-2" class="section level3">
+<h3><span class="header-section-number">1.4.2</span> Pair level</h3>
+<p>For a given set of mechanistic pairs:</p>
+<ul>
+<li>Take all mechanistic pairs available in the given dataset, take the genes forming these pairs</li>
+<li>Use these pairs to train a KTSP classifier with no statistical filtering (except for “GO” mechanism where top 500 DE genes are selected); allow upto 50 pairs to be selected (i.e. <code>krange=50</code>)</li>
+<li>For the pairs, compute binary votes using <code>SWAP.KTSP.Statistics</code> for both training and testing data.</li>
+<li>For training, split the data into training vs validation (<span class="math inline">\(70\%\)</span> vs. <span class="math inline">\(30\%\)</span>)</li>
+<li>parameters: <code>nrounds = 500, early_stopping_rounds = 50</code> and other general XBG parameters</li>
+</ul>
+<table>
+<caption>Bladder</caption>
+<thead>
+<tr class="header">
+<th align="left">mechanism</th>
+<th align="right">candidatePairs</th>
+<th align="right">selPairs</th>
+<th align="right">auc_train</th>
+<th align="right">auc_test</th>
+<th align="right">variables</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">TF_MIR</td>
+<td align="right">126</td>
+<td align="right">6</td>
+<td align="right">0.755</td>
+<td align="right">0.743</td>
+<td align="right">6</td>
+</tr>
+<tr class="even">
+<td align="left">NOTCH_MYC</td>
+<td align="right">9176</td>
+<td align="right">44</td>
+<td align="right">0.969</td>
+<td align="right">0.630</td>
+<td align="right">41</td>
+</tr>
+<tr class="odd">
+<td align="left">GO</td>
+<td align="right">216153</td>
+<td align="right">19</td>
+<td align="right">0.904</td>
 <td align="right">0.710</td>
+<td align="right">19</td>
+</tr>
+<tr class="even">
+<td align="left">Alzheimer</td>
+<td align="right">128700</td>
+<td align="right">23</td>
+<td align="right">0.904</td>
+<td align="right">0.738</td>
+<td align="right">23</td>
+</tr>
+<tr class="odd">
+<td align="left">Diabetes</td>
+<td align="right">7680</td>
+<td align="right">48</td>
+<td align="right">0.960</td>
+<td align="right">0.689</td>
+<td align="right">41</td>
+</tr>
+<tr class="even">
+<td align="left">Viral</td>
+<td align="right">6237</td>
+<td align="right">48</td>
+<td align="right">0.753</td>
+<td align="right">0.586</td>
+<td align="right">30</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption>Breast</caption>
+<thead>
+<tr class="header">
+<th align="left">mechanism</th>
+<th align="right">candidatePairs</th>
+<th align="right">selPairs</th>
+<th align="right">auc_train</th>
+<th align="right">auc_test</th>
+<th align="right">variables</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">TF_MIR</td>
+<td align="right">925</td>
+<td align="right">11</td>
+<td align="right">0.782</td>
+<td align="right">0.690</td>
+<td align="right">11</td>
+</tr>
+<tr class="even">
+<td align="left">NOTCH_MYC</td>
+<td align="right">55888</td>
+<td align="right">12</td>
+<td align="right">0.822</td>
+<td align="right">0.730</td>
+<td align="right">12</td>
+</tr>
+<tr class="odd">
+<td align="left">GO</td>
+<td align="right">3098805</td>
+<td align="right">13</td>
+<td align="right">0.860</td>
+<td align="right">0.823</td>
+<td align="right">13</td>
+</tr>
+<tr class="even">
+<td align="left">Alzheimer</td>
+<td align="right">1755432</td>
+<td align="right">25</td>
+<td align="right">0.880</td>
+<td align="right">0.784</td>
+<td align="right">24</td>
+</tr>
+<tr class="odd">
+<td align="left">Diabetes</td>
+<td align="right">84952</td>
+<td align="right">5</td>
+<td align="right">0.733</td>
+<td align="right">0.736</td>
+<td align="right">5</td>
+</tr>
+<tr class="even">
+<td align="left">Viral</td>
+<td align="right">71994</td>
+<td align="right">7</td>
+<td align="right">0.771</td>
+<td align="right">0.732</td>
+<td align="right">7</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption>Prostate</caption>
+<thead>
+<tr class="header">
+<th align="left">mechanism</th>
+<th align="right">candidatePairs</th>
+<th align="right">selPairs</th>
+<th align="right">auc_train</th>
+<th align="right">auc_test</th>
+<th align="right">variables</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">TF_MIR</td>
+<td align="right">99</td>
+<td align="right">4</td>
+<td align="right">0.620</td>
+<td align="right">0.619</td>
+<td align="right">4</td>
+</tr>
+<tr class="even">
+<td align="left">NOTCH_MYC</td>
+<td align="right">9163</td>
+<td align="right">14</td>
+<td align="right">0.742</td>
+<td align="right">0.701</td>
+<td align="right">14</td>
+</tr>
+<tr class="odd">
+<td align="left">GO</td>
+<td align="right">409965</td>
+<td align="right">26</td>
+<td align="right">0.799</td>
+<td align="right">0.738</td>
+<td align="right">26</td>
+</tr>
+<tr class="even">
+<td align="left">Alzheimer</td>
+<td align="right">189312</td>
+<td align="right">26</td>
+<td align="right">0.791</td>
+<td align="right">0.716</td>
+<td align="right">26</td>
+</tr>
+<tr class="odd">
+<td align="left">Diabetes</td>
+<td align="right">7081</td>
+<td align="right">49</td>
+<td align="right">0.808</td>
+<td align="right">0.644</td>
+<td align="right">48</td>
+</tr>
+<tr class="even">
+<td align="left">Viral</td>
+<td align="right">9890</td>
+<td align="right">22</td>
+<td align="right">0.779</td>
+<td align="right">0.658</td>
+<td align="right">22</td>
 </tr>
 </tbody>
 </table>

@@ -20,6 +20,7 @@ library(mltools)
 library(xtable)
 library(boot)
 library(patchwork)
+library(rutils)
 
 ## ---------------------
 
@@ -72,16 +73,28 @@ run_ktsp = function(trainMat, testMat, trainGroup, testGroup, mechTSPs, krange, 
   
 }
 
-list.run = lapply(list.data, function(x){
+list.R = utils.lapply_i(list.data, function(x, i, data_title){
   
-  results = Reduce(rbind, lapply(list.mech, function(mechTSPs){
+  print(sprintf("======= %s ==========", data_title))
+  
+  utils.lapply_i(list.mech, function(mechTSPs, j, mech_title){
     
-    R = run_ktsp(trainMat=x$trainMat, 
+    print(sprintf("[%s]", mech_title))
+    
+    run_ktsp(trainMat=x$trainMat, 
                  testMat=x$testMat, 
                  trainGroup=x$trainGroup, 
                  testGroup=x$testGroup, 
                  mechTSPs=mechTSPs, 
                  krange=1:50, featNo=100)
+    
+  })
+  
+})
+
+list.run = lapply(list.R, function(Rlist){
+  
+  results = Reduce(rbind, lapply(Rlist, function(R){
     
     c(
       candidatePairs=nrow(R$mechTSPs),
@@ -101,7 +114,7 @@ list.run = lapply(list.data, function(x){
   
 })
 
-
+save(list.R, file="../Objs/list.R.ktsp.rda")
 save(list.run, file="../Objs/list.run.ktsp.rda")
 
 

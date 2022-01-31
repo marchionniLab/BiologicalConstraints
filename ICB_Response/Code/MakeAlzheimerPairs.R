@@ -30,7 +30,7 @@ GeneList <- unlist(GeneList, recursive = FALSE)
 names(GeneList) <- gsub(".+\\.",  "",  names(GeneList))
 
 ######################################################
-#### Pro Diabetes
+#### Pro alzheimer
 ProAlzheimer <- GeneList[c("BLALOCK_ALZHEIMERS_DISEASE_UP",
                           'WU_ALZHEIMER_DISEASE_UP'
                           
@@ -52,7 +52,7 @@ length(ConsensusPI)
 
 
 ######################################################
-#### Anti diabetes
+#### Anti alzheimer
 AntiAlzheimer <- GeneList[c("BLALOCK_ALZHEIMERS_DISEASE_DN",
                            "WU_ALZHEIMER_DISEASE_DN"
 )]
@@ -94,6 +94,51 @@ AlzheimerList <- apply(AlzheimerList, 2, function(x) names(x[x]))
 #### Make Pairs
 AlzheimerPairs <- expand.grid(AlzheimerList)
 
+##################################
+## subsetting
+
+# subset the TF-miRNA targets
+load("../../Genes/allTSPs.rda")
+filt <- which(AlzheimerPairs[,1] %in% myTSPs[,1] & AlzheimerPairs[,2] %in% myTSPs[,2])
+AlzheimerPairs <- AlzheimerPairs[-filt, ]
+
+#####
+# subset the NOTCH-MYC targets
+Notch = load("../Breast/Objs/NotchPairs.rda")
+MYC = load("../Breast/Objs/MycPairs.rda")
+myTSPs <- rbind(NotchPairs, MycPairs)
+filt <- which(AlzheimerPairs[,1] %in% myTSPs[,1] & AlzheimerPairs[,2] %in% myTSPs[,2])
+AlzheimerPairs <- AlzheimerPairs[-filt, ]
+
+######
+# subset the adhesion, activation and O2 response pairs
+Genes1 <- read.delim("../Prostate/objs/GO_Adhesion.txt")
+Genes1 <- as.matrix(Genes1)
+Genes1 <- Genes1[-1,]
+
+Genes2 <- read.delim("../Prostate/objs/GO_Activation.txt")
+Genes2 <- as.matrix(Genes2)
+Genes2 <- Genes2[-1,]
+
+Genes3 <- read.delim("../Prostate/objs/GO_O2Response.txt")
+Genes3 <- as.matrix(Genes3)
+Genes3 <- Genes3[-1,]
+
+Genes <- c(Genes1,Genes2, Genes3)
+Genes <- Genes[!duplicated(Genes)]
+
+myTSPs <- t(combn(Genes,2))
+
+filt <- which(AlzheimerPairs[,1] %in% myTSPs[,1] & AlzheimerPairs[,2] %in% myTSPs[,2])
+AlzheimerPairs <- AlzheimerPairs[-filt, ]
+
+#####
+# subset the T-cell activation pairs
+# load("./Objs/ImmunePairs.rda")
+# filt <- which(AlzheimerPairs[,1] %in% ImmunePairs[,1] & AlzheimerPairs[,2] %in% ImmunePairs[,2])
+# AlzheimerPairs <- AlzheimerPairs[-filt, ]
+
+###############################################
 ### Rename
 colnames(AlzheimerPairs) <- c("ProAlzheimer","AntiAlzheimer")
 
@@ -102,5 +147,5 @@ AlzheimerPairs <- as.matrix(AlzheimerPairs)
 
 ######################################################################
 ####Save Results
-save(AlzheimerPairs,file="./Objs/AlzheimerPairs.rda")
+save(AlzheimerPairs,file="./Objs/AlzheimerPairs2.rda")
 

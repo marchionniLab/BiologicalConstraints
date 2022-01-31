@@ -2,7 +2,7 @@
 rm(list = ls())
 gc()
 
-## Run RF
+## Run SVM
 
 ############################################################################
 ### Load library
@@ -22,6 +22,7 @@ library(boot)
 library(patchwork)
 library(randomForest)
 library(rutils)
+library(genefilter)
 
 ## ---------------------
 
@@ -30,9 +31,9 @@ l2 = load("../Objs/list.mech.rda")
 
 
 ## ---------------------------------------------
-## run RF at the gene level
+## run SVM at the gene level
 
-run_RF_genes = function(trainMat, testMat, trainGroup, testGroup, mechTSPs, filter=FALSE, classes=NULL){
+run_SVM_genes = function(trainMat, testMat, trainGroup, testGroup, mechTSPs, filter=FALSE, classes=NULL){
   
   if(is.null(classes)){
     classes = levels(as.factor(trainGroup))
@@ -54,25 +55,24 @@ run_RF_genes = function(trainMat, testMat, trainGroup, testGroup, mechTSPs, filt
   trainMat = trainMat[genes, ]
   testMat = testMat[genes, ]
   
-  tmp <- as.vector(table(trainGroup))
-  num_classes <- length(tmp)
-  min_size <- tmp[order(tmp,decreasing=FALSE)[1]]
-  sampsizes <- rep(min_size,num_classes)
+  grid.svm = expand.grid(degree = 3, scale = 0.01, C = 0.25)
   
-  fit.rf = tuneRF(x=t(trainMat), 
-                  y=trainGroup, 
-                  mtryStart = 1, ntreeTry=500, stepFactor = 1, improve=0.05, trace=F, plot=F, doBest=T, 
-                  sampsize = sampsizes)
+  fit.svm = train(group ~ ., data=data.frame(group=trainGroup, t(trainMat)), method="svmPoly", 
+                  trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), 
+                  tuneGrid = grid.svm, metric = "ROC")
   
-  irf = randomForest::importance(fit.rf, scale=FALSE, type = 2)
-  irf = irf[order(irf, decreasing=TRUE), ]
-  irf = irf[irf > 0]
-  
-  nvar = length(irf)
-  
-  pred_train = predict(fit.rf, newdata=t(trainMat), type="vote")
-  pred_test = predict(fit.rf, newdata=t(testMat), type="vote")
+  nvar = -1
+  tryCatch({
+    isvm = varImp(fit.svm, scale = TRUE)
+    isvm = isvm$importance
+    isvm = isvm[order(isvm$Progression, decreasing = TRUE),]
+    isvm = isvm[isvm$Progression > 0, ]
+    nvar <- nrow(isvm)
+  }, error = function(e){ })
 
+  pred_train = predict(fit.svm, newdata=data.frame(t(trainMat)), type="prob")
+  pred_test = predict(fit.svm, newdata=data.frame(t(testMat)), type="prob")
+  
   roc.train = roc(trainGroup, pred_train[, 2], 
                   plot = F, print.auc = TRUE, 
                   levels = classes, 
@@ -82,16 +82,16 @@ run_RF_genes = function(trainMat, testMat, trainGroup, testGroup, mechTSPs, filt
                  levels = classes, 
                  direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
   
-  list(mechTSPs=mechTSPs, mechGenes=mechGenes, fit=fit.rf, pred.train=pred_train, pred.test=pred_test,
+  list(mechTSPs=mechTSPs, mechGenes=mechGenes, fit=fit.svm, pred.train=pred_train, pred.test=pred_test,
        roc.train=roc.train, roc.test=roc.test, nvar=nvar)
   
 }
 
 
 ## ---------------------------------------------
-## run RF at the pair level
+## run SVM at the pair level
 
-run_RF_pairs = function(trainMat, testMat, trainGroup, testGroup, mechTSPs, filter=FALSE, classes=NULL){
+run_SVM_pairs = function(trainMat, testMat, trainGroup, testGroup, mechTSPs, filter=FALSE, classes=NULL){
   
   if(is.null(classes)){
     classes = levels(as.factor(trainGroup))
@@ -107,14 +107,6 @@ run_RF_pairs = function(trainMat, testMat, trainGroup, testGroup, mechTSPs, filt
   if(! nrow(mechTSPs) > 0){
     stop("ERROR: no mechanistic pairs found in data")
   }
-  
-  P = mechTSPs
-  colnames(P) = c("gene1", "gene2")
-  rownames(P) = apply(P, 1, function(p) paste(p, collapse=","))
-  
-  fit.ktsp = list(TSPs=P)
-  
-  # if(nrow(mechTSPs) < )
   
   print(length(unique(as.vector(mechTSPs))))
   
@@ -139,29 +131,24 @@ run_RF_pairs = function(trainMat, testMat, trainGroup, testGroup, mechTSPs, filt
   
   trainV = 1 * SWAP.KTSP.Statistics(trainMat, fit.ktsp)$comparisons ## samples x pairs
   testV = 1 * SWAP.KTSP.Statistics(testMat, fit.ktsp)$comparisons
+
+  grid.svm = expand.grid(degree = 3, scale = 0.01, C = 0.25)
   
-  # if(ncol(trainV) != nrow(P)){
-  #   stop("ERROR: not all pairs converted to votes")
-  # }
+  fit.svm = train(group ~ ., data=data.frame(group=trainGroup, trainV), method="svmPoly", 
+                  trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), 
+                  tuneGrid = grid.svm, metric = "ROC")
   
-  tmp <- as.vector(table(trainGroup))
-  num_classes <- length(tmp)
-  min_size <- tmp[order(tmp,decreasing=FALSE)[1]]
-  sampsizes <- rep(min_size,num_classes)
+  nvar = -1
+  tryCatch({
+    isvm = varImp(fit.svm, scale = TRUE)
+    isvm = isvm$importance
+    isvm = isvm[order(isvm$Progression, decreasing = TRUE),]
+    isvm = isvm[isvm$Progression > 0, ]
+    nvar <- nrow(isvm)
+  }, error = function(e){  })
   
-  fit.rf = tuneRF(x=trainV, 
-                  y=trainGroup, 
-                  mtryStart = 1, ntreeTry=500, stepFactor = 1, improve=0.05, trace=F, plot=F, doBest=T, 
-                  sampsize = sampsizes)
-  
-  irf = randomForest::importance(fit.rf, scale=FALSE, type = 2)
-  irf = irf[order(irf, decreasing=TRUE), ]
-  irf = irf[irf > 0]
-  
-  nvar = length(irf)
-  
-  pred_train = predict(fit.rf, newdata=trainV, type="vote")
-  pred_test = predict(fit.rf, newdata=testV, type="vote")
+  pred_train = predict(fit.svm, newdata=data.frame(trainV), type="prob")
+  pred_test = predict(fit.svm, newdata=data.frame(testV), type="prob")
   
   roc.train = roc(trainGroup, pred_train[, 2], 
                   plot = F, print.auc = TRUE, 
@@ -172,7 +159,7 @@ run_RF_pairs = function(trainMat, testMat, trainGroup, testGroup, mechTSPs, filt
                  levels = classes, 
                  direction = "<", col = "blue", lwd = 2, grid = TRUE, auc = TRUE, ci = TRUE)
   
-  list(mechTSPs=mechTSPs, fit.ktsp=fit.ktsp, trainV=trainV, testV=testV, fit=fit.rf, pred.train=pred_train, pred.test=pred_test,
+  list(mechTSPs=mechTSPs, fit.ktsp=fit.ktsp, trainV=trainV, testV=testV, fit=fit.svm, pred.train=pred_train, pred.test=pred_test,
        roc.train=roc.train, roc.test=roc.test, nvar=nvar)
   
 }
@@ -181,15 +168,15 @@ run_RF_pairs = function(trainMat, testMat, trainGroup, testGroup, mechTSPs, filt
 
 ## gene level run
 
-list.R.genes =  utils.lapply_i(list.data, function(x, i, data_title){
+list.R.genes =  utils.lapply_i(list.data[1:2], function(x, i, data_title){
   
   print(sprintf("======= %s ==========", data_title))
   
-  utils.lapply_i(list.mech, function(mechTSPs, j, mech_title){
+  utils.lapply_i(list.mech[1:2], function(mechTSPs, j, mech_title){
     
     print(sprintf("[%s]", mech_title))
     
-    run_RF_genes(trainMat=x$trainMat, 
+    run_SVM_genes(trainMat=x$trainMat, 
                      testMat=x$testMat, 
                      trainGroup=x$trainGroup, 
                      testGroup=x$testGroup, 
@@ -207,6 +194,7 @@ list.run.genes = utils.lapply_i(list.R.genes, function(Rlist, i, data_title){
       candidateGenes=length(R$mechGenes),
       auc_train=round(as.numeric(R$roc.train$auc), 3),
       auc_test=round(as.numeric(R$roc.test$auc), 3)
+      # variables=R$nvar
     )
     
   }))
@@ -229,7 +217,7 @@ list.R.pairs = utils.lapply_i(list.data, function(x, i, data_title){
     
     print(sprintf("[%s]", mech_title))
     
-    run_RF_pairs(trainMat=x$trainMat, 
+    run_SVM_pairs(trainMat=x$trainMat, 
                      testMat=x$testMat, 
                      trainGroup=x$trainGroup, 
                      testGroup=x$testGroup, 
@@ -263,8 +251,8 @@ list.run.pairs = utils.lapply_i(list.R.pairs, function(Rlist, i, data_title){
 
 ## save
 
-save(list.R.genes, list.R.pairs, file="../Objs/list.R.rf.rda")
-save(list.run.genes, list.run.pairs, file="../Objs/list.run.rf.rda")
+save(list.R.genes, list.R.pairs, file="../Objs/list.R.svm.rda")
+save(list.run.genes, list.run.pairs, file="../Objs/list.run.svm.rda")
 
 
 

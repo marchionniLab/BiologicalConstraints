@@ -8,7 +8,7 @@ library(ggsci)
 library(tidyverse)
 library(wesanderson)
 
-## Load model comparisons: mechanistic vs agnostic (as genes) 
+## Load model comparisons: mechanistic vs random genes
 load("./Objs/KTSP/ModelCompare_KTSP_DiffNoFeat.rda")
 load("./Objs/RF/ModelCompare_RF_DiffNoFeat_new.rda")
 load("./Objs/SVM/ModelCompare_SVM_DiffNoFeat_new.rda")

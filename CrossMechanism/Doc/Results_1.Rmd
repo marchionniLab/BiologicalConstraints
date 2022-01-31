@@ -183,9 +183,9 @@ kable(list.run.genes$Prostate, caption="Prostate")
 For a given set of mechanistic pairs:
 
 * Take all mechanistic pairs available in the given dataset, take the genes forming these pairs
-* Use these pairs to train a KTSP classifier with no statistical filtering (except for "GO" mechanism where top 100 DE genes are selected); allow upto 50 pairs to be selected (i.e. `krange=50`)
+* Use these pairs to train a KTSP classifier with no statistical filtering (except for "GO" mechanism where top 500 DE genes are selected); allow upto 50 pairs to be selected (i.e. `krange=50`)
 * For the pairs, compute binary votes using `SWAP.KTSP.Statistics` for both training and testing data.
-* parameters: `mtryStart = 1, ntreeTry=500, stepFactor = 1, improve=0.05`
+* Train and test random forest with the binary votes; parameters: `mtryStart = 1, ntreeTry=500, stepFactor = 1, improve=0.05`
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
 
@@ -204,5 +204,71 @@ kable(list.run.pairs$Breast, caption="Breast")
 kable(list.run.pairs$Prostate, caption="Prostate")
 
 ```
+
+
+
+## SVM
+
+### Gene level
+
+For a given set of mechanistic pairs:
+
+* Take all mechanistic pairs available in the given dataset, take the genes forming these pairs
+* Take the gene expression data for these genes and supply them for SVM training and testing
+* parameters: polynomial SVM with `degree = 3, scale = 0.01, C = 0.25`
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+
+
+l4 = load("../Objs/list.run.svm.rda")
+
+```
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+
+kable(list.run.genes$Bladder, caption="Bladder")
+
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+
+kable(list.run.genes$Breast, caption="Breast")
+
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+
+kable(list.run.genes$Prostate, caption="Prostate")
+
+```
+
+### Pair level
+
+For a given set of mechanistic pairs:
+
+* Take all mechanistic pairs available in the given dataset, take the genes forming these pairs
+* Use these pairs to train a KTSP classifier with no statistical filtering (except for "GO" mechanism where top 500 DE genes are selected); allow upto 50 pairs to be selected (i.e. `krange=50`)
+* For the pairs, compute binary votes using `SWAP.KTSP.Statistics` for both training and testing data.
+* Train and test SVM with the binary votes; polynomial SVM with `degree = 3, scale = 0.01, C = 0.25`
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+
+kable(list.run.pairs$Bladder, caption="Bladder")
+
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+
+kable(list.run.pairs$Breast, caption="Breast")
+
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+
+kable(list.run.pairs$Prostate, caption="Prostate")
+
+```
+
 
 

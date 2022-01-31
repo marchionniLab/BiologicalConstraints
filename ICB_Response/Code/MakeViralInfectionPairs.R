@@ -100,6 +100,50 @@ InfectionList <- apply(InfectionList, 2, function(x) names(x[x]))
 #### Make Pairs
 VirInfectionPairs <- expand.grid(InfectionList)
 
+##################################
+## subsetting
+
+# subset the TF-miRNA targets
+# load("../../Genes/allTSPs.rda")
+# filt <- which(VirInfectionPairs[,1] %in% myTSPs[,1] & VirInfectionPairs[,2] %in% myTSPs[,2])
+# VirInfectionPairs <- VirInfectionPairs[-filt, ]
+
+#####
+# subset the NOTCH-MYC targets
+Notch = load("../Breast/Objs/NotchPairs.rda")
+MYC = load("../Breast/Objs/MycPairs.rda")
+myTSPs <- rbind(NotchPairs, MycPairs)
+filt <- which(VirInfectionPairs[,1] %in% myTSPs[,1] & VirInfectionPairs[,2] %in% myTSPs[,2])
+VirInfectionPairs <- VirInfectionPairs[-filt, ]
+
+######
+# subset the adhesion, activation and O2 response pairs
+Genes1 <- read.delim("../Prostate/objs/GO_Adhesion.txt")
+Genes1 <- as.matrix(Genes1)
+Genes1 <- Genes1[-1,]
+
+Genes2 <- read.delim("../Prostate/objs/GO_Activation.txt")
+Genes2 <- as.matrix(Genes2)
+Genes2 <- Genes2[-1,]
+
+Genes3 <- read.delim("../Prostate/objs/GO_O2Response.txt")
+Genes3 <- as.matrix(Genes3)
+Genes3 <- Genes3[-1,]
+
+Genes <- c(Genes1,Genes2, Genes3)
+Genes <- Genes[!duplicated(Genes)]
+
+myTSPs <- t(combn(Genes,2))
+
+filt <- which(VirInfectionPairs[,1] %in% myTSPs[,1] & VirInfectionPairs[,2] %in% myTSPs[,2])
+VirInfectionPairs <- VirInfectionPairs[-filt, ]
+
+#####
+# subset the T-cell activation pairs
+load("./Objs/ImmunePairs.rda")
+filt <- which(VirInfectionPairs[,1] %in% ImmunePairs[,1] & VirInfectionPairs[,2] %in% ImmunePairs[,2])
+VirInfectionPairs <- VirInfectionPairs[-filt, ]
+
 ### Rename
 colnames(VirInfectionPairs) <- c("ProInfection","AntiInfection")
 
@@ -108,7 +152,7 @@ VirInfectionPairs <- as.matrix(VirInfectionPairs)
 
 ######################################################################
 ####Save Results
-save(VirInfectionPairs,file="./Objs/VirInfectionPairs.rda")
+save(VirInfectionPairs,file="./Objs/VirInfectionPairs2.rda")
 
 
 #####################################################################

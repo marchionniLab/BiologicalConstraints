@@ -71,6 +71,33 @@ myTSPs <- t(combn(Genes,2))
 list.mech[["GO"]] = myTSPs
 
 ## -------------
+## Alzheimer mechanism
+
+l4 = load("../Objs/CancerUnrelatedMechanisms/AlzheimerPairs.rda")
+
+list.mech[["Alzheimer"]] = AlzheimerPairs
+
+rm(list=l4)
+
+## -------------
+## Diabetes mechanism
+
+l5 = load("../Objs/CancerUnrelatedMechanisms/DiabetesPairs.rda")
+
+list.mech[["Diabetes"]] = DiabetesPairs
+
+rm(list=l5)
+
+## -------------
+## Viral infection mechanism
+
+l6 = load("../Objs/CancerUnrelatedMechanisms/VirInfectionPairs.rda")
+
+list.mech[["Viral"]] = VirInfectionPairs
+
+rm(list=l6)
+
+## -------------
 
 save(list.mech, file="../Objs/list.mech.rda")
 
