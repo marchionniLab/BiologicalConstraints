@@ -222,7 +222,7 @@ bootobject_500 <- boot(data= Data, statistic= SWAP.Train.KTSPStrap, R= 1000, par
 ## Save all
 save(bootobject_50, bootobject_100, bootobject_200, bootobject_500, file = "../../Objs/KTSP/bootobjectKTSP_NotchAndMYC_RAND.rda")
 
-load("../../Objs/KTSP/bootobjectKTSP_NotchAndMYC_RAND.rda")
+load("Objs/KTSP/bootobjectKTSP_NotchAndMYC_RAND.rda")
 
 
 ##############################################################
@@ -275,7 +275,7 @@ ModelCompareAUCTest_50$NofFeatAgn <- "50_Genes"
 ## Save for the main figure
 ModelCompare_KTSP <- rbind(ModelCompareAUCTrain_50, ModelCompareAUCTest_50)
 ModelCompare_KTSP$algorithm <- "KTSP"
-save(ModelCompare_KTSP, file = "../../Objs/KTSP/ModelCompare_KTSP.rda")
+save(ModelCompare_KTSP, file = "Objs/KTSP/ModelCompare_KTSP_RAND.rda")
 
 ##############################################################
 ### Work with boot object 100  
@@ -435,7 +435,7 @@ ModelCompare_KTSP_DiffNoFeat <- rbind(ModelCompareAUCTrain_50,
                                       ModelCompareAUCTest_500
 )
 
-save(ModelCompare_KTSP_DiffNoFeat, file = "../../Objs/KTSP/ModelCompare_KTSP_RAND_DiffNoFeat.rda")
+save(ModelCompare_KTSP_DiffNoFeat, file = "Objs/KTSP/ModelCompare_KTSP_RAND_DiffNoFeat.rda")
 
 ####################################################################################
 ####################################################################################
