@@ -22,7 +22,7 @@ load("./Objs/icbData_GSE78220Out.rda")
 
 ############################################################################
 ### Load the selected genes
-load("./Objs/ImmunePairs2.rda")
+load("./Objs/ImmunePairs.rda")
 
 myTSPs <- ImmunePairs
 
