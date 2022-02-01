@@ -12,15 +12,15 @@ library(ggplot2)
 # Load the agnostic models
 AgnosticGSE78220_Out <- load("./Objs/KTSP/GSE78220_Out_AgnosticPerformance.rda")
 AgnosticGSE91061_Out <- load("./Objs/KTSP/GSE91061_Out_AgnosticPerformance.rda")
-AgnosticGSE115821_Out <- load("./Objs/KTSP/GSE115821_Out_AgnosticPerformance.rda")
-AgnosticTCGA_Out <- load("./Objs/KTSP/TCGA_Out_AgnosticPerformance.rda")
+#AgnosticGSE115821_Out <- load("./Objs/KTSP/GSE115821_Out_AgnosticPerformance.rda")
+#AgnosticTCGA_Out <- load("./Objs/KTSP/TCGA_Out_AgnosticPerformance.rda")
 AgnosticVanAllen_Out <- load("./Objs/KTSP/VanAllen_Out_AgnosticPerformance.rda")
 
 # Load the Mech models
 MechGSE78220_Out <- load("./Objs/KTSP/GSE78220_Out_MechPerformance.rda")
 MechGSE91061_Out <- load("./Objs/KTSP/GSE91061_Out_MechPerformance.rda")
-MechGSEGSE115821_Out <- load("./Objs/KTSP/GSE115821_Out_MechPerformance.rda")
-MechTCGA_Out <- load("./Objs/KTSP/TCGA_Out_MechPerformance.rda")
+#MechGSEGSE115821_Out <- load("./Objs/KTSP/GSE115821_Out_MechPerformance.rda")
+#MechTCGA_Out <- load("./Objs/KTSP/TCGA_Out_MechPerformance.rda")
 MechVanAllen_Out <- load("./Objs/KTSP/VanAllen_Out_MechPerformance.rda")
 
 ###################
@@ -38,16 +38,16 @@ GSE91061_Out_AgnosticPerformance$model_type <- rep("Agnostic", nrow(GSE91061_Out
 GSE91061_Out_MechPerformance$model_type <- rep("Mechanistic", nrow(GSE91061_Out_MechPerformance))
 
 # GSE115821_out
-GSE115821_Out_AgnosticPerformance$out_study <- rep("GSE115821", nrow(GSE115821_Out_AgnosticPerformance))
-GSE115821_Out_MechPerformance$out_study <- rep("GSE115821", nrow(GSE115821_Out_MechPerformance))
-GSE115821_Out_AgnosticPerformance$model_type <- rep("Agnostic", nrow(GSE115821_Out_AgnosticPerformance))
-GSE115821_Out_MechPerformance$model_type <- rep("Mechanistic", nrow(GSE115821_Out_MechPerformance))
+# GSE115821_Out_AgnosticPerformance$out_study <- rep("GSE115821", nrow(GSE115821_Out_AgnosticPerformance))
+# GSE115821_Out_MechPerformance$out_study <- rep("GSE115821", nrow(GSE115821_Out_MechPerformance))
+# GSE115821_Out_AgnosticPerformance$model_type <- rep("Agnostic", nrow(GSE115821_Out_AgnosticPerformance))
+# GSE115821_Out_MechPerformance$model_type <- rep("Mechanistic", nrow(GSE115821_Out_MechPerformance))
 
 # TCGA_out
-TCGA_Out_AgnosticPerformance$out_study <- rep("TCGA", nrow(TCGA_Out_AgnosticPerformance))
-TCGA_Out_MechPerformance$out_study <- rep("TCGA", nrow(TCGA_Out_MechPerformance))
-TCGA_Out_AgnosticPerformance$model_type <- rep("Agnostic", nrow(TCGA_Out_AgnosticPerformance))
-TCGA_Out_MechPerformance$model_type <- rep("Mechanistic", nrow(TCGA_Out_MechPerformance))
+# TCGA_Out_AgnosticPerformance$out_study <- rep("TCGA", nrow(TCGA_Out_AgnosticPerformance))
+# TCGA_Out_MechPerformance$out_study <- rep("TCGA", nrow(TCGA_Out_MechPerformance))
+# TCGA_Out_AgnosticPerformance$model_type <- rep("Agnostic", nrow(TCGA_Out_AgnosticPerformance))
+# TCGA_Out_MechPerformance$model_type <- rep("Mechanistic", nrow(TCGA_Out_MechPerformance))
 
 # VanAllen_out
 VanAllen_Out_AgnosticPerformance$out_study <- rep("VanAllen", nrow(VanAllen_Out_AgnosticPerformance))
@@ -58,8 +58,8 @@ VanAllen_Out_MechPerformance$model_type <- rep("Mechanistic", nrow(VanAllen_Out_
 
 All_KTSP_CV <- rbind(GSE78220_Out_AgnosticPerformance, GSE78220_Out_MechPerformance,
                      GSE91061_Out_AgnosticPerformance, GSE91061_Out_MechPerformance,
-                     GSE115821_Out_AgnosticPerformance, GSE115821_Out_MechPerformance, 
-                     TCGA_Out_AgnosticPerformance, TCGA_Out_MechPerformance, 
+                     #GSE115821_Out_AgnosticPerformance, GSE115821_Out_MechPerformance, 
+                     #TCGA_Out_AgnosticPerformance, TCGA_Out_MechPerformance, 
                      VanAllen_Out_AgnosticPerformance, VanAllen_Out_MechPerformance
                      )
 
