@@ -18,8 +18,8 @@ library(switchBox)
 ## SVM
 # Mechanistic
 ## Load data
-load("./Objs/KTSP/KTSP_STATs_Mechanistic.rda")
-load("./Objs/icbData.rda")
+load("./Objs/KTSP/KTSP_STATs_Mechanistic_Pre.rda")
+load("./Objs/icbData_Pre.rda")
 
 ####
 usedTrainGroup <- mixTrainGroup
@@ -63,7 +63,7 @@ fit.svmPoly_mech
 ################################################
 # Use the best parameters in the bootstrap
 
-Grid_mech <- expand.grid(degree = 3, scale = 0.01, C = 0.25)
+Grid_mech <- expand.grid(degree = 2, scale = 0.1, C = 0.25)
 
 # The function for bootstraping
 SVM_Strap <- function(data, indices) {
@@ -91,7 +91,7 @@ bootobjectMech <- boot(data= Data_train_Mechanistic, statistic= SVM_Strap, R= 10
 AUCs_SVM_Mech <- bootobjectMech$t
 colnames(AUCs_SVM_Mech) <- c("AUC_Train", "AUC_Test", "N_ImportanVariables")
 
-save(bootobjectMech, file= "./Objs/SVM/SVM_MechBootObject.rda")
+save(bootobjectMech, file= "./Objs/SVM/SVM_MechBootObject_Pre.rda")
 
 ###################################################################################
 ### Agnostic
@@ -99,7 +99,7 @@ save(bootobjectMech, file= "./Objs/SVM/SVM_MechBootObject.rda")
 ### top 50 DEGs
 
 ## Load data
-load("./Objs/icbData.rda")
+load("./Objs/icbData_Pre.rda")
 
 
 ### Quantile normalize
@@ -193,7 +193,7 @@ bootobjectAgnostic_50 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, R
 ### top 100 DEGs
 
 ## Load data
-load("./Objs/icbData.rda")
+load("./Objs/icbData_Pre.rda")
 
 
 ### Quantile normalize
@@ -236,7 +236,7 @@ control <- trainControl(method="repeatedcv", number=10, repeats=5, classProbs = 
 
 # 5-fold cross validation repeated 5 times (to find the best parameters)
 set.seed(333)
-fit.svmPoly_agnostic100 <- train(usedTrainGroup~., data=Data_train_Agnostic, method="svmPoly", trControl=control, tuneLength = 5, metric = "ROC")
+fit.svmPoly_agnostic100 <- train(usedTrainGroup~., data=Data_train_Agnostic_tmp, method="svmPoly", trControl=control, tuneLength = 5, metric = "ROC")
 fit.svmPoly_agnostic100
 
 ###########################
@@ -281,7 +281,7 @@ bootobjectAgnostic_100 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, 
 ### top 200 DEGs
 
 ## Load data
-load("./Objs/icbData.rda")
+load("./Objs/icbData_Pre.rda")
 
 ### Quantile normalize
 usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
@@ -309,7 +309,7 @@ control <- trainControl(method="repeatedcv", number=10, repeats=5, classProbs = 
 
 # 5-fold cross validation repeated 5 times (to find the best parameters)
 set.seed(333)
-fit.svmPoly_agnostic200 <- train(usedTrainGroup~., data=Data_train_Agnostic, method="svmPoly", trControl=control, tuneLength = 5, metric = "ROC")
+fit.svmPoly_agnostic200 <- train(usedTrainGroup~., data=Data_train_Agnostic_tmp, method="svmPoly", trControl=control, tuneLength = 5, metric = "ROC")
 fit.svmPoly_agnostic200
 
 ###########################
@@ -354,12 +354,23 @@ bootobjectAgnostic_200 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, 
 ### top 500 DEGs
 
 ## Load data
-load("./Objs/icbData.rda")
+load("./Objs/icbData_Pre.rda")
 
 
 ### Quantile normalize
 usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
 usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")
+
+dim(usedTrainMat)
+dim(usedTestMat)
+
+######
+# remove genes with NA values from the training and testing matrices
+sel <- which(apply(usedTrainMat, 1, function(x) all(is.finite(x)) ))
+usedTrainMat <- usedTrainMat[sel, ] 
+
+sel2 <- which(apply(usedTestMat, 1, function(x) all(is.finite(x)) ))
+usedTestMat <- usedTestMat[sel2, ] 
 
 #########
 ## Detect Top DE genes
@@ -370,10 +381,14 @@ usedTrainMat_tmp <- usedTrainMat[TopDEgenes, ]
 
 #################################################################
 ### Transpose usedTrainMat (making samples as rows instead of columns)
+Training <- t(usedTrainMat)
 Training_tmp <- t(usedTrainMat_tmp)
 
 ## Combining the expression matrix and the phenotype in one data frame
+Training <- as.data.frame(Training)
 Training_tmp <- as.data.frame(Training_tmp)
+
+Data_train_Agnostic <- cbind(Training, usedTrainGroup)
 Data_train_Agnostic_tmp <- cbind(Training_tmp, usedTrainGroup)
 
 #########################
@@ -383,12 +398,12 @@ control <- trainControl(method="repeatedcv", number=10, repeats=5, classProbs = 
 
 # 5-fold cross validation repeated 5 times (to find the best parameters)
 set.seed(333)
-fit.svmPoly_agnostic500 <- train(usedTrainGroup~., data=Data_train_Agnostic, method="svmPoly", trControl=control, tuneLength = 5, metric = "ROC")
+fit.svmPoly_agnostic500 <- train(usedTrainGroup~., data=Data_train_Agnostic_tmp, method="svmPoly", trControl=control, tuneLength = 5, metric = "ROC")
 fit.svmPoly_agnostic500
 
 ###########################
 # Use the best parameters in the bootstrap
-Grid_agn500 <- expand.grid(degree = 3, scale = 10, C = 0.25)
+Grid_agn500 <- expand.grid(degree = 1, scale = 0.001, C = 0.5)
 
 # The function for bootstraping
 SVM_Strap <- function(data, indices) {
@@ -425,10 +440,10 @@ bootobjectAgnostic_500 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, 
 ########################################################################################
 ########################################################################################
 ## Save all Objects
-save(bootobjectMech, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_200, bootobjectAgnostic_500, file= "./Objs/SVM/SVMBootObjects_new.rda")
+save(bootobjectMech, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_200, bootobjectAgnostic_500, file= "./Objs/SVM/SVMBootObjects_new_Pre.rda")
 
 ## Load
-load("./Objs/SVM/SVMBootObjects_new.rda")
+load("./Objs/SVM/SVMBootObjects_new_Pre.rda")
 
 ########################################################################################
 ########################################################################################
@@ -479,13 +494,13 @@ ModelCompareAUCTest_50$data_type <- "Testing"
 ModelCompareAUCTrain_50$NofFeatAgn <- "50_Genes"
 ModelCompareAUCTest_50$NofFeatAgn <- "50_Genes"
 
-save(ModelCompareAUCTrain_50, ModelCompareAUCTest_50, file = "./Objs/SVM/ModelCompareAUC_50_new.rda")
+save(ModelCompareAUCTrain_50, ModelCompareAUCTest_50, file = "./Objs/SVM/ModelCompareAUC_50_new_Pre.rda")
 
 # ###########################################################################3
 # ## Save for the main figure
 ModelCompare_SVM <- rbind(ModelCompareAUCTrain_50, ModelCompareAUCTest_50)
 ModelCompare_SVM$algorithm <- "SVM"
-save(ModelCompare_SVM, file = "./Objs/SVM/ModelCompare_SVM_new.rda")
+save(ModelCompare_SVM, file = "./Objs/SVM/ModelCompare_SVM_new_Pre.rda")
 
 ########################################################################################
 ########################################################################################
@@ -531,7 +546,7 @@ ModelCompareAUCTest_100$data_type <- "Testing"
 ModelCompareAUCTrain_100$NofFeatAgn <- "100_Genes"
 ModelCompareAUCTest_100$NofFeatAgn <- "100_Genes"
 
-save(ModelCompareAUCTrain_100, ModelCompareAUCTest_100, file = "./Objs/SVM/ModelCompareAUC_100_new.rda")
+save(ModelCompareAUCTrain_100, ModelCompareAUCTest_100, file = "./Objs/SVM/ModelCompareAUC_100_new_Pre.rda")
 
 ########################################################################################
 ########################################################################################
@@ -568,7 +583,7 @@ ModelCompareAUCTest_200$data_type <- "Testing"
 ModelCompareAUCTrain_200$NofFeatAgn <- "200_Genes"
 ModelCompareAUCTest_200$NofFeatAgn <- "200_Genes"
 
-save(ModelCompareAUCTrain_200, ModelCompareAUCTest_200, file = "./Objs/SVM/ModelCompareAUC_200_new.rda")
+save(ModelCompareAUCTrain_200, ModelCompareAUCTest_200, file = "./Objs/SVM/ModelCompareAUC_200_new_Pre.rda")
 
 ########################################################################################
 ########################################################################################
@@ -605,5 +620,5 @@ ModelCompareAUCTest_500$data_type <- "Testing"
 ModelCompareAUCTrain_500$NofFeatAgn <- "500_Genes"
 ModelCompareAUCTest_500$NofFeatAgn <- "500_Genes"
 
-save(ModelCompareAUCTrain_500, ModelCompareAUCTest_500, file = "./Objs/SVM/ModelCompareAUC_500_new.rda")
+save(ModelCompareAUCTrain_500, ModelCompareAUCTest_500, file = "./Objs/SVM/ModelCompareAUC_500_new_Pre.rda")
 

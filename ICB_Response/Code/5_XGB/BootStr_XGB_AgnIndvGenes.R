@@ -24,8 +24,8 @@ library(boot)
 # Mechanistic
 
 ## Load data
-load("./Objs/KTSP/KTSP_STATs_Mechanistic.rda")
-load("./Objs/icbData.rda")
+load("./Objs/KTSP/KTSP_STATs_Mechanistic_Pre.rda")
+load("./Objs/icbData_Pre.rda")
 
 
 ### Associated groups
@@ -170,7 +170,7 @@ bootobjectMech <- boot(data= Data_train_Mech, statistic= XGBStrap, R= 1000, para
 AUCs_XG_Mech <- bootobjectMech$t
 colnames(AUCs_XG_Mech) <- c("AUC_Train", "AUC_Test", "N_ImportanVariables")
 
-save(bootobjectMech, file = './objs/XGB/XGB_bootobjectMech.rda')
+save(bootobjectMech, file = './objs/XGB/XGB_bootobjectMech_Pre.rda')
 
 #########################################################################
 #########################################################################
@@ -179,7 +179,7 @@ save(bootobjectMech, file = './objs/XGB/XGB_bootobjectMech.rda')
 ## Top 50 DEGs
 
 ## Load data
-load("./Objs/icbData.rda")
+load("./Objs/icbData_Pre.rda")
 
 
 ### Quantile normalize
@@ -345,7 +345,7 @@ bootobjectAgnostic_50 <- boot(data= Data_train_Agnostic, statistic= XGBStrap, R=
 ## Top 100 DEGs
 
 ## Load data
-# load("./Objs/icbData.rda")
+# load("./Objs/icbData_Pre.rda")
 # 
 # 
 # ### Quantile normalize
@@ -535,7 +535,7 @@ bootobjectAgnostic_100 <- boot(data= Data_train_Agnostic, statistic= XGBStrap, R
 ## Top 200 DEGs
 
 ## Load data
-# load("./Objs/icbData.rda")
+# load("./Objs/icbData_Pre.rda")
 # 
 # 
 # ### Quantile normalize
@@ -723,7 +723,7 @@ bootobjectAgnostic_200 <- boot(data= Data_train_Agnostic, statistic= XGBStrap, R
 ## Top 500 DEGs
 
 ## Load data
-# load("./Objs/icbData.rda")
+# load("./Objs/icbData_Pre.rda")
 # 
 # 
 # ### Quantile normalize
@@ -910,10 +910,10 @@ bootobjectAgnostic_500 <- boot(data= Data_train_Agnostic, statistic= XGBStrap, R
 ################################################################################################
 
 ### Save boot objects
-save(bootobjectMech, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_200, bootobjectAgnostic_500, file = "./Objs/XGB/XGBBootObjects_new.rda")
+save(bootobjectMech, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_200, bootobjectAgnostic_500, file = "./Objs/XGB/XGBBootObjects_new_Pre.rda")
 
 # Load
-load("./Objs/XGB/XGBBootObjects_new.rda")
+load("./Objs/XGB/XGBBootObjects_new_Pre.rda")
 
 ################################################################################################
 ################################################################################################
@@ -964,13 +964,13 @@ ModelCompareAUC_Test_50$data_type <- "Testing"
 ModelCompareAUC_Train_50$NofFeatAgn <- "50_Genes"
 ModelCompareAUC_Test_50$NofFeatAgn <- "50_Genes"
 
-save(ModelCompareAUC_Train_50, ModelCompareAUC_Test_50, file = "./Objs/XGB/ModelCompareAUC_50_new.rda")
+save(ModelCompareAUC_Train_50, ModelCompareAUC_Test_50, file = "./Objs/XGB/ModelCompareAUC_50_new_Pre.rda")
 
 ######################
 ## Save for the main figure
 ModelCompare_XGB <- rbind(ModelCompareAUC_Train_50, ModelCompareAUC_Test_50)
 ModelCompare_XGB$algorithm <- "XGB"
-save(ModelCompare_XGB, file = "./Objs/XGB/ModelCompare_XGB_new.rda")
+save(ModelCompare_XGB, file = "./Objs/XGB/ModelCompare_XGB_new_Pre.rda")
 
 ################################################################################################
 ################################################################################################
@@ -1019,7 +1019,7 @@ ModelCompareAUC_Test_100$data_type <- "Testing"
 ModelCompareAUC_Train_100$NofFeatAgn <- "100_Genes"
 ModelCompareAUC_Test_100$NofFeatAgn <- "100_Genes"
 
-save(ModelCompareAUC_Train_100, ModelCompareAUC_Test_100, file = "./Objs/XGB/ModelCompareAUC_100_new.rda")
+save(ModelCompareAUC_Train_100, ModelCompareAUC_Test_100, file = "./Objs/XGB/ModelCompareAUC_100_new_Pre.rda")
 
 ################################################################################################
 ################################################################################################
@@ -1057,7 +1057,7 @@ ModelCompareAUC_Test_200$data_type <- "Testing"
 ModelCompareAUC_Train_200$NofFeatAgn <- "200_Genes"
 ModelCompareAUC_Test_200$NofFeatAgn <- "200_Genes"
 
-save(ModelCompareAUC_Train_200, ModelCompareAUC_Test_200, file = "./Objs/XGB/ModelCompareAUC_200_new.rda")
+save(ModelCompareAUC_Train_200, ModelCompareAUC_Test_200, file = "./Objs/XGB/ModelCompareAUC_200_new_Pre.rda")
 
 ################################################################################################
 ################################################################################################
@@ -1095,5 +1095,5 @@ ModelCompareAUC_Test_500$data_type <- "Testing"
 ModelCompareAUC_Train_500$NofFeatAgn <- "500_Genes"
 ModelCompareAUC_Test_500$NofFeatAgn <- "500_Genes"
 
-save(ModelCompareAUC_Train_500, ModelCompareAUC_Test_500, file = "./Objs/XGB/ModelCompareAUC_500_new.rda")
+save(ModelCompareAUC_Train_500, ModelCompareAUC_Test_500, file = "./Objs/XGB/ModelCompareAUC_500_new_Pre.rda")
 

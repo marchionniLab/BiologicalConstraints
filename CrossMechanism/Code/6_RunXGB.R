@@ -150,24 +150,24 @@ run_XGB_pairs = function(trainMat, testMat, trainGroup, testGroup, mechTSPs, fil
   
   print(length(unique(as.vector(mechTSPs))))
   
-  if(length(unique(as.vector(mechTSPs))) < 500){
+  # if(length(unique(as.vector(mechTSPs))) < 500){
   
     fit.ktsp = SWAP.Train.KTSP(inputMat=trainMat, 
                                phenoGroup=trainGroup, 
-                               krange=1:min(nrow(mechTSPs), 50), 
+                               krange=2:min(nrow(mechTSPs), 25), 
                                FilterFunc=NULL, 
                                featureNo=length(unique(as.vector(mechTSPs))), 
                                RestrictedPairs=mechTSPs)
-  }else{
-    
-    fit.ktsp = SWAP.Train.KTSP(inputMat=trainMat, 
-                               phenoGroup=trainGroup, 
-                               krange=1:min(nrow(mechTSPs), 50), 
-                               FilterFunc=SWAP.Filter.Wilcoxon, 
-                               featureNo=500, 
-                               RestrictedPairs=mechTSPs)
-  
-  }
+  # }else{
+  #   
+  #   fit.ktsp = SWAP.Train.KTSP(inputMat=trainMat, 
+  #                              phenoGroup=trainGroup, 
+  #                              krange=1:min(nrow(mechTSPs), 50), 
+  #                              FilterFunc=SWAP.Filter.Wilcoxon, 
+  #                              featureNo=500, 
+  #                              RestrictedPairs=mechTSPs)
+  # 
+  # }
   
   trainV = 1 * SWAP.KTSP.Statistics(trainMat, fit.ktsp)$comparisons ## samples x pairs
   testV = 1 * SWAP.KTSP.Statistics(testMat, fit.ktsp)$comparisons
@@ -301,8 +301,8 @@ list.run.pairs = utils.lapply_i(list.R.pairs, function(Rlist, i, data_title){
 
 ## save
 
-save(list.R.genes, list.R.pairs, file="../Objs/list.R.xgb.rda")
-save(list.run.genes, list.run.pairs, file="../Objs/list.run.xgb.rda")
+save(list.R.genes, list.R.pairs, file="../Objs/list.R.xgb.2.rda")
+save(list.run.genes, list.run.pairs, file="../Objs/list.run.xgb.2.rda")
 
 
 

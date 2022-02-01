@@ -18,7 +18,7 @@ library(doParallel)
 # Mechanistic
 # ## Load data
 # load("./Objs/KTSP/KTSP_STATs_Mechanistic2.rda")
-# load("./Objs/icbData.rda")
+# load("./Objs/icbData_Pre.rda")
 # 
 # 
 # ### Associated groups
@@ -92,7 +92,7 @@ library(doParallel)
 
 
 # Load the Mechanistic bootstrap object from the previous script
-load("./Objs/SVM/SVM_MechBootObject.rda")
+load("./Objs/SVM/SVM_MechBootObject_Pre.rda")
 
 #########################################################################################
 #########################################################################################
@@ -102,8 +102,8 @@ load("./Objs/SVM/SVM_MechBootObject.rda")
 # 25 pairs (from 50 DEGs)
 
 ## Load data
-load("./Objs/KTSP/KTSP_STATs_Agnostic_25.rda")
-load("./Objs/icbData.rda")
+load("./Objs/KTSP/KTSP_STATs_Agnostic_25_Pre.rda")
+load("./Objs/icbData_Pre.rda")
 
 
 ####
@@ -148,7 +148,7 @@ fit.svmPoly_agnostic25pairs
 ###########################
 # Use the best parameters in the bootstrap
 
-Grid_agn25pairs <- expand.grid(degree = 1, scale = 0.01, C = 0.25)
+Grid_agn25pairs <- expand.grid(degree = 3, scale = 0.001, C = 4)
 
 # The function for bootstraping
 SVM_Strap <- function(data, indices) {
@@ -181,8 +181,8 @@ bootobjectAgnostic_25 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, R
 # 50 pairs (from 100 DEGs)
 
 ## Load data
-load("./Objs/KTSP/KTSP_STATs_Agnostic_50.rda")
-load("./Objs/icbData.rda")
+load("./Objs/KTSP/KTSP_STATs_Agnostic_50_Pre.rda")
+load("./Objs/icbData_Pre.rda")
 
 
 ### Associated groups
@@ -228,7 +228,7 @@ fit.svmPoly_agnostic50pairs
 ###########################
 # Use the best parameters in the bootstrap
 
-Grid_agn50pairs <- expand.grid(degree = 3, scale = 0.01, C = 0.5)
+Grid_agn50pairs <- expand.grid(degree = 2, scale = 0.1, C = 0.25)
 
 # The function for bootstraping
 SVM_Strap <- function(data, indices) {
@@ -261,8 +261,8 @@ bootobjectAgnostic_50 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, R
 # 100 pairs (from 200 DEGs)
 
 ## Load data
-load("./Objs/KTSP/KTSP_STATs_Agnostic_100.rda")
-load("./Objs/icbData.rda")
+load("./Objs/KTSP/KTSP_STATs_Agnostic_100_Pre.rda")
+load("./Objs/icbData_Pre.rda")
 
 
 ### Associated groups
@@ -307,7 +307,7 @@ fit.svmPoly_agnostic100pairs
 ###########################
 # Use the best parameters in the bootstrap
 
-Grid_agn100pairs <- expand.grid(degree = 3, scale = 0.01, C = 0.25)
+Grid_agn100pairs <- expand.grid(degree = 1, scale = 0.1, C = 0.25)
 
 # The function for bootstraping
 SVM_Strap <- function(data, indices) {
@@ -340,8 +340,8 @@ bootobjectAgnostic_100 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, 
 # 250 pairs (from 500 DEGs)
 
 ## Load data
-load("./Objs/KTSP/KTSP_STATs_Agnostic_250.rda")
-load("./Objs/icbData.rda")
+load("./Objs/KTSP/KTSP_STATs_Agnostic_250_Pre.rda")
+load("./Objs/icbData_Pre.rda")
 
 
 ### Associated groups
@@ -386,7 +386,7 @@ fit.svmPoly_agnostic250pairs
 ###########################
 # Use the best parameters in the bootstrap
 
-Grid_agn250pairs <- expand.grid(degree = 1, scale = 0.01, C = 1)
+Grid_agn250pairs <- expand.grid(degree = 3, scale = 1, C = 0.25)
 
 # The function for bootstraping
 SVM_Strap <- function(data, indices) {
@@ -413,10 +413,10 @@ bootobjectAgnostic_250 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, 
 ########################################################################################
 ########################################################################################
 ## Save all Objects
-save(bootobjectMech, bootobjectAgnostic_25, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_250, file= "./Objs/SVM/SVMBootObjects_AgnPairs_new.rda")
+save(bootobjectMech, bootobjectAgnostic_25, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_250, file= "./Objs/SVM/SVMBootObjects_AgnPairs_new_Pre.rda")
 
 ## Load
-load("./Objs/SVM/SVMBootObjects_AgnPairs_new.rda")
+load("./Objs/SVM/SVMBootObjects_AgnPairs_new_Pre.rda")
 
 ########################################################################################
 ########################################################################################
@@ -468,12 +468,12 @@ ModelCompareAUCTest_25$NofFeatAgn <- "25_Pairs"
 ## Save for the main figure
 ModelCompare_SVM <- rbind(ModelCompareAUCTrain_25, ModelCompareAUCTest_25)
 ModelCompare_SVM$algorithm <- "SVM"
-save(ModelCompare_SVM, file = "./Objs/SVM/ModelCompare_SVM_AgnPairs_new.rda")
+save(ModelCompare_SVM, file = "./Objs/SVM/ModelCompare_SVM_AgnPairs_new_Pre.rda")
 
 # #########################################################################
 # ############################################################
 # # Load the AUC comparisons from the indivdial genes and combine them with pairs
-load("./Objs/SVM/ModelCompareAUC_50_new.rda")
+load("./Objs/SVM/ModelCompareAUC_50_new_Pre.rda")
 
 # Combine
 ModelCompareAUC_Train_25_50 <- rbind(ModelCompareAUCTrain_25, ModelCompareAUCTrain_50)
@@ -526,7 +526,7 @@ ModelCompareAUCTest_50$NofFeatAgn <- "50_Pairs"
 #########################################################################
 ############################################################
 # Load the AUC comparisons from the indivdial genes and combine them with pairs
-load("./Objs/SVM/ModelCompareAUC_100_new.rda")
+load("./Objs/SVM/ModelCompareAUC_100_new_Pre.rda")
 
 # Combine
 ModelCompareAUC_Train_50_100 <- rbind(ModelCompareAUCTrain_50, ModelCompareAUCTrain_100)
@@ -570,7 +570,7 @@ ModelCompareAUCTest_100$NofFeatAgn <- "100_Pairs"
 #########################################################################
 ############################################################
 # Load the AUC comparisons from the indivdial genes and combine them with pairs
-load("./Objs/SVM/ModelCompareAUC_200_new.rda")
+load("./Objs/SVM/ModelCompareAUC_200_new_Pre.rda")
 
 # Combine
 ModelCompareAUC_Train_100_200 <- rbind(ModelCompareAUCTrain_100, ModelCompareAUCTrain_200)
@@ -614,7 +614,7 @@ ModelCompareAUCTest_250$NofFeatAgn <- "250_Pairs"
 #########################################################################
 ############################################################
 # Load the AUC comparisons from the indivdial genes and combine them with pairs
-load("./Objs/SVM/ModelCompareAUC_500_new.rda")
+load("./Objs/SVM/ModelCompareAUC_500_new_Pre.rda")
 
 # Combine
 ModelCompareAUC_Train_250_500 <- rbind(ModelCompareAUCTrain_250, ModelCompareAUCTrain_500)
@@ -635,7 +635,7 @@ ModelCompare_SVM_DiffNoFeat <- rbind(ModelCompareAUC_Train_25_50,
                                      ModelCompareAUC_Test_250_500
 )
 
-save(ModelCompare_SVM_DiffNoFeat, file = "./Objs/SVM/ModelCompare_SVM_DiffNoFeat_new.rda")
+save(ModelCompare_SVM_DiffNoFeat, file = "./Objs/SVM/ModelCompare_SVM_DiffNoFeat_new_Pre.rda")
 
 ####################################################################################
 ####################################################################################

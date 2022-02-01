@@ -8,10 +8,10 @@ library(tidyverse)
 library(wesanderson)
 
 ## Load model comparisons: mechanistic vs agnostic (as genes) 
-load("./Objs/KTSP/ModelCompare_KTSP_DiffNoFeat_exhausion.rda")
-load("./Objs/RF/ModelCompare_RF_DiffNoFeat_new.rda")
-load("./Objs/SVM/ModelCompare_SVM_DiffNoFeat_new.rda")
-load("./Objs/XGB/ModelCompare_XGB_DiffNoFeat_new.rda")
+load("./Objs/KTSP/ModelCompare_KTSP_DiffNoFeat_Pre.rda")
+load("./Objs/RF/ModelCompare_RF_DiffNoFeat_new_Pre.rda")
+load("./Objs/SVM/ModelCompare_SVM_DiffNoFeat_new_Pre.rda")
+load("./Objs/XGB/ModelCompare_XGB_DiffNoFeat_new_Pre.rda")
 
 #########
 ModelCompare_KTSP_DiffNoFeat$algorithm <- "K-TSPs"
@@ -53,20 +53,20 @@ AllModelCompare_ICB_DiffNoFeat$FeatureType <- ifelse(AllModelCompare_ICB_DiffNoF
 ############################################################################
 ## Plot
 My_Theme = theme(
-  axis.title.x = element_text(size = 14),
-  axis.text.x = element_text(size = 12),
-  axis.title.y = element_text(size = 14),
-  axis.text.y = element_text(size = 12),
-  strip.text.x = element_text(size = 14),
-  plot.title = element_text(size=15, face = "bold", hjust = 0.5)
+  axis.title.x = element_text(size = 10),
+  axis.text.x = element_text(size = 8),
+  axis.title.y = element_text(size = 10),
+  axis.text.y = element_text(size = 8),
+  strip.text.x = element_text(size = 10),
+  plot.title = element_text(size=12, face = "bold", hjust = 0.5)
 )
 
 
 ## Density plot
-png(filename = "./Figs/ICB_BS_AllModels_Density_DiffNoFeatAndPairs_new.png", width = 3000, height = 1500, res = 200)
+png(filename = "./Figs/ICB_BS_AllModels_Density_DiffNoFeatAndPairs_new_Pre.png", width = 2500, height = 1500, res = 200)
 BS_AUC_ModelCompare <- ggplot(AllModelCompare_ICB_DiffNoFeat, aes(x = AUC, y = modelType, fill = NofFeatAgn, height = ..ndensity..)) + 
   geom_density_ridges(stat = "density", alpha = 0.9, bw = 0.8, adjust= 0.01, scale=1.2) +
-  scale_x_continuous(limits = c(0.35, 0.9), breaks = seq(0.5, 0.9, by = 0.1), expand = c(0, 0)) +
+  scale_x_continuous(limits = c(0.25, 0.8), breaks = seq(0.3, 0.8, by = 0.1), expand = c(0, 0)) +
   scale_y_discrete(expand = c(0, 0)) +
   labs(title="Mechanistic (27 pairs) vs agnostic (different N of features/pairs) performance at predicting the response to ICIs in the testing data") + 
   ylab("Model Type") +
@@ -82,26 +82,4 @@ BS_AUC_ModelCompare <- ggplot(AllModelCompare_ICB_DiffNoFeat, aes(x = AUC, y = m
 
 BS_AUC_ModelCompare
 dev.off()
-
-
-
-BS_AUC_ModelCompare <- ggplot(ModelCompare_KTSP_DiffNoFeat, aes(x = AUC, y = modelType, fill = NofFeatAgn, height = ..ndensity..)) + 
-  geom_density_ridges(stat = "density", alpha = 0.9, bw = 0.8, adjust= 0.01, scale=1.2) +
-  scale_x_continuous(limits = c(0.35, 1), breaks = seq(0.5, 0.9, by = 0.1), expand = c(0, 0)) +
-  scale_y_discrete(expand = c(0, 0)) +
-  labs(title="Mechanistic (27 pairs) vs agnostic (different N of features/pairs) performance at predicting the response to ICIs in the testing data") + 
-  ylab("Model Type") +
-  My_Theme +
-  #scale_fill_manual(values = c("#21908CFF", "cadetblue1", "#3B9AB2", "cyan4", "#440154FF", "darkcyan", "#21908CFF", "#21908CFF")) +
-  #scale_fill_jco() +
-  scale_alpha_manual(values = c(0.4, 1))+
-  scale_fill_viridis(discrete = TRUE)+
-  coord_cartesian(clip = "off") +
-  facet_wrap(~data_type, dir = "v", ncol = 1, scales = "free_y") + theme(axis.text = element_text(face = "bold"), 
-                                                                         panel.background = element_rect(fill = "gray93"), 
-                                                                         plot.background = element_rect(fill = "white")) +labs(fill = "N of features/pairs", alpha = "data type")
-
-BS_AUC_ModelCompare
-
-
 

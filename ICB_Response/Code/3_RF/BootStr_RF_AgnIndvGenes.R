@@ -20,8 +20,8 @@ library(boot)
 
 
 ## Load data
-load("./Objs/KTSP/KTSP_STATs_Mechanistic.rda")
-load("./Objs/icbData.rda")
+load("./Objs/KTSP/KTSP_STATs_Mechanistic_Pre.rda")
+load("./Objs/icbData_Pre_Pre.rda")
 
 
 ### Quantile normalize
@@ -75,7 +75,7 @@ bootobjectMech <- boot(data= DataMech_Train, statistic= RF_Strap, R= 1000, paral
 AUCs_RF_Mech <- bootobjectMech$t
 colnames(AUCs_RF_Mech) <- c("AUC_Train", "AUC_Test", "N_ImportanVariables")
 
-save(bootobjectMech, file = './objs/RF/RF_bootobjectMech.rda')
+save(bootobjectMech, file = './objs/RF/RF_bootobjectMech_Pre.rda')
 
 ###################################################
 ## RF
@@ -83,7 +83,7 @@ save(bootobjectMech, file = './objs/RF/RF_bootobjectMech.rda')
 
 
 ## Load the data
-load("./Objs/icbData.rda")
+load("./Objs/icbData_Pre.rda")
 
 ### Quantile normalize
 usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
@@ -118,6 +118,9 @@ RF_Strap <- function(data, indices) {
   # subset the data to those top genes
   d <- d[, c(Top50genes, 'usedTrainGroup')]
   
+  # subset the testing data
+  predictor_data_Test_Agnostic <- predictor_data_Test_Agnostic[, Top50genes]
+  
   # Select the minimum sample size
   tmp <- as.vector(table(d$usedTrainGroup))
   num_classes <- length(tmp)
@@ -149,7 +152,7 @@ bootobjectAgnostic_50 <- boot(data= DataAgnostic_Train, statistic= RF_Strap, R= 
 # Agnostic top 100 DEGs
 
 ## Load the data
-load("./Objs/icbData.rda")
+load("./Objs/icbData_Pre.rda")
 
 ### Quantile normalize
 usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
@@ -184,6 +187,9 @@ RF_Strap <- function(data, indices) {
   # subset the data to those top genes
   d <- d[, c(Top100genes, 'usedTrainGroup')]
   
+  # subset the testing data
+  predictor_data_Test_Agnostic <- predictor_data_Test_Agnostic[, Top100genes]
+  
   # Select the minimum sample size
   tmp <- as.vector(table(d$usedTrainGroup))
   num_classes <- length(tmp)
@@ -215,7 +221,7 @@ bootobjectAgnostic_100 <- boot(data= DataAgnostic_Train, statistic= RF_Strap, R=
 # Agnostic top 200 DEGs
 
 ## Load the data
-load("./Objs/icbData.rda")
+load("./Objs/icbData_Pre.rda")
 
 ### Quantile normalize
 usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
@@ -249,6 +255,9 @@ RF_Strap <- function(data, indices) {
   # subset the data to those top genes
   d <- d[, c(Top200genes, 'usedTrainGroup')]
   
+  # subset the testing data
+  predictor_data_Test_Agnostic <- predictor_data_Test_Agnostic[, Top200genes]
+  
   # Select the minimum sample size
   tmp <- as.vector(table(d$usedTrainGroup))
   num_classes <- length(tmp)
@@ -281,11 +290,21 @@ bootobjectAgnostic_200 <- boot(data= DataAgnostic_Train, statistic= RF_Strap, R=
 # Agnostic top 500 DEGs
 
 ## Load the data
-load("./Objs/icbData.rda")
+load("./Objs/icbData_Pre.rda")
 
 ### Quantile normalize
 usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
 usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")
+
+dim(usedTrainMat)
+dim(usedTestMat)
+
+sel <- which(apply(usedTrainMat, 1, function(x) all(is.finite(x)) ))
+usedTrainMat <- usedTrainMat[sel, ] 
+
+sel2 <- which(apply(usedTestMat, 1, function(x) all(is.finite(x)) ))
+usedTestMat <- usedTestMat[sel2, ] 
+
 
 ####
 usedTrainGroup <- mixTrainGroup
@@ -318,6 +337,9 @@ RF_Strap <- function(data, indices) {
   # subset the data to those top genes
   d <- d[, c(Top500genes, 'usedTrainGroup')]
   
+  # subset the testing data
+  predictor_data_Test_Agnostic <- predictor_data_Test_Agnostic[, Top500genes]
+  
   # Select the minimum sample size
   tmp <- as.vector(table(d$usedTrainGroup))
   num_classes <- length(tmp)
@@ -348,10 +370,10 @@ bootobjectAgnostic_500 <- boot(data= DataAgnostic_Train, statistic= RF_Strap, R=
 ################################################################################
 
 ## Save all bootobjects
-save(bootobjectMech, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_200, bootobjectAgnostic_500, file = "./Objs/RF/RFBootObjects_new.rda")
+save(bootobjectMech, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_200, bootobjectAgnostic_500, file = "./Objs/RF/RFBootObjects_new_Pre.rda")
 
 ## load
-load("./Objs/RF/RFBootObjects_new.rda")
+load("./Objs/RF/RFBootObjects_new_Pre.rda")
 
 ##################################################################################
 ##################################################################################
@@ -375,6 +397,10 @@ quantile(DiffMech, c(0.025, 0.975))
 
 range(AUCs_RF_Mech[, 'AUC_Test'])
 range(AUCs_RF_Agnostic_50[, 'AUC_Test'])
+
+summary(AUCs_RF_Mech[, 'AUC_Test'] > 0.6)
+summary(AUCs_RF_Agnostic_50[, 'AUC_Test'] > 0.6)
+
 
 ## Plot the distributions of the AUCs from both methods in the training data
 MechanisticAUC_Train <- data.frame(AUC = AUCs_RF_Mech[, "AUC_Train"])
@@ -401,13 +427,13 @@ ModelCompareAUC_Test_50$data_type <- "Testing"
 ModelCompareAUC_Train_50$NofFeatAgn <- "50_Genes"
 ModelCompareAUC_Test_50$NofFeatAgn <- "50_Genes"
 
-save(ModelCompareAUC_Train_50, ModelCompareAUC_Test_50, file = "./Objs/RF/ModelCompareAUC_50_new.rda")
+save(ModelCompareAUC_Train_50, ModelCompareAUC_Test_50, file = "./Objs/RF/ModelCompareAUC_50_new_Pre.rda")
 
 #############################################################################
 ## Save for the main figure
 ModelCompare_RF <- rbind(ModelCompareAUC_Train_50, ModelCompareAUC_Test_50)
 ModelCompare_RF$algorithm <- "RF"
-save(ModelCompare_RF, file = "./Objs/RF/ModelCompare_RF_new.rda")
+save(ModelCompare_RF, file = "./Objs/RF/ModelCompare_RF_new_Pre.rda")
 
 ###################################################################################3
 ###################################################################################
@@ -452,7 +478,7 @@ ModelCompareAUC_Test_100$data_type <- "Testing"
 ModelCompareAUC_Train_100$NofFeatAgn <- "100_Genes"
 ModelCompareAUC_Test_100$NofFeatAgn <- "100_Genes"
 
-save(ModelCompareAUC_Train_100, ModelCompareAUC_Test_100, file = "./Objs/RF/ModelCompareAUC_100_new.rda")
+save(ModelCompareAUC_Train_100, ModelCompareAUC_Test_100, file = "./Objs/RF/ModelCompareAUC_100_new_Pre.rda")
 
 #############################################################################
 ###################################################################################
@@ -487,7 +513,7 @@ ModelCompareAUC_Test_200$data_type <- "Testing"
 ModelCompareAUC_Train_200$NofFeatAgn <- "200_Genes"
 ModelCompareAUC_Test_200$NofFeatAgn <- "200_Genes"
 
-save(ModelCompareAUC_Train_200, ModelCompareAUC_Test_200, file = "./Objs/RF/ModelCompareAUC_200_new.rda")
+save(ModelCompareAUC_Train_200, ModelCompareAUC_Test_200, file = "./Objs/RF/ModelCompareAUC_200_new_Pre.rda")
 
 ############
 ###################################################################################3
@@ -523,5 +549,5 @@ ModelCompareAUC_Test_500$data_type <- "Testing"
 ModelCompareAUC_Train_500$NofFeatAgn <- "500_Genes"
 ModelCompareAUC_Test_500$NofFeatAgn <- "500_Genes"
 
-save(ModelCompareAUC_Train_500, ModelCompareAUC_Test_500, file = "./Objs/RF/ModelCompareAUC_500_new.rda")
+save(ModelCompareAUC_Train_500, ModelCompareAUC_Test_500, file = "./Objs/RF/ModelCompareAUC_500_new_Pre.rda")
 

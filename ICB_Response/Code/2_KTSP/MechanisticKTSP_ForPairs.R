@@ -20,7 +20,7 @@ library(Ckmeans.1d.dp)
 
 
 ## Load data
-load("./Objs/icbData.rda")
+load("./Objs/icbData_Pre.rda")
 
 #########
 ## Load the selected genes *(Notch pairs)
@@ -82,5 +82,5 @@ KTSP_STATs_Test_Mechanistic[KTSP_STATs_Test_Mechanistic == FALSE] <- 0
 
 
 
-save(KTSP_STATs_Train_Mechanistic, KTSP_STATs_Test_Mechanistic, file = "./Objs/KTSP/KTSP_STATs_Mechanistic.rda")
+save(KTSP_STATs_Train_Mechanistic, KTSP_STATs_Test_Mechanistic, file = "./Objs/KTSP/KTSP_STATs_Mechanistic_Pre.rda")
 

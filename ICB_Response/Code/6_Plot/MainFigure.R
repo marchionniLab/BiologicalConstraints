@@ -7,10 +7,10 @@ library(ggsci)
 library(wesanderson)
 
 ## Load model comparisons: mechanistic vs agnostic (as genes) 
-load("./Objs/KTSP/ModelCompare_KTSP.rda")
-load("./Objs/RF/ModelCompare_RF_new.rda")
-load("./Objs/SVM/ModelCompare_SVM_new.rda")
-load("./Objs/XGB/ModelCompare_XGB_new.rda")
+load("./Objs/KTSP/ModelCompare_KTSP_Pre.rda")
+load("./Objs/RF/ModelCompare_RF_new_Pre.rda")
+load("./Objs/SVM/ModelCompare_SVM_new_Pre.rda")
+load("./Objs/XGB/ModelCompare_XGB_new_Pre.rda")
 
 
 ## Bind the 4 together in one data frame
@@ -22,10 +22,10 @@ levels(AllModelCompare_ICB_AgnIndGenes$modelType) <- c("Agnostic (top 50 DEGs)",
 ############################################################################
 
 ## Load model comparisons: mechanistic vs agnostic (as pairs) 
-load("./Objs/KTSP/ModelCompare_KTSP.rda") # K-TSPs is the same
-load("./Objs/RF/ModelCompare_RF_AgnPairs_new.rda")
-load("./Objs/SVM/ModelCompare_SVM_AgnPairs_new.rda")
-load("./Objs/XGB/ModelCompare_XGB_AgnPairs_new.rda")
+load("./Objs/KTSP/ModelCompare_KTSP_Pre.rda") # K-TSPs is the same
+load("./Objs/RF/ModelCompare_RF_AgnPairs_new_Pre.rda")
+load("./Objs/SVM/ModelCompare_SVM_AgnPairs_new_Pre.rda")
+load("./Objs/XGB/ModelCompare_XGB_AgnPairs_new_Pre.rda")
 
 ## Bind the 4 together in one data frame
 AllModelCompare_ICB_AgnPairs <- rbind(ModelCompare_KTSP, ModelCompare_RF, ModelCompare_SVM, ModelCompare_XGB)
@@ -45,20 +45,20 @@ AllModelCompare_ICB$modelType <- factor(AllModelCompare_ICB$modelType, levels = 
 ############################################################################
 ## Plot
 My_Theme = theme(
-  axis.title.x = element_text(size = 14),
-  axis.text.x = element_text(size = 12),
-  axis.title.y = element_text(size = 14),
-  axis.text.y = element_text(size = 12),
-  strip.text.x = element_text(size = 14),
-  plot.title = element_text(size=16, face = "bold", hjust = 0.5)
+  axis.title.x = element_text(size = 10),
+  axis.text.x = element_text(size = 8),
+  axis.title.y = element_text(size = 10),
+  axis.text.y = element_text(size = 8),
+  strip.text.x = element_text(size = 10),
+  plot.title = element_text(size=12, face = "bold", hjust = 0.5)
 )
 
 
 ## Density plot
-png(filename = "./Figs/ICB_BS_AllModels_Density_new.png", width = 3000, height = 1500, res = 200)
+png(filename = "./Figs/ICB_BS_AllModels_Density_new_Pre.png", width = 2500, height = 1500, res = 200)
 BS_AUC_ModelCompare <- ggplot(AllModelCompare_ICB, aes(x = AUC, y = modelType, fill = modelType, alpha = data_type, height = ..ndensity..)) + 
   geom_density_ridges(stat = "density", bw = 0.8, adjust= 0.01, scale=1.2) +
-  scale_x_continuous(limits = c(0.35, 1.02), breaks = seq(0.5, 1, by = 0.1), expand = c(0, 0)) +
+  scale_x_continuous(limits = c(0.25, 1.02), breaks = seq(0.3, 1, by = 0.1), expand = c(0, 0)) +
   scale_y_discrete(expand = c(0, 0)) +
   labs(title="Predicting the response to ICIs in melanoma patients: density of the AUC distribution of the agnostic and mechanistic models") + 
   ylab("Model Type") +
@@ -74,5 +74,4 @@ BS_AUC_ModelCompare <- ggplot(AllModelCompare_ICB, aes(x = AUC, y = modelType, f
 
 BS_AUC_ModelCompare
 dev.off()
-
 

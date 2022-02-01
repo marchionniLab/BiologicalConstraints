@@ -18,7 +18,7 @@ library(dplyr)
 library(Ckmeans.1d.dp)
 
 ## Load data
-load("./Objs/icbData.rda")
+load("./Objs/icbData_Pre.rda")
 
 ### Quantile normalize
 usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
@@ -61,7 +61,7 @@ summary(ktspStatsTestUnRes_25$statistics)
 KTSP_STATs_Test_Agnostic_25 <- t(ktspStatsTestUnRes_25$comparisons)
 KTSP_STATs_Test_Agnostic_25[KTSP_STATs_Test_Agnostic_25 == FALSE] <- 0
 
-save(KTSP_STATs_Train_Agnostic_25, KTSP_STATs_Test_Agnostic_25, file = "./Objs/KTSP/KTSP_STATs_Agnostic_25.rda")
+save(KTSP_STATs_Train_Agnostic_25, KTSP_STATs_Test_Agnostic_25, file = "./Objs/KTSP/KTSP_STATs_Agnostic_25_Pre.rda")
 
 #############################################################################
 ###############################################################################
@@ -93,7 +93,7 @@ summary(ktspStatsTestUnRes_50$statistics)
 KTSP_STATs_Test_Agnostic_50 <- t(ktspStatsTestUnRes_50$comparisons)
 KTSP_STATs_Test_Agnostic_50[KTSP_STATs_Test_Agnostic_50 == FALSE] <- 0
 
-save(KTSP_STATs_Train_Agnostic_50, KTSP_STATs_Test_Agnostic_50, file = "./Objs/KTSP/KTSP_STATs_Agnostic_50.rda")
+save(KTSP_STATs_Train_Agnostic_50, KTSP_STATs_Test_Agnostic_50, file = "./Objs/KTSP/KTSP_STATs_Agnostic_50_Pre.rda")
 
 #############################################################################
 ###############################################################################
@@ -125,7 +125,7 @@ summary(ktspStatsTestUnRes_100$statistics)
 KTSP_STATs_Test_Agnostic_100 <- t(ktspStatsTestUnRes_100$comparisons)
 KTSP_STATs_Test_Agnostic_100[KTSP_STATs_Test_Agnostic_100 == FALSE] <- 0
 
-save(KTSP_STATs_Train_Agnostic_100, KTSP_STATs_Test_Agnostic_100, file = "./Objs/KTSP/KTSP_STATs_Agnostic_100.rda")
+save(KTSP_STATs_Train_Agnostic_100, KTSP_STATs_Test_Agnostic_100, file = "./Objs/KTSP/KTSP_STATs_Agnostic_100_Pre.rda")
 
 
 #############################################################################
@@ -158,7 +158,7 @@ summary(ktspStatsTestUnRes_250$statistics)
 KTSP_STATs_Test_Agnostic_250 <- t(ktspStatsTestUnRes_250$comparisons)
 KTSP_STATs_Test_Agnostic_250[KTSP_STATs_Test_Agnostic_250 == FALSE] <- 0
 
-save(KTSP_STATs_Train_Agnostic_250, KTSP_STATs_Test_Agnostic_250, file = "./Objs/KTSP/KTSP_STATs_Agnostic_250.rda")
+save(KTSP_STATs_Train_Agnostic_250, KTSP_STATs_Test_Agnostic_250, file = "./Objs/KTSP/KTSP_STATs_Agnostic_250_Pre.rda")
 
 
 

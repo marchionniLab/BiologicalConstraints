@@ -221,6 +221,9 @@ quantile(Diff_Mechanistic_50, c(0.025, 0.975))
 range(All_50[, 'AUC_Test_Agnostic'])
 range(All_50[, 'AUC_Test_Mech'])
 
+summary(All_50[, 'AUC_Test_Agnostic'] > 0.50)
+summary(All_50[, 'AUC_Test_Mech'] > 0.50)
+
 ## Calculate the difference and CI of the difference
 #Diff <- MechKTSP_AUC_Test - AgnosticKTSP_AUC_Test
 #quantile(Diff, c(0.025, 0.975))
@@ -251,12 +254,12 @@ ModelCompareAUCTest_50$data_type <- "Testing"
 
 ModelCompareAUCTrain_50$NofFeatAgn <- "50_Genes"
 ModelCompareAUCTest_50$NofFeatAgn <- "50_Genes"
-# 
+
 # ###########################################################################
 ## Save for the main figure
 ModelCompare_KTSP <- rbind(ModelCompareAUCTrain_50, ModelCompareAUCTest_50)
 ModelCompare_KTSP$algorithm <- "KTSP"
-save(ModelCompare_KTSP, file = "./Objs/KTSP/ModelCompare_KTSP.rda")
+save(ModelCompare_KTSP, file = "./Objs/KTSP/ModelCompare_KTSP_Pre.rda")
 
 ##############################################################
 ### Work with boot object 100  
@@ -416,7 +419,7 @@ ModelCompare_KTSP_DiffNoFeat <- rbind(ModelCompareAUCTrain_50,
                                       ModelCompareAUCTest_500
 )
 
-save(ModelCompare_KTSP_DiffNoFeat, file = "./Objs/KTSP/ModelCompare_KTSP_DiffNoFeat.rda")
+save(ModelCompare_KTSP_DiffNoFeat, file = "./Objs/KTSP/ModelCompare_KTSP_DiffNoFeat_Pre.rda")
 
 ####################################################################################
 ####################################################################################

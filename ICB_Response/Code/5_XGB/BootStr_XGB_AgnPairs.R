@@ -23,7 +23,7 @@ library(patchwork)
 # Mechanistic
 ## Load data
 # load("./Objs/KTSP/KTSP_STATs_Mechanistic.rda")
-# load("./Objs/icbData.rda")
+# load("./Objs/icbData_Pre.rda")
 # 
 # ### Associated groups
 # usedTrainGroup <- mixTrainGroup
@@ -166,7 +166,7 @@ library(patchwork)
 # AUCs_XG_Mech <- bootobjectMech$t
 # colnames(AUCs_XG_Mech) <- c("AUC_Train", "AUC_Test", "N_ImportanVariables")
 
-load('./objs/XGB/XGB_bootobjectMech.rda')
+load('./objs/XGB/XGB_bootobjectMech_Pre.rda')
 
 #########################################################################3
 #########################################################################3
@@ -176,8 +176,8 @@ load('./objs/XGB/XGB_bootobjectMech.rda')
 # 25 pairs
 
 ## Load data
-load("./Objs/KTSP/KTSP_STATs_Agnostic_25.rda")
-load("./Objs/icbData.rda")
+load("./Objs/KTSP/KTSP_STATs_Agnostic_25_Pre.rda")
+load("./Objs/icbData_Pre.rda")
 
 
 ### Associated groups
@@ -329,8 +329,8 @@ bootobjectAgnostic_25 <- boot(data= Data_train_Agnostic, statistic= XGBStrap, R=
 # 50 pairs
 
 ## Load data
-load("./Objs/KTSP/KTSP_STATs_Agnostic_50.rda")
-load("./Objs/icbData.rda")
+load("./Objs/KTSP/KTSP_STATs_Agnostic_50_Pre.rda")
+load("./Objs/icbData_Pre.rda")
 
 
 ### Associated groups
@@ -481,8 +481,8 @@ bootobjectAgnostic_50 <- boot(data= Data_train_Agnostic, statistic= XGBStrap, R=
 # 100 pairs
 
 ## Load data
-load("./Objs/KTSP/KTSP_STATs_Agnostic_100.rda")
-load("./Objs/icbData.rda")
+load("./Objs/KTSP/KTSP_STATs_Agnostic_100_Pre.rda")
+load("./Objs/icbData_Pre.rda")
 
 
 ### Associated groups
@@ -633,8 +633,8 @@ bootobjectAgnostic_100 <- boot(data= Data_train_Agnostic, statistic= XGBStrap, R
 # 250 pairs
 
 ## Load data
-load("./Objs/KTSP/KTSP_STATs_Agnostic_250.rda")
-load("./Objs/icbData.rda")
+load("./Objs/KTSP/KTSP_STATs_Agnostic_250_Pre.rda")
+load("./Objs/icbData_Pre.rda")
 
 
 ### Associated groups
@@ -781,10 +781,10 @@ bootobjectAgnostic_250 <- boot(data= Data_train_Agnostic, statistic= XGBStrap, R
 ################################################################################################
 
 ### Save boot objects
-save(bootobjectMech, bootobjectAgnostic_25, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_250, file = "./Objs/XGB/XGBBootObjects_AgnPairs_new.rda")
+save(bootobjectMech, bootobjectAgnostic_25, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_250, file = "./Objs/XGB/XGBBootObjects_AgnPairs_new_Pre.rda")
 
 # Load
-load("./Objs/XGB/XGBBootObjects_AgnPairs.rda")
+load("./Objs/XGB/XGBBootObjects_AgnPairs_new_Pre.rda")
 
 ################################################################################################
 ################################################################################################
@@ -837,11 +837,11 @@ ModelCompareAUC_Test_25$NofFeatAgn <- "25_Pairs"
 ## For the main figure
 ModelCompare_XGB <- rbind(ModelCompareAUC_Train_25, ModelCompareAUC_Test_25)
 ModelCompare_XGB$algorithm <- "XGB"
-save(ModelCompare_XGB, file = "./Objs/XGB/ModelCompare_XGB_AgnPairs_new.rda")
+save(ModelCompare_XGB, file = "./Objs/XGB/ModelCompare_XGB_AgnPairs_new_Pre.rda")
 
 ####################################
 # Load the AUC comparisons from the indivdial genes and combine them with pairs
-load("./Objs/XGB/ModelCompareAUC_50_new.rda")
+load("./Objs/XGB/ModelCompareAUC_50_new_Pre.rda")
 
 # Combine
 ModelCompareAUC_Train_25_50 <- rbind(ModelCompareAUC_Train_25, ModelCompareAUC_Train_50)
@@ -895,7 +895,7 @@ ModelCompareAUC_Test_50$NofFeatAgn <- "50_Pairs"
 
 ####################################
 # Load the AUC comparisons from the indivdial genes and combine them with pairs
-load("./Objs/XGB/ModelCompareAUC_100_new.rda")
+load("./Objs/XGB/ModelCompareAUC_100_new_Pre.rda")
 
 ModelCompareAUC_Train_50_100 <- rbind(ModelCompareAUC_Train_50, ModelCompareAUC_Train_100)
 ModelCompareAUC_Test_50_100 <- rbind(ModelCompareAUC_Test_50, ModelCompareAUC_Test_100)
@@ -938,7 +938,7 @@ ModelCompareAUC_Test_100$NofFeatAgn <- "100_Pairs"
 
 ####################################
 # Load the AUC comparisons from the indivdial genes and combine them with pairs
-load("./Objs/XGB/ModelCompareAUC_200_new.rda")
+load("./Objs/XGB/ModelCompareAUC_200_new_Pre.rda")
 
 ModelCompareAUC_Train_100_200 <- rbind(ModelCompareAUC_Train_100, ModelCompareAUC_Train_200)
 ModelCompareAUC_Test_100_200 <- rbind(ModelCompareAUC_Test_100, ModelCompareAUC_Test_200)
@@ -981,7 +981,7 @@ ModelCompareAUC_Test_250$NofFeatAgn <- "250_Pairs"
 
 ####################################
 # Load the AUC comparisons from the indivdial genes and combine them with pairs
-load("./Objs/XGB/ModelCompareAUC_500_new.rda")
+load("./Objs/XGB/ModelCompareAUC_500_new_Pre.rda")
 
 ModelCompareAUC_Train_250_500 <- rbind(ModelCompareAUC_Train_250, ModelCompareAUC_Train_500)
 ModelCompareAUC_Test_250_500 <- rbind(ModelCompareAUC_Test_250, ModelCompareAUC_Test_500)
@@ -1001,7 +1001,7 @@ ModelCompare_XGB_DiffNoFeat <- rbind(ModelCompareAUC_Train_25_50,
                                      ModelCompareAUC_Test_250_500
 )
 
-save(ModelCompare_XGB_DiffNoFeat, file = "./Objs/XGB/ModelCompare_XGB_DiffNoFeat_new.rda")
+save(ModelCompare_XGB_DiffNoFeat, file = "./Objs/XGB/ModelCompare_XGB_DiffNoFeat_new_Pre.rda")
 
 ####################################################################################
 ####################################################################################

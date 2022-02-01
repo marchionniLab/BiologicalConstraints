@@ -55,7 +55,17 @@ run_SVM_genes = function(trainMat, testMat, trainGroup, testGroup, mechTSPs, fil
   trainMat = trainMat[genes, ]
   testMat = testMat[genes, ]
   
-  grid.svm = expand.grid(degree = 3, scale = 0.01, C = 0.25)
+  # grid.svm = expand.grid(degree = 3, scale = 0.01, C = 0.25)
+  
+  control <- trainControl(method="repeatedcv", number=10, repeats=5, classProbs = TRUE, summaryFunction = twoClassSummary, allowParallel = T)
+  
+  set.seed(333)
+  fit.svmPoly <- train(group ~ ., data=data.frame(group=trainGroup, t(trainMat)), method="svmPoly", trControl=control, metric = "ROC")  
+  
+  grid.svm = expand.grid(degree = fit.svmPoly$finalModel@kernelf@kpar$degree, 
+                         scale = fit.svmPoly$finalModel@kernelf@kpar$scale, 
+                         C = fit.svmPoly$finalModel@param$C)
+  
   
   fit.svm = train(group ~ ., data=data.frame(group=trainGroup, t(trainMat)), method="svmPoly", 
                   trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), 
@@ -91,6 +101,11 @@ run_SVM_genes = function(trainMat, testMat, trainGroup, testGroup, mechTSPs, fil
 ## ---------------------------------------------
 ## run SVM at the pair level
 
+# x = list.data$Bladder
+# data_title = "Bladder"
+# trainMat=x$trainMat; testMat=x$testMat; trainGroup=x$trainGroup; testGroup=x$testGroup
+# mechTSPs = list.mech$TF_MIR
+
 run_SVM_pairs = function(trainMat, testMat, trainGroup, testGroup, mechTSPs, filter=FALSE, classes=NULL){
   
   if(is.null(classes)){
@@ -110,29 +125,24 @@ run_SVM_pairs = function(trainMat, testMat, trainGroup, testGroup, mechTSPs, fil
   
   print(length(unique(as.vector(mechTSPs))))
   
-  if(length(unique(as.vector(mechTSPs))) < 500){
-  
-    fit.ktsp = SWAP.Train.KTSP(inputMat=trainMat, 
-                               phenoGroup=trainGroup, 
-                               krange=1:min(nrow(mechTSPs), 50), 
-                               FilterFunc=NULL, 
-                               featureNo=length(unique(as.vector(mechTSPs))), 
-                               RestrictedPairs=mechTSPs)
-  }else{
-    
-    fit.ktsp = SWAP.Train.KTSP(inputMat=trainMat, 
-                               phenoGroup=trainGroup, 
-                               krange=1:min(nrow(mechTSPs), 50), 
-                               FilterFunc=SWAP.Filter.Wilcoxon, 
-                               featureNo=500, 
-                               RestrictedPairs=mechTSPs)
-  
-  }
-  
+  fit.ktsp = SWAP.Train.KTSP(inputMat=trainMat, 
+                             phenoGroup=trainGroup, 
+                             krange=2:min(nrow(mechTSPs), 25), 
+                             FilterFunc=NULL, 
+                             featureNo=length(unique(as.vector(mechTSPs))), 
+                             RestrictedPairs=mechTSPs)
+
   trainV = 1 * SWAP.KTSP.Statistics(trainMat, fit.ktsp)$comparisons ## samples x pairs
   testV = 1 * SWAP.KTSP.Statistics(testMat, fit.ktsp)$comparisons
 
-  grid.svm = expand.grid(degree = 3, scale = 0.01, C = 0.25)
+  control <- trainControl(method="repeatedcv", number=10, repeats=5, classProbs = TRUE, summaryFunction = twoClassSummary, allowParallel = T)
+  
+  set.seed(333)
+  fit.svmPoly <- train(group ~ ., data=data.frame(group=trainGroup, trainV), method="svmPoly", trControl=control, metric = "ROC")  
+  
+  grid.svm = expand.grid(degree = fit.svmPoly$finalModel@kernelf@kpar$degree, 
+                         scale = fit.svmPoly$finalModel@kernelf@kpar$scale, 
+                         C = fit.svmPoly$finalModel@param$C)
   
   fit.svm = train(group ~ ., data=data.frame(group=trainGroup, trainV), method="svmPoly", 
                   trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), 
@@ -168,11 +178,11 @@ run_SVM_pairs = function(trainMat, testMat, trainGroup, testGroup, mechTSPs, fil
 
 ## gene level run
 
-list.R.genes =  utils.lapply_i(list.data[1:2], function(x, i, data_title){
+list.R.genes =  utils.lapply_i(list.data, function(x, i, data_title){
   
   print(sprintf("======= %s ==========", data_title))
   
-  utils.lapply_i(list.mech[1:2], function(mechTSPs, j, mech_title){
+  utils.lapply_i(list.mech, function(mechTSPs, j, mech_title){
     
     print(sprintf("[%s]", mech_title))
     
@@ -251,8 +261,8 @@ list.run.pairs = utils.lapply_i(list.R.pairs, function(Rlist, i, data_title){
 
 ## save
 
-save(list.R.genes, list.R.pairs, file="../Objs/list.R.svm.rda")
-save(list.run.genes, list.run.pairs, file="../Objs/list.run.svm.rda")
+save(list.R.genes, list.R.pairs, file="../Objs/list.R.svm.2.rda")
+save(list.run.genes, list.run.pairs, file="../Objs/list.run.svm.2.rda")
 
 
 

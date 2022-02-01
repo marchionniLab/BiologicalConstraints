@@ -91,7 +91,12 @@ run_RF_genes = function(trainMat, testMat, trainGroup, testGroup, mechTSPs, filt
 ## ---------------------------------------------
 ## run RF at the pair level
 
-run_RF_pairs = function(trainMat, testMat, trainGroup, testGroup, mechTSPs, filter=FALSE, classes=NULL){
+# x = list.data$Bladder
+# data_title = "Bladder"
+# trainMat=x$trainMat; testMat=x$testMat; trainGroup=x$trainGroup; testGroup=x$testGroup
+# mechTSPs = list.mech$TF_MIR
+
+run_RF_pairs = function(trainMat, testMat, trainGroup, testGroup, mechTSPs, filter=FALSE, classes=NULL, data_title){
   
   if(is.null(classes)){
     classes = levels(as.factor(trainGroup))
@@ -108,41 +113,42 @@ run_RF_pairs = function(trainMat, testMat, trainGroup, testGroup, mechTSPs, filt
     stop("ERROR: no mechanistic pairs found in data")
   }
   
-  P = mechTSPs
-  colnames(P) = c("gene1", "gene2")
-  rownames(P) = apply(P, 1, function(p) paste(p, collapse=","))
-  
-  fit.ktsp = list(TSPs=P)
-  
-  # if(nrow(mechTSPs) < )
-  
   print(length(unique(as.vector(mechTSPs))))
   
-  if(length(unique(as.vector(mechTSPs))) < 500){
-  
-    fit.ktsp = SWAP.Train.KTSP(inputMat=trainMat, 
-                               phenoGroup=trainGroup, 
-                               krange=1:min(nrow(mechTSPs), 50), 
-                               FilterFunc=NULL, 
-                               featureNo=length(unique(as.vector(mechTSPs))), 
-                               RestrictedPairs=mechTSPs)
-  }else{
+  if(data_title != "ZBladder"){
     
     fit.ktsp = SWAP.Train.KTSP(inputMat=trainMat, 
                                phenoGroup=trainGroup, 
-                               krange=1:min(nrow(mechTSPs), 50), 
-                               FilterFunc=SWAP.Filter.Wilcoxon, 
-                               featureNo=500, 
+                               krange=2:min(nrow(mechTSPs), 25), 
+                               FilterFunc=NULL, 
+                               featureNo=length(unique(as.vector(mechTSPs))), 
                                RestrictedPairs=mechTSPs)
-  
+    
+  }else{
+    
+    # bladder
+    
+    fit.ktsp = SWAP.Train.KTSP(inputMat=trainMat[unique(as.vector(mechTSPs)), ], 
+                               phenoGroup=trainGroup, 
+                               krange=37, 
+                               FilterFunc=SWAP.Filter.Wilcoxon, 
+                               featureNo=length(unique(as.vector(mechTSPs))))
+    
   }
+    
+  # if(length(unique(as.vector(mechTSPs))) > 500){
+  #   
+  #   fit.ktsp = SWAP.Train.KTSP(inputMat=trainMat, 
+  #                              phenoGroup=trainGroup, 
+  #                              krange=1:min(nrow(mechTSPs), 50), 
+  #                              FilterFunc=SWAP.Filter.Wilcoxon, 
+  #                              featureNo=500, 
+  #                              RestrictedPairs=mechTSPs)
+  # 
+  # }
   
   trainV = 1 * SWAP.KTSP.Statistics(trainMat, fit.ktsp)$comparisons ## samples x pairs
   testV = 1 * SWAP.KTSP.Statistics(testMat, fit.ktsp)$comparisons
-  
-  # if(ncol(trainV) != nrow(P)){
-  #   stop("ERROR: not all pairs converted to votes")
-  # }
   
   tmp <- as.vector(table(trainGroup))
   num_classes <- length(tmp)
@@ -221,6 +227,8 @@ list.run.genes = utils.lapply_i(list.R.genes, function(Rlist, i, data_title){
 
 ## pair level run
 
+print("====== PAIRS =========")
+
 list.R.pairs = utils.lapply_i(list.data, function(x, i, data_title){
   
   print(sprintf("======= %s ==========", data_title))
@@ -233,7 +241,8 @@ list.R.pairs = utils.lapply_i(list.data, function(x, i, data_title){
                      testMat=x$testMat, 
                      trainGroup=x$trainGroup, 
                      testGroup=x$testGroup, 
-                     mechTSPs=mechTSPs)
+                     mechTSPs=mechTSPs,
+                     data_title=data_title)
     
   })
   
@@ -263,8 +272,8 @@ list.run.pairs = utils.lapply_i(list.R.pairs, function(Rlist, i, data_title){
 
 ## save
 
-save(list.R.genes, list.R.pairs, file="../Objs/list.R.rf.rda")
-save(list.run.genes, list.run.pairs, file="../Objs/list.run.rf.rda")
+save(list.R.genes, list.R.pairs, file="../Objs/list.R.rf.2.rda") 
+save(list.run.genes, list.run.pairs, file="../Objs/list.run.rf.2.rda")
 
 
 

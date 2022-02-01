@@ -27,6 +27,11 @@ library(rutils)
 l1 = load("../Objs/list.data.rda")
 l2 = load("../Objs/list.mech.rda")
 
+# x = list.data$Bladder
+# data_title = "Bladder"
+# trainMat=x$trainMat; testMat=x$testMat; trainGroup=x$trainGroup; testGroup=x$testGroup
+# mechTSPs = list.mech$Alzheimer
+
 
 run_ktsp = function(trainMat, testMat, trainGroup, testGroup, mechTSPs, krange, featNo, filter=FALSE, classes=NULL){
   
@@ -86,7 +91,7 @@ list.R = utils.lapply_i(list.data, function(x, i, data_title){
                  trainGroup=x$trainGroup, 
                  testGroup=x$testGroup, 
                  mechTSPs=mechTSPs, 
-                 krange=1:50, featNo=100)
+                 krange=2:25, featNo=100)
     
   })
   
@@ -114,8 +119,8 @@ list.run = lapply(list.R, function(Rlist){
   
 })
 
-save(list.R, file="../Objs/list.R.ktsp.rda")
-save(list.run, file="../Objs/list.run.ktsp.rda")
+save(list.R, file="../Objs/list.R.ktsp.2.rda")
+save(list.run, file="../Objs/list.run.ktsp.2.rda")
 
 
 
