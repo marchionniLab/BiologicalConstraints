@@ -55,8 +55,7 @@ set.seed(333)
 
 ktspPredictorRes <- SWAP.Train.KTSP(
   usedTrainMat, usedTrainGroup, krange=ktsp,
-  FilterFunc = SWAP.Filter.Wilcoxon, featureNo=featNo, RestrictedPairs = myTSPs,
-  disjoint = F)
+  FilterFunc = SWAP.Filter.Wilcoxon, featureNo=featNo, RestrictedPairs = myTSPs)
 
 ktspPredictorRes
 

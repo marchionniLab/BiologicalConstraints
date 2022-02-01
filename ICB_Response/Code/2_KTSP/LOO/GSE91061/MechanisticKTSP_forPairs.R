@@ -19,7 +19,7 @@ library(xtable)
 
 ###########################################################################
 ### Load expression and phenotype data
-load("./Objs/icbData_GSE91061Out.rda")
+load("./Objs/icbData_GSE91061Out_Pre.rda")
 
 ############################################################################
 ## Load the selected genes

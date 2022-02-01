@@ -17,7 +17,7 @@ library(mltools)
 
 #####################################################################
 ### Load data
-load("./Objs/icbData_GSE91061Out.rda")
+load("./Objs/icbData_GSE91061Out_Pre.rda")
 
 ##########################################################
 ## Quantile normalize the datasets
