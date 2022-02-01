@@ -41,6 +41,10 @@ Genes <- Genes[!duplicated(Genes)]
 
 myTSPs <- t(combn(Genes,2))
 
+#save(myTSPs, file = './objs/metastasisPairs.rda')
+colnames(myTSPs) <- c('gene1', 'gene2')
+write_csv(as.data.frame(myTSPs), file = './objs/metastasis_pairs.csv')
+
 #################################
 ### Quantile normalize
 usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")[RGenes, ]
