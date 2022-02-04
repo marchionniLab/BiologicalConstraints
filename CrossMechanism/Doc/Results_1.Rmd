@@ -142,15 +142,21 @@ kable(list.run$Prostate, caption="Prostate")
 
 ```
 
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+
+kable(list.run$ICB_Response, caption="ICB")
+
+```
+
 ## RF
 
-### Gene level
+<!-- ### Gene level -->
 
-For a given set of mechanistic pairs:
+<!-- #For a given set of mechanistic pairs: -->
 
-* Take all mechanistic pairs available in the given dataset, take the genes forming these pairs
-* Take the gene expression data for these genes and supply them for random forest training and testing
-* parameters: `mtryStart = 1, ntreeTry=500, stepFactor = 1, improve=0.05`
+<!-- * Take all mechanistic pairs available in the given dataset, take the genes forming these pairs -->
+<!-- * Take the gene expression data for these genes and supply them for random forest training and testing -->
+<!-- * parameters: `mtryStart = 1, ntreeTry=500, stepFactor = 1, improve=0.05` -->
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
 
@@ -160,23 +166,23 @@ l4 = load("../Objs/list.run.rf.2.rda")
 ```
 
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+<!-- ```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6} -->
 
-kable(list.run.genes$Bladder, caption="Bladder")
+<!-- kable(list.run.genes$Bladder, caption="Bladder") -->
 
-```
+<!-- ``` -->
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+<!-- ```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6} -->
 
-kable(list.run.genes$Breast, caption="Breast")
+<!-- kable(list.run.genes$Breast, caption="Breast") -->
 
-```
+<!-- ``` -->
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+<!-- ```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6} -->
 
-kable(list.run.genes$Prostate, caption="Prostate")
+<!-- kable(list.run.genes$Prostate, caption="Prostate") -->
 
-```
+<!-- ``` -->
 
 ### Pair level
 
@@ -205,43 +211,48 @@ kable(list.run.pairs$Prostate, caption="Prostate")
 
 ```
 
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+
+kable(list.run.pairs$ICB_Response, caption="ICB")
+
+```
 
 
 ## SVM
 
-### Gene level
+<!-- ### Gene level -->
 
-For a given set of mechanistic pairs:
+<!-- For a given set of mechanistic pairs: -->
 
-* Take all mechanistic pairs available in the given dataset, take the genes forming these pairs
-* Take the gene expression data for these genes and supply them for SVM training and testing
-* parameters: polynomial SVM with `degree = 3, scale = 0.01, C = 0.25`
+<!-- * Take all mechanistic pairs available in the given dataset, take the genes forming these pairs -->
+<!-- * Take the gene expression data for these genes and supply them for SVM training and testing -->
+<!-- * parameters: polynomial SVM with `degree = 3, scale = 0.01, C = 0.25` -->
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
 
 
-l4 = load("../Objs/list.run.svm.rda")
+l5 = load("../Objs/list.run.svm.2.rda")
 
 ```
 
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+<!-- ```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6} -->
 
-kable(list.run.genes$Bladder, caption="Bladder")
+<!-- kable(list.run.genes$Bladder, caption="Bladder") -->
 
-```
+<!-- ``` -->
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+<!-- ```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6} -->
 
-kable(list.run.genes$Breast, caption="Breast")
+<!-- kable(list.run.genes$Breast, caption="Breast") -->
 
-```
+<!-- ``` -->
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+<!-- ```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6} -->
 
-kable(list.run.genes$Prostate, caption="Prostate")
+<!-- kable(list.run.genes$Prostate, caption="Prostate") -->
 
-```
+<!-- ``` -->
 
 ### Pair level
 
@@ -270,43 +281,48 @@ kable(list.run.pairs$Prostate, caption="Prostate")
 
 ```
 
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+
+kable(list.run.pairs$ICB_Response, caption="ICB")
+
+```
 
 ## XGB
 
-### Gene level
+<!-- ### Gene level -->
 
-For a given set of mechanistic pairs:
+<!-- For a given set of mechanistic pairs: -->
 
-* Take all mechanistic pairs available in the given dataset, take the genes forming these pairs
-* Take the gene expression data for these genes and supply them for XGB training and testing
-* For training, split the data into training vs validation ($70\%$ vs. $30\%$)
-* parameters: `nrounds = 500, early_stopping_rounds = 50` and other general XBG parameters
+<!-- * Take all mechanistic pairs available in the given dataset, take the genes forming these pairs -->
+<!-- * Take the gene expression data for these genes and supply them for XGB training and testing -->
+<!-- * For training, split the data into training vs validation ($70\%$ vs. $30\%$) -->
+<!-- * parameters: `nrounds = 500, early_stopping_rounds = 50` and other general XBG parameters -->
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
 
 
-l5 = load("../Objs/list.run.xgb.2.rda")
+l6 = load("../Objs/list.run.xgb.2.rda")
 
 ```
 
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+<!-- ```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6} -->
 
-kable(list.run.genes$Bladder, caption="Bladder")
+<!-- kable(list.run.genes$Bladder, caption="Bladder") -->
 
-```
+<!-- ``` -->
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+<!-- ```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6} -->
 
-kable(list.run.genes$Breast, caption="Breast")
+<!-- kable(list.run.genes$Breast, caption="Breast") -->
 
-```
+<!-- ``` -->
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+<!-- ```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6} -->
 
-kable(list.run.genes$Prostate, caption="Prostate")
+<!-- kable(list.run.genes$Prostate, caption="Prostate") -->
 
-```
+<!-- ``` -->
 
 ### Pair level
 
@@ -337,4 +353,8 @@ kable(list.run.pairs$Prostate, caption="Prostate")
 
 ```
 
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
 
+kable(list.run.pairs$ICB_Response, caption="ICB")
+
+```

@@ -272,7 +272,8 @@ list.R.pairs = utils.lapply_i(list.data, function(x, i, data_title){
                      trainGroup=x$trainGroup, 
                      testGroup=x$testGroup, 
                      mechTSPs=mechTSPs,
-                     data_title = data_title, mech_title=mech_title)
+                     data_title = data_title, 
+                     mech_title=mech_title)
     
   })
   
