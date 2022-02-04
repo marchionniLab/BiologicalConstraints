@@ -13,7 +13,7 @@ library(dplyr)
 library(mltools)
 
 ## Load data
-load("./Objs/icbData_GSE78220Out.rda")
+load("./Objs/icbData_GSE78220Out_Pre.rda")
 
 
 ### Quantile normalize

@@ -19,7 +19,7 @@ library(plotROC)
 
 ## Load data
 load("./Objs/KTSP/KTSP_STATs_Agnostic_GSE91061Out.rda")
-load("./Objs/icbData_GSE91061Out.rda")
+load("./Objs/icbData_GSE91061Out_Pre.rda")
 
 Training <- t(KTSP_STATs_Train_Agnostic)
 

@@ -26,8 +26,8 @@ list.data = list()
 ## -------------
 ## Bladder
 
-l1 = load("../../Bladder/Objs/progressionDataGood2.rda")
-l2 = load("../../Bladder/Objs/Correlation/RGenes.rda")
+l1 = load("../Bladder/Objs/progressionDataGood2.rda")
+l2 = load("../Bladder/Objs/Correlation/RGenes.rda")
 
 usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")[RGenes, ]
 usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")[RGenes, ]
@@ -47,7 +47,7 @@ rm(list=c(l1, l2))
 ## -------------
 ## Breast
 
-l3 = load("../../Breast/Objs/ChemoDataNew.rda")
+l3 = load("../Breast/Objs/ChemoDataNew.rda")
 
 usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
 usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")
@@ -67,8 +67,8 @@ rm(list=l3)
 ## -------------
 ## Prostate
 
-l4 = load("../../Prostate/Objs/MetastasisDataGood.rda")
-l5 = load("../../Prostate/Objs/Correlation/RGenes.rda")
+l4 = load("../Prostate/Objs/MetastasisDataGood.rda")
+l5 = load("../Prostate/Objs/Correlation/RGenes.rda")
 
 usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")[RGenes, ]
 usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")[RGenes, ]
@@ -83,9 +83,31 @@ list.data[["Prostate"]] = list(
   testGroup = usedTestGroup
 )
 
+rm(list = c(l4,l5))
+
+## -------------
+## ICB response
+
+l6 = load("../ICB_Response/Objs/icbData.rda")
+
+usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
+usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")
+
+usedTrainGroup <- mixTrainGroup
+usedTestGroup <- mixTestGroup
+
+list.data[["ICB_Response"]] = list(
+  trainMat = usedTrainMat,
+  testMat = usedTestMat,
+  trainGroup = usedTrainGroup,
+  testGroup = usedTestGroup
+)
+
+rm(list = l6)
+
 ## -------------
 
-save(list.data, file="../Objs/list.data.rda")
+save(list.data, file="../CrossMechanism/Objs/list.data.rda")
 
 
 

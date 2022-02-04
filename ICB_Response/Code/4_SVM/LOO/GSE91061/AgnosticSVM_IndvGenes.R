@@ -19,11 +19,23 @@ registerDoParallel(cl)
 #######################################################################
 
 ## Load data
-load("./Objs/icbData_GSE91061Out.rda")
+load("./Objs/icbData_GSE91061Out_Pre.rda")
 
 ### Normalization
 usedTrainMat <- normalizeBetweenArrays(trainMat, method = "quantile")
 usedTestMat <- testMat
+
+######
+# remove genes with NA values from the training and testing matrices
+sel <- which(apply(usedTrainMat, 1, function(x) all(is.finite(x)) ))
+usedTrainMat <- usedTrainMat[sel, ] 
+
+sel2 <- which(apply(usedTestMat, 1, function(x) all(is.finite(x)) ))
+usedTestMat <- usedTestMat[sel2, ] 
+
+keep <- intersect(rownames(usedTrainMat), rownames(usedTestMat))
+usedTrainMat <- usedTrainMat[keep, ]
+usedTestMat <- usedTestMat[keep,]
 
 ### Associated groups
 usedTrainGroup <- trainGroup
@@ -83,16 +95,16 @@ fit.svmPoly_agnostic
 
 ## ROC stat for the training data
 train_pred_prob_svmPoly_agnostic <- predict(fit.svmPoly_agnostic, Training, type = "prob")
-ROCTrain <- roc(usedTrainGroup, train_pred_prob_svmPoly_agnostic[,2], plot = F, ci = T, print.auc=TRUE, levels = c("NR", "R"), direction = "<", col="blue", lwd=2, grid=TRUE, main = "ROC Test SVM Poly (Agnostic)")
+ROCTrain <- roc(usedTrainGroup, train_pred_prob_svmPoly_agnostic[,2], plot = F, ci = T, print.auc=TRUE, levels = c("NR", "R"), col="blue", lwd=2, grid=TRUE, main = "ROC Test SVM Poly (Agnostic)")
 ROCTrain
 
 # Best threshold
-thr <- coords(roc(usedTrainGroup, train_pred_prob_svmPoly_agnostic[,2], levels = c("NR", "R"), direction = "<"), "best")["threshold"]
+thr <- coords(roc(usedTrainGroup, train_pred_prob_svmPoly_agnostic[,1], levels = c("NR", "R"), direction = "<"), "best")["threshold"]
 thr <- thr$threshold
 thr
 
 ## Convert predicted probabilities to binary outcome
-train_pred_classes_svmPoly_agnostic <- ifelse(train_pred_prob_svmPoly_agnostic[,2] >= thr, "R", "NR")
+train_pred_classes_svmPoly_agnostic <- ifelse(train_pred_prob_svmPoly_agnostic[,1] >= thr, "R", "NR")
 table(train_pred_classes_svmPoly_agnostic)
 # Convert to factor
 train_pred_classes_svmPoly_agnostic <- factor(train_pred_classes_svmPoly_agnostic, levels = c("NR", "R"))
@@ -113,11 +125,11 @@ rownames(TrainPerf) <- c("AUC", "AUC_CI_low", "AUC_CI_high", "Accuracy", "Bal.Ac
 ## Predict in the testing data
 ## ROC/AUC in the Testing set
 test_pred_prob_svmPoly_agnostic <- predict(fit.svmPoly_agnostic, Testing, type = "prob")
-ROCTest <- roc(usedTestGroup, test_pred_prob_svmPoly_agnostic[,2], plot = F, print.auc=TRUE, ci = T, levels = c("NR", "R"), direction = "<", col="blue", lwd=2, grid=TRUE, main = "ROC Test SVM Poly (Agnostic)")
+ROCTest <- roc(usedTestGroup, test_pred_prob_svmPoly_agnostic[,2], plot = F, print.auc=TRUE, ci = T, levels = c("NR", "R"), col="blue", lwd=2, grid=TRUE, main = "ROC Test SVM Poly (Agnostic)")
 ROCTest
 
 # Predict classes according to the best threshold
-test_pred_classes_svmPoly_agnostic <- ifelse(test_pred_prob_svmPoly_agnostic[,2] > thr, "R", "NR")
+test_pred_classes_svmPoly_agnostic <- ifelse(test_pred_prob_svmPoly_agnostic[,1] > thr, "R", "NR")
 table(test_pred_classes_svmPoly_agnostic)
 # Convert to factor
 test_pred_classes_svmPoly_agnostic <- factor(test_pred_classes_svmPoly_agnostic, levels = c("NR", "R"))

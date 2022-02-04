@@ -28,7 +28,7 @@ list.mech = list()
 ## -------------
 ## TF-MiR (Bladder) mechanism
 
-l1 = load("../../../Genes/allTSPs.rda")
+l1 = load("../../Genes/allTSPs.rda")
 
 list.mech[["TF_MIR"]] = myTSPs
 
@@ -37,8 +37,8 @@ rm(myTSPs)
 ## -------------
 ## NOTCH and MYC (Breast) mechanism
 
-l2 = load("../../Breast/Objs/NotchPairs.rda")
-l3 = load("../../Breast/Objs/MycPairs.rda")
+l2 = load("../Breast/Objs/NotchPairs.rda")
+l3 = load("../Breast/Objs/MycPairs.rda")
 
 myTSPs <- rbind(NotchPairs, MycPairs)
 colnames(myTSPs) <- c("BadGene", "GoodGene")
@@ -51,15 +51,15 @@ rm(myTSPs)
 ## GO (Prostate) mechanism
 
 
-Genes1 <- read.delim("../../Prostate/objs/GO_Adhesion.txt")
+Genes1 <- read.delim("../Prostate/objs/GO_Adhesion.txt")
 Genes1 <- as.matrix(Genes1)
 Genes1 <- Genes1[-1,]
 
-Genes2 <- read.delim("../../Prostate/objs/GO_Activation.txt")
+Genes2 <- read.delim("../Prostate/objs/GO_Activation.txt")
 Genes2 <- as.matrix(Genes2)
 Genes2 <- Genes2[-1,]
 
-Genes3 <- read.delim("../../Prostate/objs/GO_O2Response.txt")
+Genes3 <- read.delim("../Prostate/objs/GO_O2Response.txt")
 Genes3 <- as.matrix(Genes3)
 Genes3 <- Genes3[-1,]
 
@@ -71,35 +71,45 @@ myTSPs <- t(combn(Genes,2))
 list.mech[["GO"]] = myTSPs
 
 ## -------------
-## Alzheimer mechanism
+## T cell activation mechanism
 
-l4 = load("../Objs/CancerUnrelatedMechanisms/AlzheimerPairs.rda")
+l4 = load("/Users/mohamedomar/Dropbox (MechPred)/MechPred/USER/Mohamed/MechanisticModels/BiologicalConstraints/ICB_Response/Objs/ImmunePairs.rda")
 
-list.mech[["Alzheimer"]] = AlzheimerPairs
+list.mech[["T-cell activation"]] = ImmunePairs
 
 rm(list=l4)
 
+
 ## -------------
-## Diabetes mechanism
+## Alzheimer mechanism
 
-l5 = load("../Objs/CancerUnrelatedMechanisms/DiabetesPairs.rda")
+l5 = load("../CrossMechanism/Objs/CancerUnrelatedMechanisms/AlzheimerPairs.rda")
 
-list.mech[["Diabetes"]] = DiabetesPairs
+list.mech[["Alzheimer"]] = AlzheimerPairs
 
 rm(list=l5)
 
 ## -------------
-## Viral infection mechanism
+## Diabetes mechanism
 
-l6 = load("../Objs/CancerUnrelatedMechanisms/VirInfectionPairs.rda")
+l6 = load("../CrossMechanism/Objs/CancerUnrelatedMechanisms/DiabetesPairs.rda")
 
-list.mech[["Viral"]] = VirInfectionPairs
+list.mech[["Diabetes"]] = DiabetesPairs
 
 rm(list=l6)
 
 ## -------------
+## Viral infection mechanism
 
-save(list.mech, file="../Objs/list.mech.rda")
+l7 = load("../CrossMechanism/Objs/CancerUnrelatedMechanisms/VirInfectionPairs.rda")
+
+list.mech[["Viral"]] = VirInfectionPairs
+
+rm(list=l7)
+
+## -------------
+
+save(list.mech, file="../CrossMechanism/Objs/list.mech.rda")
 
 
 

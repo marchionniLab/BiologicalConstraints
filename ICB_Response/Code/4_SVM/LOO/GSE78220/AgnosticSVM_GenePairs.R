@@ -15,7 +15,7 @@ registerDoParallel(cl)
 
 ## Agnostic
 load("./Objs/KTSP/KTSP_STATs_Agnostic_GSE78220Out.rda")
-load("./Objs/icbData_GSE78220Out.rda")
+load("./Objs/icbData_GSE78220Out_Pre.rda")
 
 
 usedTrainGroup <- trainGroup
@@ -53,7 +53,7 @@ fit.svmPoly <- train(usedTrainGroup~., data=Data_train, method="svmPoly", trCont
 fit.svmPoly
 
 ## Training using all data (using the best parameters)
-Grid <- expand.grid(degree = 1, scale = 0.01, C = 0.5)
+Grid <- expand.grid(degree = 1, scale = 1, C = 0.25)
 set.seed(333)
 fit.svmPoly_agnostic_OnKTSP <- train(usedTrainGroup~., data=Data_train, method="svmPoly", trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), tuneGrid = Grid, metric = c("ROC"))
 fit.svmPoly_agnostic_OnKTSP

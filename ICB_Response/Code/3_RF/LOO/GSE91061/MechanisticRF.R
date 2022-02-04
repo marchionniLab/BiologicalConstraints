@@ -13,7 +13,7 @@ library(varSelRF)
 
 ## Load data
 load("./Objs/KTSP/KTSP_STATs_Mechanistic_GSE91061Out.rda")
-load("./Objs/icbData_GSE91061Out.rda")
+load("./Objs/icbData_GSE91061Out_Pre.rda")
 
 
 usedTrainGroup <- trainGroup

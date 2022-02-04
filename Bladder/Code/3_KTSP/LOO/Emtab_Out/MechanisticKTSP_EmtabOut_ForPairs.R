@@ -9,8 +9,6 @@
 ###### 
 # Clean Work space
 rm(list = ls())
-# Set work directory
-setwd("/Volumes/Macintosh/Research/Projects/Bladder")
 
 ############################################################################
 ### Load library
@@ -71,6 +69,8 @@ ktspPredictorRes <- SWAP.Train.KTSP(
   FilterFunc = SWAP.Filter.Wilcoxon, featureNo=featNo)
 
 ktspPredictorRes
+
+xx <- SWAP.Filter.Wilcoxon(usedTrainMat, phenoGroup = usedTrainGroup, featureNo = nrow(usedTrainMat))
 
 ############################################################################
 ### Compute the sum and find the best threshold: All training samples

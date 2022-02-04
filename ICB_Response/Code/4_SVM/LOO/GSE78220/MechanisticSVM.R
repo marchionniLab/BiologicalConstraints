@@ -19,7 +19,7 @@ registerDoParallel(cl)
 
 ## Load data
 load("./Objs/KTSP/KTSP_STATs_Mechanistic_GSE78220Out.rda")
-load("./Objs/icbData_GSE78220Out.rda")
+load("./Objs/icbData_GSE78220Out_Pre.rda")
 
 
 
@@ -61,7 +61,7 @@ fit.svmPoly <- train(usedTrainGroup~., data=Data_train, method="svmPoly", trCont
 fit.svmPoly
 
 ## Training using all data (using the best parameters)
-Grid <- expand.grid(degree = 1, scale = 0.01, C = 4)
+Grid <- expand.grid(degree = 1, scale = 0.001, C = 0.25)
 set.seed(333)
 fit.svmPoly_mechanistic_OnKTSP <- train(usedTrainGroup~., data=Data_train, method="svmPoly", trControl=trainControl(method = "none", classProbs = TRUE, summaryFunction = twoClassSummary), tuneGrid = Grid, metric = c("ROC"))
 fit.svmPoly_mechanistic_OnKTSP

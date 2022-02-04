@@ -12,7 +12,7 @@ library(mltools)
 
 ## Agnostic
 load("./Objs/KTSP/KTSP_STATs_Agnostic_GSE78220Out.rda")
-load("./Objs/icbData_GSE78220Out.rda")
+load("./Objs/icbData_GSE78220Out_Pre.rda")
 
 
 usedTrainGroup <- trainGroup
@@ -29,7 +29,7 @@ set.seed(333)
 tuneRF(x=predictor_data, y=usedTrainGroup, plot = TRUE, improve = 0.01, ntreeTry = 50, proximity = TRUE, sampsize = sampsizes)
 
 set.seed(333)
-RF_Agnostic_OnKTSP <- randomForest(x =predictor_data, y=usedTrainGroup, importance = TRUE, ntree = 50, mtry = 3 ,proximity=TRUE, na.action = na.omit, sampsize = sampsizes)
+RF_Agnostic_OnKTSP <- randomForest(x =predictor_data, y=usedTrainGroup, importance = TRUE, ntree = 50, mtry = 5 ,proximity=TRUE, na.action = na.omit, sampsize = sampsizes)
 RF_Agnostic_OnKTSP
 
 # Predictions in the training data

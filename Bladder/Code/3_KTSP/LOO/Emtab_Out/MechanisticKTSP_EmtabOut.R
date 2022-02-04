@@ -9,8 +9,6 @@
 ###### 
 # Clean Work space
 rm(list = ls())
-# Set work directory
-setwd("/Volumes/Macintosh/Research/Projects/Bladder")
 
 ############################################################################
 ### Load library

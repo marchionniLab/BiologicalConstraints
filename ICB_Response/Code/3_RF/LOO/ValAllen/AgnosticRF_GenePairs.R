@@ -12,7 +12,7 @@ library(mltools)
 
 ## Agnostic
 load("./Objs/KTSP/KTSP_STATs_Agnostic_VanAllenOut.rda")
-load("./Objs/icbData_VanAllenOut.rda")
+load("./Objs/icbData_VanAllenOut_Pre.rda")
 
 
 usedTrainGroup <- trainGroup

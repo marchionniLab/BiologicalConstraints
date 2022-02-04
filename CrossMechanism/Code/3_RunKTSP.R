@@ -24,8 +24,8 @@ library(rutils)
 
 ## ---------------------
 
-l1 = load("../Objs/list.data.rda")
-l2 = load("../Objs/list.mech.rda")
+l1 = load("../CrossMechanism/Objs/list.data.rda")
+l2 = load("../CrossMechanism/Objs/list.mech.rda")
 
 # x = list.data$Bladder
 # data_title = "Bladder"
@@ -119,8 +119,8 @@ list.run = lapply(list.R, function(Rlist){
   
 })
 
-save(list.R, file="../Objs/list.R.ktsp.2.rda")
-save(list.run, file="../Objs/list.run.ktsp.2.rda")
+save(list.R, file="../CrossMechanism/Objs/list.R.ktsp.2.rda")
+save(list.run, file="../CrossMechanism/Objs/list.run.ktsp.2.rda")
 
 
 

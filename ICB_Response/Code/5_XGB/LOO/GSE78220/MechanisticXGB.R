@@ -16,7 +16,7 @@ library(plotROC)
 
 ## Load data
 load("./Objs/KTSP/KTSP_STATs_Mechanistic_GSE78220Out.rda")
-load("./Objs/icbData_GSE78220Out.rda")
+load("./Objs/icbData_GSE78220Out_Pre.rda")
 
 Training <- t(KTSP_STATs_Train_Mechanistic)
 
@@ -117,9 +117,9 @@ parameters <- list(
   booster            = "gbtree",        
   silent             = 1,                 
   # Booster Parameters
-  eta                = 0.1,           
+  eta                = 0.001,           
   gamma              = 0,           
-  max_depth          = 1,           
+  max_depth          = 2,           
   min_child_weight   = 1,          
   subsample          = 0.5,          
   colsample_bytree   = 1,         

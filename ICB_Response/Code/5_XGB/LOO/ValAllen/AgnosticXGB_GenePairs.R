@@ -19,7 +19,7 @@ library(plotROC)
 
 ## Load data
 load("./Objs/KTSP/KTSP_STATs_Agnostic_VanAllenOut.rda")
-load("./Objs/icbData_VanAllenOut.rda")
+load("./Objs/icbData_VanAllenOut_Pre.rda")
 
 Training <- t(KTSP_STATs_Train_Agnostic)
 

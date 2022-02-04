@@ -10,11 +10,21 @@ library(limma)
 library(mltools)
 
 ## Load the data
-load("./Objs/icbData_VanAllenOut.rda")
+load("./Objs/icbData_VanAllenOut_Pre.rda")
 
 ### Normalization
 usedTrainMat <- normalizeBetweenArrays(trainMat, method = "quantile")
 usedTestMat <- testMat
+
+sel <- which(apply(usedTrainMat, 1, function(x) all(is.finite(x)) ))
+usedTrainMat <- usedTrainMat[sel, ] 
+
+sel2 <- which(apply(usedTestMat, 1, function(x) all(is.finite(x)) ))
+usedTestMat <- usedTestMat[sel2, ] 
+
+keep <- intersect(rownames(usedTrainMat), rownames(usedTestMat))
+usedTrainMat <- usedTrainMat[keep, ]
+usedTestMat <- usedTestMat[keep, ]
 
 ### Associated groups
 usedTrainGroup <- trainGroup
@@ -56,7 +66,7 @@ set.seed(333)
 tuneRF(x=predictor_data, y=target, plot = TRUE, improve = 0.01, ntreeTry = 1000, proximity = TRUE, sampsize = sampsizes, na.action = na.omit)
 
 set.seed(333)
-RF_Agnostic <- randomForest(x =predictor_data, y=target, importance = TRUE, ntree = 1000, mtry = 65 ,proximity=TRUE, na.action = na.omit, sampsize = sampsizes)
+RF_Agnostic <- randomForest(x =predictor_data, y=target, importance = TRUE, ntree = 1000, mtry = 17 ,proximity=TRUE, na.action = na.omit, sampsize = sampsizes)
 print(RF_Agnostic)
 
 # ROC curve in training data

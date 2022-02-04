@@ -11,22 +11,22 @@ library(ggplot2)
 # Load the agnostic pairs models
 AgnosticGSE78220_Out <- load("./Objs/XGB/GSE78220_Out_XGB_AgnosticPerformance.rda")
 AgnosticGSE91061_Out <- load("./Objs/XGB/GSE91061_Out_XGB_AgnosticPerformance.rda")
-AgnosticGSE115821_Out <- load("./Objs/XGB/GSE115821_Out_XGB_AgnosticPerformance.rda")
-AgnosticTCGA_Out <- load("./Objs/XGB/TCGA_Out_XGB_AgnosticPerformance.rda")
+#AgnosticGSE115821_Out <- load("./Objs/XGB/GSE115821_Out_XGB_AgnosticPerformance.rda")
+#AgnosticTCGA_Out <- load("./Objs/XGB/TCGA_Out_XGB_AgnosticPerformance.rda")
 AgnosticVanAllen_Out <- load("./Objs/XGB/VanAllen_Out_XGB_AgnosticPerformance.rda")
 
 # Load the agnostic genes models
 AgnosticGSE78220_Out_indvGenes <- load("./Objs/XGB/GSE78220_Out_XGB_indvGenes_AgnosticPerformance.rda")
 AgnosticGSE91061_Out_indvGenes <- load("./Objs/XGB/GSE91061_Out_XGB_indvGenes_AgnosticPerformance.rda")
-AgnosticGSE115821_Out_indvGenes <- load("./Objs/XGB/GSE115821_Out_XGB_indvGenes_AgnosticPerformance.rda")
-AgnosticTCGA_Out_indvGenes <- load("./Objs/XGB/TCGA_Out_XGB_indvGenes_AgnosticPerformance.rda")
+#AgnosticGSE115821_Out_indvGenes <- load("./Objs/XGB/GSE115821_Out_XGB_indvGenes_AgnosticPerformance.rda")
+#AgnosticTCGA_Out_indvGenes <- load("./Objs/XGB/TCGA_Out_XGB_indvGenes_AgnosticPerformance.rda")
 AgnosticVanAllen_Out_indvGenes <- load("./Objs/XGB/VanAllen_Out_XGB_indvGenes_AgnosticPerformance.rda")
 
 # Load the Mech models
 MechGSE78220_Out <- load("./Objs/XGB/GSE78220_Out_XGB_MechPerformance.rda")
 MechGSE91061_Out <- load("./Objs/XGB/GSE91061_Out_XGB_MechPerformance.rda")
-MechGSEGSE115821_Out <- load("./Objs/XGB/GSE115821_Out_XGB_MechPerformance.rda")
-MechTCGA_Out <- load("./Objs/XGB/TCGA_Out_XGB_MechPerformance.rda")
+#MechGSEGSE115821_Out <- load("./Objs/XGB/GSE115821_Out_XGB_MechPerformance.rda")
+#MechTCGA_Out <- load("./Objs/XGB/TCGA_Out_XGB_MechPerformance.rda")
 MechVanAllen_Out <- load("./Objs/XGB/VanAllen_Out_XGB_MechPerformance.rda")
 
 ###################
@@ -49,24 +49,24 @@ GSE91061_Out_XGB_AgnosticPerformance$model_type <- rep("Agnostic_pairs", nrow(GS
 GSE91061_Out_XGB_IndvGenes_AgnosticPerformance$model_type <- rep("Agnostic_genes", nrow(GSE91061_Out_XGB_IndvGenes_AgnosticPerformance))
 GSE91061_Out_XGB_MechPerformance$model_type <- rep("Mechanistic", nrow(GSE91061_Out_XGB_MechPerformance))
 
-# GSE115821_out
-GSE115821_Out_XGB_AgnosticPerformance$out_study <- rep("GSE115821", nrow(GSE115821_Out_XGB_AgnosticPerformance))
-GSE115821_Out_XGB_IndvGenes_AgnosticPerformance$out_study <- rep("GSE115821", nrow(GSE115821_Out_XGB_IndvGenes_AgnosticPerformance))
-GSE115821_Out_XGB_MechPerformance$out_study <- rep("GSE115821", nrow(GSE115821_Out_XGB_MechPerformance))
-
-GSE115821_Out_XGB_AgnosticPerformance$model_type <- rep("Agnostic_pairs", nrow(GSE115821_Out_XGB_AgnosticPerformance))
-GSE115821_Out_XGB_IndvGenes_AgnosticPerformance$model_type <- rep("Agnostic_genes", nrow(GSE115821_Out_XGB_IndvGenes_AgnosticPerformance))
-GSE115821_Out_XGB_MechPerformance$model_type <- rep("Mechanistic", nrow(GSE115821_Out_XGB_MechPerformance))
-
-# TCGA_out
-TCGA_Out_XGB_AgnosticPerformance$out_study <- rep("TCGA", nrow(TCGA_Out_XGB_AgnosticPerformance))
-TCGA_Out_XGB_IndvGenes_AgnosticPerformance$out_study <- rep("TCGA", nrow(TCGA_Out_XGB_IndvGenes_AgnosticPerformance))
-TCGA_Out_XGB_MechPerformance$out_study <- rep("TCGA", nrow(TCGA_Out_XGB_MechPerformance))
-
-TCGA_Out_XGB_AgnosticPerformance$model_type <- rep("Agnostic_pairs", nrow(TCGA_Out_XGB_AgnosticPerformance))
-TCGA_Out_XGB_IndvGenes_AgnosticPerformance$model_type <- rep("Agnostic_genes", nrow(TCGA_Out_XGB_IndvGenes_AgnosticPerformance))
-TCGA_Out_XGB_MechPerformance$model_type <- rep("Mechanistic", nrow(TCGA_Out_XGB_MechPerformance))
-
+# # GSE115821_out
+# GSE115821_Out_XGB_AgnosticPerformance$out_study <- rep("GSE115821", nrow(GSE115821_Out_XGB_AgnosticPerformance))
+# GSE115821_Out_XGB_IndvGenes_AgnosticPerformance$out_study <- rep("GSE115821", nrow(GSE115821_Out_XGB_IndvGenes_AgnosticPerformance))
+# GSE115821_Out_XGB_MechPerformance$out_study <- rep("GSE115821", nrow(GSE115821_Out_XGB_MechPerformance))
+# 
+# GSE115821_Out_XGB_AgnosticPerformance$model_type <- rep("Agnostic_pairs", nrow(GSE115821_Out_XGB_AgnosticPerformance))
+# GSE115821_Out_XGB_IndvGenes_AgnosticPerformance$model_type <- rep("Agnostic_genes", nrow(GSE115821_Out_XGB_IndvGenes_AgnosticPerformance))
+# GSE115821_Out_XGB_MechPerformance$model_type <- rep("Mechanistic", nrow(GSE115821_Out_XGB_MechPerformance))
+# 
+# # TCGA_out
+# TCGA_Out_XGB_AgnosticPerformance$out_study <- rep("TCGA", nrow(TCGA_Out_XGB_AgnosticPerformance))
+# TCGA_Out_XGB_IndvGenes_AgnosticPerformance$out_study <- rep("TCGA", nrow(TCGA_Out_XGB_IndvGenes_AgnosticPerformance))
+# TCGA_Out_XGB_MechPerformance$out_study <- rep("TCGA", nrow(TCGA_Out_XGB_MechPerformance))
+# 
+# TCGA_Out_XGB_AgnosticPerformance$model_type <- rep("Agnostic_pairs", nrow(TCGA_Out_XGB_AgnosticPerformance))
+# TCGA_Out_XGB_IndvGenes_AgnosticPerformance$model_type <- rep("Agnostic_genes", nrow(TCGA_Out_XGB_IndvGenes_AgnosticPerformance))
+# TCGA_Out_XGB_MechPerformance$model_type <- rep("Mechanistic", nrow(TCGA_Out_XGB_MechPerformance))
+# 
 # VanAllen_out
 VanAllen_Out_XGB_AgnosticPerformance$out_study <- rep("VanAllen", nrow(VanAllen_Out_XGB_AgnosticPerformance))
 VanAllen_Out_XGB_IndvGenes_AgnosticPerformance$out_study <- rep("VanAllen", nrow(VanAllen_Out_XGB_IndvGenes_AgnosticPerformance))
@@ -79,8 +79,8 @@ VanAllen_Out_XGB_MechPerformance$model_type <- rep("Mechanistic", nrow(VanAllen_
 
 All_XGB_CV <- rbind(GSE78220_Out_XGB_AgnosticPerformance, GSE78220_Out_XGB_IndvGenes_AgnosticPerformance, GSE78220_Out_XGB_MechPerformance,
                    GSE91061_Out_XGB_AgnosticPerformance, GSE91061_Out_XGB_IndvGenes_AgnosticPerformance, GSE91061_Out_XGB_MechPerformance,
-                   GSE115821_Out_XGB_AgnosticPerformance, GSE115821_Out_XGB_IndvGenes_AgnosticPerformance, GSE115821_Out_XGB_MechPerformance, 
-                   TCGA_Out_XGB_AgnosticPerformance, TCGA_Out_XGB_IndvGenes_AgnosticPerformance, TCGA_Out_XGB_MechPerformance, 
+                   #GSE115821_Out_XGB_AgnosticPerformance, GSE115821_Out_XGB_IndvGenes_AgnosticPerformance, GSE115821_Out_XGB_MechPerformance, 
+                   #TCGA_Out_XGB_AgnosticPerformance, TCGA_Out_XGB_IndvGenes_AgnosticPerformance, TCGA_Out_XGB_MechPerformance, 
                    VanAllen_Out_XGB_AgnosticPerformance, VanAllen_Out_XGB_IndvGenes_AgnosticPerformance, VanAllen_Out_XGB_MechPerformance
 )
 
