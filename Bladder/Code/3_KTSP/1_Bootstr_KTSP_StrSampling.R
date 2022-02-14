@@ -23,6 +23,7 @@ library(enrichR)
 library(mltools)
 library(xtable)
 library(boot)
+library(tidyverse)
 library(patchwork)
 
 ### Load expression and phenotype data
@@ -227,6 +228,12 @@ quantile(Diff_Mechanistic_74, c(0.025, 0.975))
 #Diff <- MechKTSP_AUC_Test - AgnosticKTSP_AUC_Test
 #quantile(Diff, c(0.025, 0.975))
 
+##########
+# N of pairs
+mean(All_74[,'N_Pairs_Agnostic'])
+mean(All_74[,'N_Pairs_Mech'])
+
+#########
 
 ## Plot the distributions of the AUCs from both methods in the training data
 MechanisticAUCTrain_74 <- data.frame(AUC = All_74[, "AUC_Train_Mech"])

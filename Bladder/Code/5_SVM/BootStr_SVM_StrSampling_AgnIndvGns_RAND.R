@@ -20,8 +20,8 @@ library(patchwork)
 ## SVM
 # Mechanistic
 ## Load data
-load("../../Objs/KTSP_0/KTSP_STATs_Mechanistic.rda")
-load("../../Objs/ProgressionDataGood2.rda")
+load("./Objs/KTSP/KTSP_STATs_Mechanistic.rda")
+load("./Objs/ProgressionDataGood2.rda")
 
 
 ### Associated groups
@@ -56,6 +56,7 @@ colnames(Training) <- make.names(colnames(Training))
 colnames(Testing) <- make.names(colnames(Testing))
 
 Grid <- expand.grid(degree = 3, scale = 0.01, C = 0.25)
+
 # The function for bootstraping
 SVM_Strap <- function(data, indices) {
   d <- data[indices, ] # allows boot to select sample
@@ -88,8 +89,8 @@ colnames(AUCs_SVM_Mech) <- c("AUC_Train", "AUC_Test", "N_ImportanVariables")
 ### 74 random genes
 
 ## Load data
-load("../../Objs/ProgressionDataGood2.rda")
-load("../../Objs/Correlation/RGenes.rda")
+load("./Objs/ProgressionDataGood2.rda")
+load("./Objs/Correlation/RGenes.rda")
 
 
 ### Normalization
@@ -166,8 +167,8 @@ bootobjectAgnostic_74 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, R
 
 ### 100 random genes
 
-load("../../Objs/ProgressionDataGood2.rda")
-load("../../Objs/Correlation/RGenes.rda")
+load("./Objs/ProgressionDataGood2.rda")
+load("./Objs/Correlation/RGenes.rda")
 
 
 ### Normalization
@@ -244,8 +245,8 @@ bootobjectAgnostic_100 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, 
 
 ### 200 random genes
 
-load("../../Objs/ProgressionDataGood2.rda")
-load("../../Objs/Correlation/RGenes.rda")
+load("./Objs/ProgressionDataGood2.rda")
+load("./Objs/Correlation/RGenes.rda")
 
 
 ### Normalization
@@ -315,15 +316,15 @@ SVM_Strap <- function(data, indices) {
 
 
 set.seed(333)
-bootobjectAgnostic_200 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, R= 1000, parallel = "multicore", ncpus = 15) 
+bootobjectAgnostic_200 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, R= 1000, parallel = "multicore", ncpus = 13) 
 
 ########################################################################################
 ### Agnostic
 
 ### 500 random genes
 
-load("../../Objs/ProgressionDataGood2.rda")
-load("../../Objs/Correlation/RGenes.rda")
+load("./Objs/ProgressionDataGood2.rda")
+load("./Objs/Correlation/RGenes.rda")
 
 
 ### Normalization
@@ -405,10 +406,10 @@ bootobjectAgnostic_500 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, 
 ########################################################################################
 ########################################################################################
 ## Save all Objects
-save(bootobjectMech, bootobjectAgnostic_74, bootobjectAgnostic_100, bootobjectAgnostic_200, bootobjectAgnostic_500, file= "../../Objs/SVM/SVMBootObjects_RAND.rda")
+save(bootobjectMech, bootobjectAgnostic_74, bootobjectAgnostic_100, bootobjectAgnostic_200, bootobjectAgnostic_500, file= "./Objs/SVM/SVMBootObjects_RAND.rda")
 
 ## Load
-load("../../Objs/SVM/SVMBootObjects_RAND.rda")
+load("./Objs/SVM/SVMBootObjects_RAND.rda")
 
 ########################################################################################
 ########################################################################################
@@ -456,56 +457,56 @@ ModelCompareAUCTest_74$data_type <- "Testing"
 ModelCompareAUCTrain_74$NofFeatAgn <- "74_Genes"
 ModelCompareAUCTest_74$NofFeatAgn <- "74_Genes"
 
-save(ModelCompareAUCTrain_74, ModelCompareAUCTest_74, file = "../../Objs/SVM/ModelCompare_RAND_AUC_74.rda")
+save(ModelCompareAUCTrain_74, ModelCompareAUCTest_74, file = "./Objs/SVM/ModelCompare_RAND_AUC_74.rda")
 
 ############################################################################
 # Save for the main figure
 ModelCompare_SVM <- rbind(ModelCompareAUCTrain_74, ModelCompareAUCTest_74)
 ModelCompare_SVM$algorithm <- "SVM"
-save(ModelCompare_SVM, file = "../../Objs/SVM/ModelCompare_RAND_SVM.rda")
+save(ModelCompare_SVM, file = "./Objs/SVM/ModelCompare_RAND_SVM.rda")
 
 ############################################################################
 
 ######
 ## Plots
-My_Theme = theme(
-  axis.title.x = element_text(size = 5),
-  axis.text.x = element_text(size = 5),
-  axis.title.y = element_text(size = 5),
-  axis.text.y = element_text(size = 5),
-  plot.title = element_text(size=8)
-)
-
-DiffHist_Agnostic_74 <- ggplot(as.data.frame(DiffAgnostic_74), aes(DiffAgnostic_74, fill = "red")) +
-  geom_histogram(bins = 25) +
-  scale_x_continuous(limits = c(0, 0.5)) +
-  labs(title="Histogram of the difference between the training and testing data using the agnostic model") + My_Theme
-
-DiffHist_Mech <- ggplot(as.data.frame(DiffMech), aes(DiffMech, fill = "red")) +
-  geom_histogram(bins = 25) +
-  scale_x_continuous(limits = c(0, 0.5)) +
-  labs(title="Histogram of the difference between the training and testing data using the mechanistic model") + My_Theme
-
-AUC_Train_DistrHist_74 <- ggplot(ModelCompareAUCTrain_74, aes(AUC, fill = modelType)) +
-  geom_density(alpha = 0.5, adjust=0.01) +
-  scale_x_continuous(limits = c(0.5, 1)) +
-  labs(title="AUC distribution of the agnostic and mechanistic SVM models in the training data") + My_Theme
-
-AUC_Test_DistrHist_74 <- ggplot(ModelCompareAUCTest_74, aes(AUC, fill = modelType)) +
-  geom_density(alpha = 0.5) +
-  scale_x_continuous(limits = c(0.5, 1)) +
-  labs(title="AUC distribution of the agnostic and mechanistic SVM models in the testing data") + My_Theme
-
-# BarPlotImportance <- ggplot(data=ModelCompare_ImportantFeatures, aes(x=NofOutputFeatures, fill = modelType)) +
-#   geom_bar(stat="bin") +
-#   scale_x_continuous(limits = c(30, 80)) +
-#   labs(title="Distribution of the number of important features (output)") +
-#   facet_grid(~modelType, scale='free_x') +
-#   My_Theme
-
-png("../../Figs/SVM/SVM_BS_RAND_AUC_74.png", width = 3000, height = 1500, res = 300)
-(AUC_Train_DistrHist_74 / AUC_Test_DistrHist_74) | (DiffHist_Agnostic_74 / DiffHist_Mech) + plot_layout(widths = c(2, 1)) #| BarPlotImportance
-dev.off()
+# My_Theme = theme(
+#   axis.title.x = element_text(size = 5),
+#   axis.text.x = element_text(size = 5),
+#   axis.title.y = element_text(size = 5),
+#   axis.text.y = element_text(size = 5),
+#   plot.title = element_text(size=8)
+# )
+# 
+# DiffHist_Agnostic_74 <- ggplot(as.data.frame(DiffAgnostic_74), aes(DiffAgnostic_74, fill = "red")) +
+#   geom_histogram(bins = 25) +
+#   scale_x_continuous(limits = c(0, 0.5)) +
+#   labs(title="Histogram of the difference between the training and testing data using the agnostic model") + My_Theme
+# 
+# DiffHist_Mech <- ggplot(as.data.frame(DiffMech), aes(DiffMech, fill = "red")) +
+#   geom_histogram(bins = 25) +
+#   scale_x_continuous(limits = c(0, 0.5)) +
+#   labs(title="Histogram of the difference between the training and testing data using the mechanistic model") + My_Theme
+# 
+# AUC_Train_DistrHist_74 <- ggplot(ModelCompareAUCTrain_74, aes(AUC, fill = modelType)) +
+#   geom_density(alpha = 0.5, adjust=0.01) +
+#   scale_x_continuous(limits = c(0.5, 1)) +
+#   labs(title="AUC distribution of the agnostic and mechanistic SVM models in the training data") + My_Theme
+# 
+# AUC_Test_DistrHist_74 <- ggplot(ModelCompareAUCTest_74, aes(AUC, fill = modelType)) +
+#   geom_density(alpha = 0.5) +
+#   scale_x_continuous(limits = c(0.5, 1)) +
+#   labs(title="AUC distribution of the agnostic and mechanistic SVM models in the testing data") + My_Theme
+# 
+# # BarPlotImportance <- ggplot(data=ModelCompare_ImportantFeatures, aes(x=NofOutputFeatures, fill = modelType)) +
+# #   geom_bar(stat="bin") +
+# #   scale_x_continuous(limits = c(30, 80)) +
+# #   labs(title="Distribution of the number of important features (output)") +
+# #   facet_grid(~modelType, scale='free_x') +
+# #   My_Theme
+# 
+# png("../../Figs/SVM/SVM_BS_RAND_AUC_74.png", width = 3000, height = 1500, res = 300)
+# (AUC_Train_DistrHist_74 / AUC_Test_DistrHist_74) | (DiffHist_Agnostic_74 / DiffHist_Mech) + plot_layout(widths = c(2, 1)) #| BarPlotImportance
+# dev.off()
 
 ########################################################################################
 ########################################################################################
@@ -542,48 +543,48 @@ ModelCompareAUCTest_100$data_type <- "Testing"
 ModelCompareAUCTrain_100$NofFeatAgn <- "100_Genes"
 ModelCompareAUCTest_100$NofFeatAgn <- "100_Genes"
 
-save(ModelCompareAUCTrain_100, ModelCompareAUCTest_100, file = "../../Objs/SVM/ModelCompare_RAND_AUC_100.rda")
+save(ModelCompareAUCTrain_100, ModelCompareAUCTest_100, file = "./Objs/SVM/ModelCompare_RAND_AUC_100.rda")
 
 ######
 ## Plots
-My_Theme = theme(
-  axis.title.x = element_text(size = 5),
-  axis.text.x = element_text(size = 5),
-  axis.title.y = element_text(size = 5),
-  axis.text.y = element_text(size = 5),
-  plot.title = element_text(size=8)
-)
-
-DiffHist_Agnostic_100 <- ggplot(as.data.frame(DiffAgnostic_100), aes(DiffAgnostic_100, fill = "red")) +
-  geom_histogram(bins = 25) +
-  scale_x_continuous(limits = c(0, 0.5)) +
-  labs(title="Histogram of the difference between the training and testing data using the agnostic model") + My_Theme
-
-DiffHist_Mech <- ggplot(as.data.frame(DiffMech), aes(DiffMech, fill = "red")) +
-  geom_histogram(bins = 25) +
-  scale_x_continuous(limits = c(0, 0.5)) +
-  labs(title="Histogram of the difference between the training and testing data using the mechanistic model") + My_Theme
-
-AUC_Train_DistrHist_100 <- ggplot(ModelCompareAUCTrain_100, aes(AUC, fill = modelType)) +
-  geom_density(alpha = 0.5, adjust=0.01) +
-  scale_x_continuous(limits = c(0.5, 1)) +
-  labs(title="AUC distribution of the agnostic and mechanistic SVM models in the training data") + My_Theme
-
-AUC_Test_DistrHist_100 <- ggplot(ModelCompareAUCTest_100, aes(AUC, fill = modelType)) +
-  geom_density(alpha = 0.5) +
-  scale_x_continuous(limits = c(0.5, 1)) +
-  labs(title="AUC distribution of the agnostic and mechanistic SVM models in the testing data") + My_Theme
-
-# BarPlotImportance <- ggplot(data=ModelCompare_ImportantFeatures, aes(x=NofOutputFeatures, fill = modelType)) +
-#   geom_bar(stat="bin") +
-#   scale_x_continuous(limits = c(30, 80)) +
-#   labs(title="Distribution of the number of important features (output)") +
-#   facet_grid(~modelType, scale='free_x') +
-#   My_Theme
-
-png("../../Figs/SVM/SVM_BS_RAND_AUC_100.png", width = 3000, height = 1500, res = 300)
-(AUC_Train_DistrHist_100 / AUC_Test_DistrHist_100) | (DiffHist_Agnostic_100 / DiffHist_Mech) + plot_layout(widths = c(2, 1)) #| BarPlotImportance
-dev.off()
+# My_Theme = theme(
+#   axis.title.x = element_text(size = 5),
+#   axis.text.x = element_text(size = 5),
+#   axis.title.y = element_text(size = 5),
+#   axis.text.y = element_text(size = 5),
+#   plot.title = element_text(size=8)
+# )
+# 
+# DiffHist_Agnostic_100 <- ggplot(as.data.frame(DiffAgnostic_100), aes(DiffAgnostic_100, fill = "red")) +
+#   geom_histogram(bins = 25) +
+#   scale_x_continuous(limits = c(0, 0.5)) +
+#   labs(title="Histogram of the difference between the training and testing data using the agnostic model") + My_Theme
+# 
+# DiffHist_Mech <- ggplot(as.data.frame(DiffMech), aes(DiffMech, fill = "red")) +
+#   geom_histogram(bins = 25) +
+#   scale_x_continuous(limits = c(0, 0.5)) +
+#   labs(title="Histogram of the difference between the training and testing data using the mechanistic model") + My_Theme
+# 
+# AUC_Train_DistrHist_100 <- ggplot(ModelCompareAUCTrain_100, aes(AUC, fill = modelType)) +
+#   geom_density(alpha = 0.5, adjust=0.01) +
+#   scale_x_continuous(limits = c(0.5, 1)) +
+#   labs(title="AUC distribution of the agnostic and mechanistic SVM models in the training data") + My_Theme
+# 
+# AUC_Test_DistrHist_100 <- ggplot(ModelCompareAUCTest_100, aes(AUC, fill = modelType)) +
+#   geom_density(alpha = 0.5) +
+#   scale_x_continuous(limits = c(0.5, 1)) +
+#   labs(title="AUC distribution of the agnostic and mechanistic SVM models in the testing data") + My_Theme
+# 
+# # BarPlotImportance <- ggplot(data=ModelCompare_ImportantFeatures, aes(x=NofOutputFeatures, fill = modelType)) +
+# #   geom_bar(stat="bin") +
+# #   scale_x_continuous(limits = c(30, 80)) +
+# #   labs(title="Distribution of the number of important features (output)") +
+# #   facet_grid(~modelType, scale='free_x') +
+# #   My_Theme
+# 
+# png("../../Figs/SVM/SVM_BS_RAND_AUC_100.png", width = 3000, height = 1500, res = 300)
+# (AUC_Train_DistrHist_100 / AUC_Test_DistrHist_100) | (DiffHist_Agnostic_100 / DiffHist_Mech) + plot_layout(widths = c(2, 1)) #| BarPlotImportance
+# dev.off()
 
 ########################################################################################
 ########################################################################################
@@ -620,42 +621,42 @@ ModelCompareAUCTest_200$data_type <- "Testing"
 ModelCompareAUCTrain_200$NofFeatAgn <- "200_Genes"
 ModelCompareAUCTest_200$NofFeatAgn <- "200_Genes"
 
-save(ModelCompareAUCTrain_200, ModelCompareAUCTest_200, file = "../../Objs/SVM/ModelCompare_RAND_AUC_200.rda")
+save(ModelCompareAUCTrain_200, ModelCompareAUCTest_200, file = "./Objs/SVM/ModelCompare_RAND_AUC_200.rda")
 
 ######
 ## Plots
-My_Theme = theme(
-  axis.title.x = element_text(size = 5),
-  axis.text.x = element_text(size = 5),
-  axis.title.y = element_text(size = 5),
-  axis.text.y = element_text(size = 5),
-  plot.title = element_text(size=8)
-)
-
-DiffHist_Agnostic_200 <- ggplot(as.data.frame(DiffAgnostic_200), aes(DiffAgnostic_200, fill = "red")) +
-  geom_histogram(bins = 25) +
-  scale_x_continuous(limits = c(0, 0.5)) +
-  labs(title="Histogram of the difference between the training and testing data using the agnostic model") + My_Theme
-
-DiffHist_Mech <- ggplot(as.data.frame(DiffMech), aes(DiffMech, fill = "red")) +
-  geom_histogram(bins = 25) +
-  scale_x_continuous(limits = c(0, 0.5)) +
-  labs(title="Histogram of the difference between the training and testing data using the mechanistic model") + My_Theme
-
-AUC_Train_DistrHist_200 <- ggplot(ModelCompareAUCTrain_200, aes(AUC, fill = modelType)) +
-  geom_density(alpha = 0.5, adjust=0.01) +
-  scale_x_continuous(limits = c(0.5, 1)) +
-  labs(title="AUC distribution of the agnostic and mechanistic SVM models in the training data") + My_Theme
-
-AUC_Test_DistrHist_200 <- ggplot(ModelCompareAUCTest_200, aes(AUC, fill = modelType)) +
-  geom_density(alpha = 0.5) +
-  scale_x_continuous(limits = c(0.5, 1)) +
-  labs(title="AUC distribution of the agnostic and mechanistic SVM models in the testing data") + My_Theme
-
-
-png("../../Figs/SVM/SVM_BS_RAND_AUC_200.png", width = 3000, height = 1500, res = 300)
-(AUC_Train_DistrHist_200 / AUC_Test_DistrHist_200) | (DiffHist_Agnostic_200 / DiffHist_Mech) + plot_layout(widths = c(2, 1)) #| BarPlotImportance
-dev.off()
+# My_Theme = theme(
+#   axis.title.x = element_text(size = 5),
+#   axis.text.x = element_text(size = 5),
+#   axis.title.y = element_text(size = 5),
+#   axis.text.y = element_text(size = 5),
+#   plot.title = element_text(size=8)
+# )
+# 
+# DiffHist_Agnostic_200 <- ggplot(as.data.frame(DiffAgnostic_200), aes(DiffAgnostic_200, fill = "red")) +
+#   geom_histogram(bins = 25) +
+#   scale_x_continuous(limits = c(0, 0.5)) +
+#   labs(title="Histogram of the difference between the training and testing data using the agnostic model") + My_Theme
+# 
+# DiffHist_Mech <- ggplot(as.data.frame(DiffMech), aes(DiffMech, fill = "red")) +
+#   geom_histogram(bins = 25) +
+#   scale_x_continuous(limits = c(0, 0.5)) +
+#   labs(title="Histogram of the difference between the training and testing data using the mechanistic model") + My_Theme
+# 
+# AUC_Train_DistrHist_200 <- ggplot(ModelCompareAUCTrain_200, aes(AUC, fill = modelType)) +
+#   geom_density(alpha = 0.5, adjust=0.01) +
+#   scale_x_continuous(limits = c(0.5, 1)) +
+#   labs(title="AUC distribution of the agnostic and mechanistic SVM models in the training data") + My_Theme
+# 
+# AUC_Test_DistrHist_200 <- ggplot(ModelCompareAUCTest_200, aes(AUC, fill = modelType)) +
+#   geom_density(alpha = 0.5) +
+#   scale_x_continuous(limits = c(0.5, 1)) +
+#   labs(title="AUC distribution of the agnostic and mechanistic SVM models in the testing data") + My_Theme
+# 
+# 
+# png("../../Figs/SVM/SVM_BS_RAND_AUC_200.png", width = 3000, height = 1500, res = 300)
+# (AUC_Train_DistrHist_200 / AUC_Test_DistrHist_200) | (DiffHist_Agnostic_200 / DiffHist_Mech) + plot_layout(widths = c(2, 1)) #| BarPlotImportance
+# dev.off()
 
 ########################################################################################
 ########################################################################################
@@ -692,106 +693,121 @@ ModelCompareAUCTest_500$data_type <- "Testing"
 ModelCompareAUCTrain_500$NofFeatAgn <- "500_Genes"
 ModelCompareAUCTest_500$NofFeatAgn <- "500_Genes"
 
-save(ModelCompareAUCTrain_500, ModelCompareAUCTest_500, file = "../../Objs/SVM/ModelCompare_RAND_AUC_500.rda")
+save(ModelCompareAUCTrain_500, ModelCompareAUCTest_500, file = "./Objs/SVM/ModelCompare_RAND_AUC_500.rda")
 
-######
-## Plots
-My_Theme = theme(
-  axis.title.x = element_text(size = 5),
-  axis.text.x = element_text(size = 5),
-  axis.title.y = element_text(size = 5),
-  axis.text.y = element_text(size = 5),
-  plot.title = element_text(size=8)
-)
-
-DiffHist_Agnostic_500 <- ggplot(as.data.frame(DiffAgnostic_500), aes(DiffAgnostic_500, fill = "red")) +
-  geom_histogram(bins = 25) +
-  scale_x_continuous(limits = c(0, 0.5)) +
-  labs(title="Histogram of the difference between the training and testing data using the agnostic model") + My_Theme
-
-DiffHist_Mech <- ggplot(as.data.frame(DiffMech), aes(DiffMech, fill = "red")) +
-  geom_histogram(bins = 25) +
-  scale_x_continuous(limits = c(0, 0.5)) +
-  labs(title="Histogram of the difference between the training and testing data using the mechanistic model") + My_Theme
-
-AUC_Train_DistrHist_500 <- ggplot(ModelCompareAUCTrain_500, aes(AUC, fill = modelType)) +
-  geom_density(alpha = 0.5, adjust=0.01) +
-  scale_x_continuous(limits = c(0.5, 1)) +
-  labs(title="AUC distribution of the agnostic and mechanistic SVM models in the training data") + My_Theme
-
-AUC_Test_DistrHist_500 <- ggplot(ModelCompareAUCTest_500, aes(AUC, fill = modelType)) +
-  geom_density(alpha = 0.5) +
-  scale_x_continuous(limits = c(0.5, 1)) +
-  labs(title="AUC distribution of the agnostic and mechanistic SVM models in the testing data") + My_Theme
-
-# BarPlotImportance <- ggplot(data=ModelCompare_ImportantFeatures, aes(x=NofOutputFeatures, fill = modelType)) +
-#   geom_bar(stat="bin") +
-#   scale_x_continuous(limits = c(30, 80)) +
-#   labs(title="Distribution of the number of important features (output)") +
-#   facet_grid(~modelType, scale='free_x') +
-#   My_Theme
-
-png("../../Figs/SVM/SVM_BS_RAND_AUC_500.png", width = 3000, height = 1500, res = 300)
-(AUC_Train_DistrHist_500 / AUC_Test_DistrHist_500) | (DiffHist_Agnostic_500 / DiffHist_Mech) + plot_layout(widths = c(2, 1)) #| BarPlotImportance
-dev.off()
-# 
-# ###################################################################################
-# ###########################################
-# ###########################################
-My_Theme2 = theme(
-  axis.title.x = element_text(size = 5),
-  axis.text.x = element_text(size = 5),
-  axis.title.y = element_text(size = 5),
-  axis.text.y = element_text(size = 5),
-  plot.title = element_text(size=9)
-)
-
-#############################
-AUC_Train_DistrHist_74 <- ggplot(ModelCompareAUCTrain_74, aes(AUC, fill = modelType)) +
-  geom_density(alpha = 0.5, adjust=0.01) +
-  scale_x_continuous(limits = c(0.5, 1)) +
-  labs(title="Agnostic (74 random genes) vs mechanistic SVM models in the training data") + My_Theme2
-
-AUC_Test_DistrHist_74 <- ggplot(ModelCompareAUCTest_74, aes(AUC, fill = modelType)) +
-  geom_density(alpha = 0.5) +
-  scale_x_continuous(limits = c(0.5, 1)) +
-  labs(title="Agnostic (74 random genes) vs mechanistic SVM models in the testing data") + My_Theme2
-#############################
-AUC_Train_DistrHist_100 <- ggplot(ModelCompareAUCTrain_100, aes(AUC, fill = modelType)) +
-  geom_density(alpha = 0.5, adjust=0.01) +
-  scale_x_continuous(limits = c(0.5, 1)) +
-  labs(title="Agnostic (100 random genes) vs mechanistic SVM models in the training data") + My_Theme2
-
-AUC_Test_DistrHist_100 <- ggplot(ModelCompareAUCTest_100, aes(AUC, fill = modelType)) +
-  geom_density(alpha = 0.5) +
-  scale_x_continuous(limits = c(0.5, 1)) +
-  labs(title="Agnostic (100 random genes) vs mechanistic SVM models in the testing data") + My_Theme2
-##############################
-AUC_Train_DistrHist_200 <- ggplot(ModelCompareAUCTrain_200, aes(AUC, fill = modelType)) +
-  geom_density(alpha = 0.5, adjust=0.01) +
-  scale_x_continuous(limits = c(0.5, 1)) +
-  labs(title="Agnostic (200 random genes) vs mechanistic SVM models in the training data") + My_Theme2
-
-AUC_Test_DistrHist_200 <- ggplot(ModelCompareAUCTest_200, aes(AUC, fill = modelType)) +
-  geom_density(alpha = 0.5) +
-  scale_x_continuous(limits = c(0.5, 1)) +
-  labs(title="Agnostic (200 random genes) vs mechanistic SVM models in the testing data") + My_Theme2
 ###############################
-AUC_Train_DistrHist_500 <- ggplot(ModelCompareAUCTrain_500, aes(AUC, fill = modelType)) +
-  geom_density(alpha = 0.5, adjust=0.01) +
-  scale_x_continuous(limits = c(0.5, 1)) +
-  labs(title="Agnostic (500 random genes) vs mechanistic SVM models in the training data") + My_Theme2
+## save all
 
-AUC_Test_DistrHist_500 <- ggplot(ModelCompareAUCTest_500, aes(AUC, fill = modelType)) +
-  geom_density(alpha = 0.5) +
-  scale_x_continuous(limits = c(0.5, 1)) +
-  labs(title="Agnostic (500 random genes) vs mechanistic SVM models in the testing data") + My_Theme2
+ModelCompare_SVM_RAND_DiffNoFeat <- rbind(ModelCompareAUCTrain_74,
+                                         ModelCompareAUCTest_74,
+                                         ModelCompareAUCTrain_100,
+                                         ModelCompareAUCTest_100,
+                                         ModelCompareAUCTrain_200,
+                                         ModelCompareAUCTest_200,
+                                         ModelCompareAUCTrain_500,
+                                         ModelCompareAUCTest_500
+)
 
+save(ModelCompare_SVM_RAND_DiffNoFeat, file = "./Objs/SVM/ModelCompare_SVM_RAND_DiffNoFeat.rda")
 
-# All in one figure
-png("../../Figs/BootStrap_Diff_No_features/SVM_BS_RAND_AUC_DiffFeatures.png", width = 3000, height = 1500, res = 150)
-(AUC_Train_DistrHist_74 / AUC_Test_DistrHist_74) | (AUC_Train_DistrHist_100 / AUC_Test_DistrHist_100) | (AUC_Train_DistrHist_200 / AUC_Test_DistrHist_200) | (AUC_Train_DistrHist_500 / AUC_Test_DistrHist_500) + plot_layout(widths = c(1, 1))
-dev.off()
+# ######
+# ## Plots
+# My_Theme = theme(
+#   axis.title.x = element_text(size = 5),
+#   axis.text.x = element_text(size = 5),
+#   axis.title.y = element_text(size = 5),
+#   axis.text.y = element_text(size = 5),
+#   plot.title = element_text(size=8)
+# )
+# 
+# DiffHist_Agnostic_500 <- ggplot(as.data.frame(DiffAgnostic_500), aes(DiffAgnostic_500, fill = "red")) +
+#   geom_histogram(bins = 25) +
+#   scale_x_continuous(limits = c(0, 0.5)) +
+#   labs(title="Histogram of the difference between the training and testing data using the agnostic model") + My_Theme
+# 
+# DiffHist_Mech <- ggplot(as.data.frame(DiffMech), aes(DiffMech, fill = "red")) +
+#   geom_histogram(bins = 25) +
+#   scale_x_continuous(limits = c(0, 0.5)) +
+#   labs(title="Histogram of the difference between the training and testing data using the mechanistic model") + My_Theme
+# 
+# AUC_Train_DistrHist_500 <- ggplot(ModelCompareAUCTrain_500, aes(AUC, fill = modelType)) +
+#   geom_density(alpha = 0.5, adjust=0.01) +
+#   scale_x_continuous(limits = c(0.5, 1)) +
+#   labs(title="AUC distribution of the agnostic and mechanistic SVM models in the training data") + My_Theme
+# 
+# AUC_Test_DistrHist_500 <- ggplot(ModelCompareAUCTest_500, aes(AUC, fill = modelType)) +
+#   geom_density(alpha = 0.5) +
+#   scale_x_continuous(limits = c(0.5, 1)) +
+#   labs(title="AUC distribution of the agnostic and mechanistic SVM models in the testing data") + My_Theme
+# 
+# # BarPlotImportance <- ggplot(data=ModelCompare_ImportantFeatures, aes(x=NofOutputFeatures, fill = modelType)) +
+# #   geom_bar(stat="bin") +
+# #   scale_x_continuous(limits = c(30, 80)) +
+# #   labs(title="Distribution of the number of important features (output)") +
+# #   facet_grid(~modelType, scale='free_x') +
+# #   My_Theme
+# 
+# png("../../Figs/SVM/SVM_BS_RAND_AUC_500.png", width = 3000, height = 1500, res = 300)
+# (AUC_Train_DistrHist_500 / AUC_Test_DistrHist_500) | (DiffHist_Agnostic_500 / DiffHist_Mech) + plot_layout(widths = c(2, 1)) #| BarPlotImportance
+# dev.off()
+# # 
+# # ###################################################################################
+# # ###########################################
+# # ###########################################
+# My_Theme2 = theme(
+#   axis.title.x = element_text(size = 5),
+#   axis.text.x = element_text(size = 5),
+#   axis.title.y = element_text(size = 5),
+#   axis.text.y = element_text(size = 5),
+#   plot.title = element_text(size=9)
+# )
+# 
+# #############################
+# AUC_Train_DistrHist_74 <- ggplot(ModelCompareAUCTrain_74, aes(AUC, fill = modelType)) +
+#   geom_density(alpha = 0.5, adjust=0.01) +
+#   scale_x_continuous(limits = c(0.5, 1)) +
+#   labs(title="Agnostic (74 random genes) vs mechanistic SVM models in the training data") + My_Theme2
+# 
+# AUC_Test_DistrHist_74 <- ggplot(ModelCompareAUCTest_74, aes(AUC, fill = modelType)) +
+#   geom_density(alpha = 0.5) +
+#   scale_x_continuous(limits = c(0.5, 1)) +
+#   labs(title="Agnostic (74 random genes) vs mechanistic SVM models in the testing data") + My_Theme2
+# #############################
+# AUC_Train_DistrHist_100 <- ggplot(ModelCompareAUCTrain_100, aes(AUC, fill = modelType)) +
+#   geom_density(alpha = 0.5, adjust=0.01) +
+#   scale_x_continuous(limits = c(0.5, 1)) +
+#   labs(title="Agnostic (100 random genes) vs mechanistic SVM models in the training data") + My_Theme2
+# 
+# AUC_Test_DistrHist_100 <- ggplot(ModelCompareAUCTest_100, aes(AUC, fill = modelType)) +
+#   geom_density(alpha = 0.5) +
+#   scale_x_continuous(limits = c(0.5, 1)) +
+#   labs(title="Agnostic (100 random genes) vs mechanistic SVM models in the testing data") + My_Theme2
+# ##############################
+# AUC_Train_DistrHist_200 <- ggplot(ModelCompareAUCTrain_200, aes(AUC, fill = modelType)) +
+#   geom_density(alpha = 0.5, adjust=0.01) +
+#   scale_x_continuous(limits = c(0.5, 1)) +
+#   labs(title="Agnostic (200 random genes) vs mechanistic SVM models in the training data") + My_Theme2
+# 
+# AUC_Test_DistrHist_200 <- ggplot(ModelCompareAUCTest_200, aes(AUC, fill = modelType)) +
+#   geom_density(alpha = 0.5) +
+#   scale_x_continuous(limits = c(0.5, 1)) +
+#   labs(title="Agnostic (200 random genes) vs mechanistic SVM models in the testing data") + My_Theme2
+# ###############################
+# AUC_Train_DistrHist_500 <- ggplot(ModelCompareAUCTrain_500, aes(AUC, fill = modelType)) +
+#   geom_density(alpha = 0.5, adjust=0.01) +
+#   scale_x_continuous(limits = c(0.5, 1)) +
+#   labs(title="Agnostic (500 random genes) vs mechanistic SVM models in the training data") + My_Theme2
+# 
+# AUC_Test_DistrHist_500 <- ggplot(ModelCompareAUCTest_500, aes(AUC, fill = modelType)) +
+#   geom_density(alpha = 0.5) +
+#   scale_x_continuous(limits = c(0.5, 1)) +
+#   labs(title="Agnostic (500 random genes) vs mechanistic SVM models in the testing data") + My_Theme2
+# 
+# 
+# # All in one figure
+# png("../../Figs/BootStrap_Diff_No_features/SVM_BS_RAND_AUC_DiffFeatures.png", width = 3000, height = 1500, res = 150)
+# (AUC_Train_DistrHist_74 / AUC_Test_DistrHist_74) | (AUC_Train_DistrHist_100 / AUC_Test_DistrHist_100) | (AUC_Train_DistrHist_200 / AUC_Test_DistrHist_200) | (AUC_Train_DistrHist_500 / AUC_Test_DistrHist_500) + plot_layout(widths = c(1, 1))
+# dev.off()
 
 # 
 # 

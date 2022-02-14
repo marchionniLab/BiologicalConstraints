@@ -14,7 +14,6 @@ library(limma)
 library(genefilter)
 library(edgeR)
 library(caret)
-library(sampling)
 
 ### Getting the data 
 # dataset1 <- getGEO("GSE25055", GSEMatrix = TRUE, AnnotGPL = TRUE)
