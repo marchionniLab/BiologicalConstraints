@@ -1065,3 +1065,18 @@ ModelCompareAUC_Test_500$NofFeatAgn <- "500_Genes"
 
 save(ModelCompareAUC_Train_500, ModelCompareAUC_Test_500, file = "Objs/XGB/ModelCompare_RAND_AUC_500.rda")
 
+###############################
+## save all
+
+ModelCompare_XGB_RAND_DiffNoFeat <- rbind(ModelCompareAUC_Train_50,
+                                          ModelCompareAUC_Test_50,
+                                          ModelCompareAUC_Train_100,
+                                          ModelCompareAUC_Test_100,
+                                          ModelCompareAUC_Train_200,
+                                          ModelCompareAUC_Test_200,
+                                          ModelCompareAUC_Train_500,
+                                          ModelCompareAUC_Test_500
+)
+
+save(ModelCompare_XGB_RAND_DiffNoFeat, file = "./Objs/XGB/ModelCompare_XGB_RAND_DiffNoFeat.rda")
+

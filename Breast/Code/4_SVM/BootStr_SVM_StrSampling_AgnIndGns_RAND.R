@@ -585,3 +585,18 @@ ModelCompareAUCTest_500$NofFeatAgn <- "500_Genes"
 
 save(ModelCompareAUCTrain_500, ModelCompareAUCTest_500, file = "Objs/SVM/ModelCompare_RAND_AUC_500.rda")
 
+###############################
+## save all
+
+ModelCompare_SVM_RAND_DiffNoFeat <- rbind(ModelCompareAUCTrain_50,
+                                         ModelCompareAUCTest_50,
+                                         ModelCompareAUCTrain_100,
+                                         ModelCompareAUCTest_100,
+                                         ModelCompareAUCTrain_200,
+                                         ModelCompareAUCTest_200,
+                                         ModelCompareAUCTrain_500,
+                                         ModelCompareAUCTest_500
+)
+
+save(ModelCompare_SVM_RAND_DiffNoFeat, file = "./Objs/SVM/ModelCompare_SVM_RAND_DiffNoFeat.rda")
+
