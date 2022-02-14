@@ -49,6 +49,12 @@ table(AllModelCompare_Bladder_DiffNoFeat$modelType, AllModelCompare_Bladder_Diff
 
 #AllModelCompare_Bladder_DiffNoFeat$FeatureType <- ifelse(AllModelCompare_Bladder_DiffNoFeat$modelType == "Agnostic DEGs", "Genes", "Pairs")
 
+
+# remove the KTSP
+AllModelCompare_Bladder_DiffNoFeat <- AllModelCompare_Bladder_DiffNoFeat %>%
+  filter(algorithm != 'K-TSPs')
+
+
 ###########################
 ############################################################################
 ## Plot
