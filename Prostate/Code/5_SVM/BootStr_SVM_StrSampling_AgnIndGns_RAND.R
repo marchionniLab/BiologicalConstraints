@@ -17,8 +17,8 @@ library(patchwork)
 ## SVM
 # Mechanistic
 ## Load data
-load("../../Objs/KTSP/KTSP_STATs_Mechanistic_Combined.rda")
-load("../../Objs/MetastasisDataGood.rda")
+load("./Objs/KTSP/KTSP_STATs_Mechanistic_Combined.rda")
+load("./Objs/MetastasisDataGood.rda")
 
 ####
 usedTrainGroup <- mixTrainGroup
@@ -86,8 +86,8 @@ colnames(AUCs_SVM_Mech) <- c("AUC_Train", "AUC_Test", "N_ImportanVariables")
 ### 50 random genes
 
 ## Load data
-load("../../Objs/MetastasisDataGood.rda")
-load("../../Objs/Correlation/RGenes.rda")
+load("./Objs/MetastasisDataGood.rda")
+load("./Objs/Correlation/RGenes.rda")
 
 
 ### Normalization
@@ -166,14 +166,12 @@ bootobjectAgnostic_50 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, R
 ### 100 random genes
 
 ## Load data
-load("../../Objs/MetastasisDataGood.rda")
-load("../../Objs/Correlation/RGenes.rda")
-
+load("./Objs/MetastasisDataGood.rda")
+load("./Objs/Correlation/RGenes.rda")
 
 ### Normalization
 usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")[RGenes, ]
 usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")[RGenes, ]
-
 
 ####
 usedTrainGroup <- mixTrainGroup
@@ -248,8 +246,8 @@ bootobjectAgnostic_100 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, 
 ### 200 random genes
 
 ## Load data
-load("../../Objs/MetastasisDataGood.rda")
-load("../../Objs/Correlation/RGenes.rda")
+load("./Objs/MetastasisDataGood.rda")
+load("./Objs/Correlation/RGenes.rda")
 
 
 ### Normalization
@@ -329,8 +327,8 @@ bootobjectAgnostic_200 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, 
 ### 500 random genes
 
 ## Load data
-load("../../Objs/MetastasisDataGood.rda")
-load("../../Objs/Correlation/RGenes.rda")
+load("./Objs/MetastasisDataGood.rda")
+load("./Objs/Correlation/RGenes.rda")
 
 
 ### Normalization
@@ -407,10 +405,10 @@ bootobjectAgnostic_500 <- boot(data= Data_train_Agnostic, statistic= SVM_Strap, 
 ########################################################################################
 ########################################################################################
 ## Save all Objects
-save(bootobjectMech, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_200, bootobjectAgnostic_500, file= "../../Objs/SVM/SVMBootObjects_AdhesionActivationO2response_RAND.rda")
+save(bootobjectMech, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_200, bootobjectAgnostic_500, file= "./Objs/SVM/SVMBootObjects_AdhesionActivationO2response_RAND.rda")
 
 ## Load
-load("../../Objs/SVM/SVMBootObjects_AdhesionActivationO2response_RAND.rda")
+load("./Objs/SVM/SVMBootObjects_AdhesionActivationO2response_RAND.rda")
 
 ########################################################################################
 ########################################################################################
@@ -458,13 +456,13 @@ ModelCompareAUCTest_50$data_type <- "Testing"
 ModelCompareAUCTrain_50$NofFeatAgn <- "50_Genes"
 ModelCompareAUCTest_50$NofFeatAgn <- "50_Genes"
 
-save(ModelCompareAUCTrain_50, ModelCompareAUCTest_50, file = "../../Objs/SVM/ModelCompare_RAND_AUC_50.rda")
+save(ModelCompareAUCTrain_50, ModelCompareAUCTest_50, file = "./Objs/SVM/ModelCompare_RAND_AUC_50.rda")
 
 # ###########################################################################3
 # ## Save for the main figure
 ModelCompare_SVM <- rbind(ModelCompareAUCTrain_50, ModelCompareAUCTest_50)
 ModelCompare_SVM$algorithm <- "SVM"
-save(ModelCompare_SVM, file = "../../Objs/SVM/ModelCompare_SVM_50_RAND.rda")
+save(ModelCompare_SVM, file = "./Objs/SVM/ModelCompare_SVM_50_RAND.rda")
 
 ########################################################################################
 ########################################################################################
@@ -510,7 +508,7 @@ ModelCompareAUCTest_100$data_type <- "Testing"
 ModelCompareAUCTrain_100$NofFeatAgn <- "100_Genes"
 ModelCompareAUCTest_100$NofFeatAgn <- "100_Genes"
 
-save(ModelCompareAUCTrain_100, ModelCompareAUCTest_100, file = "../../Objs/SVM/ModelCompare_RAND_AUC_100.rda")
+save(ModelCompareAUCTrain_100, ModelCompareAUCTest_100, file = "./Objs/SVM/ModelCompare_RAND_AUC_100.rda")
 
 ###########################################################################3
 ## Save for the main figure
@@ -553,7 +551,7 @@ ModelCompareAUCTest_200$data_type <- "Testing"
 ModelCompareAUCTrain_200$NofFeatAgn <- "200_Genes"
 ModelCompareAUCTest_200$NofFeatAgn <- "200_Genes"
 
-save(ModelCompareAUCTrain_200, ModelCompareAUCTest_200, file = "../../Objs/SVM/ModelCompare_RAND_AUC_200.rda")
+save(ModelCompareAUCTrain_200, ModelCompareAUCTest_200, file = "./Objs/SVM/ModelCompare_RAND_AUC_200.rda")
 
 ########################################################################################
 ########################################################################################
@@ -590,5 +588,20 @@ ModelCompareAUCTest_500$data_type <- "Testing"
 ModelCompareAUCTrain_500$NofFeatAgn <- "500_Genes"
 ModelCompareAUCTest_500$NofFeatAgn <- "500_Genes"
 
-save(ModelCompareAUCTrain_500, ModelCompareAUCTest_500, file = "../../Objs/SVM/ModelCompare_RAND_AUC_500.rda")
+save(ModelCompareAUCTrain_500, ModelCompareAUCTest_500, file = "./Objs/SVM/ModelCompare_RAND_AUC_500.rda")
+
+###############################
+## save all
+
+ModelCompare_SVM_RAND_DiffNoFeat <- rbind(ModelCompareAUCTrain_50,
+                                         ModelCompareAUCTest_50,
+                                         ModelCompareAUCTrain_100,
+                                         ModelCompareAUCTest_100,
+                                         ModelCompareAUCTrain_200,
+                                         ModelCompareAUCTest_200,
+                                         ModelCompareAUCTrain_500,
+                                         ModelCompareAUCTest_500
+)
+
+save(ModelCompare_SVM_RAND_DiffNoFeat, file = "./Objs/SVM/ModelCompare_SVM_RAND_DiffNoFeat.rda")
 

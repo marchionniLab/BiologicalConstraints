@@ -24,8 +24,8 @@ library(boot)
 # Mechanistic
 
 ## Load data
-load("../../Objs/KTSP/KTSP_STATs_Mechanistic_Combined.rda")
-load("../../Objs/MetastasisDataGood.rda")
+load("./Objs/KTSP/KTSP_STATs_Mechanistic_Combined.rda")
+load("./Objs/MetastasisDataGood.rda")
 
 
 ### Associated groups
@@ -112,9 +112,6 @@ DataTrain_Mech <- xgb.DMatrix(as.matrix(Training), label = Train_label)
 DataVal_Mech <- xgb.DMatrix(as.matrix(Validation), label = Val_label)
 DataTest_Mech <- xgb.DMatrix(as.matrix(Testing), label = Test_label)
 
-## Creat a watch list
-watchlist <- list(train  = DataTrain_Mech, test = DataVal_Mech)
-
 ##########################
 
 ## Parameters
@@ -149,6 +146,10 @@ XGBStrap <- function(data, indices) {
   Mets <- sum(Train_label == 1)
   d$usedTrainGroup1 <- NULL
   d2 <- xgb.DMatrix(as.matrix(d), label = Train_label)
+  
+  # add the watch list
+  watchlist <- list(train  = d2, test = DataVal_Mech)
+  
   XGB <- xgb.train(parameters, data = d2, nrounds = 500, watchlist,  early_stopping_rounds = 50, scale_pos_weight = No_Mets/Mets)
   Importance_Mech <- xgb.importance(model = XGB)
   Importance_Mech <- Importance_Mech[order(Importance_Mech$Gain, decreasing = TRUE), ]
@@ -174,8 +175,8 @@ colnames(AUCs_XG_Mech) <- c("AUC_Train", "AUC_Test", "N_ImportanVariables")
 ## 50 random genes
 
 ## Load data
-load("../../Objs/MetastasisDataGood.rda")
-load("../../Objs/Correlation/RGenes.rda")
+load("./Objs/MetastasisDataGood.rda")
+load("./Objs/Correlation/RGenes.rda")
 
 ### Normalization
 usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")[RGenes, ]
@@ -274,9 +275,6 @@ DataTrain_Agnostic <- xgb.DMatrix(as.matrix(Training), label = Train_label)
 DataVal_Agnostic <- xgb.DMatrix(as.matrix(Validation), label = Val_label)
 DataTest_Agnostic <- xgb.DMatrix(as.matrix(Testing), label = Test_label)
 
-## Creat a watch list
-watchlist <- list(train  = DataTrain_Agnostic, test = DataVal_Agnostic)
-
 ##########################
 
 ## Make a list of model parameters
@@ -349,8 +347,8 @@ bootobjectAgnostic_50 <- boot(data= Data_train_Agnostic, statistic= XGBStrap, R=
 ## 100 Random genes
 
 ## Load data
-load("../../Objs/MetastasisDataGood.rda")
-load("../../Objs/Correlation/RGenes.rda")
+load("./Objs/MetastasisDataGood.rda")
+load("./Objs/Correlation/RGenes.rda")
 
 ### Normalization
 usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")[RGenes, ]
@@ -524,8 +522,8 @@ bootobjectAgnostic_100 <- boot(data= Data_train_Agnostic, statistic= XGBStrap, R
 ## 200 random genes
 
 ## Load data
-load("../../Objs/MetastasisDataGood.rda")
-load("../../Objs/Correlation/RGenes.rda")
+load("./Objs/MetastasisDataGood.rda")
+load("./Objs/Correlation/RGenes.rda")
 
 ### Normalization
 usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")[RGenes, ]
@@ -699,8 +697,8 @@ bootobjectAgnostic_200 <- boot(data= Data_train_Agnostic, statistic= XGBStrap, R
 ## 500 Random genes
 
 ## Load data
-load("../../Objs/MetastasisDataGood.rda")
-load("../../Objs/Correlation/RGenes.rda")
+load("./Objs/MetastasisDataGood.rda")
+load("./Objs/Correlation/RGenes.rda")
 
 ### Normalization
 usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")[RGenes, ]
@@ -871,10 +869,10 @@ bootobjectAgnostic_500 <- boot(data= Data_train_Agnostic, statistic= XGBStrap, R
 ################################################################################################
 
 ### Save boot objects
-save(bootobjectMech, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_200, bootobjectAgnostic_500, file = "../../Objs/XGB/XGBBootObjects_AdhesionActivationO2response_RAND.rda")
+save(bootobjectMech, bootobjectAgnostic_50, bootobjectAgnostic_100, bootobjectAgnostic_200, bootobjectAgnostic_500, file = "./Objs/XGB/XGBBootObjects_AdhesionActivationO2response_RAND.rda")
 
 # Load
-load("../../Objs/XGB/XGBBootObjects_AdhesionActivationO2response_RAND.rda")
+load("./Objs/XGB/XGBBootObjects_AdhesionActivationO2response_RAND.rda")
 
 ################################################################################################
 ################################################################################################
@@ -922,13 +920,13 @@ ModelCompareAUC_Test_50$data_type <- "Testing"
 ModelCompareAUC_Train_50$NofFeatAgn <- "50_Genes"
 ModelCompareAUC_Test_50$NofFeatAgn <- "50_Genes"
 
-save(ModelCompareAUC_Train_50, ModelCompareAUC_Test_50, file = "../../Objs/XGB/ModelCompare_RAND_AUC_50.rda")
+save(ModelCompareAUC_Train_50, ModelCompareAUC_Test_50, file = "./Objs/XGB/ModelCompare_RAND_AUC_50.rda")
 
 ######################
 ## Save for the main figure
 ModelCompare_XGB <- rbind(ModelCompareAUC_Train_50, ModelCompareAUC_Test_50)
 ModelCompare_XGB$algorithm <- "XGB"
-save(ModelCompare_XGB, file = "../../Objs/XGB/ModelCompare_XGB_RAND.rda")
+save(ModelCompare_XGB, file = "./Objs/XGB/ModelCompare_XGB_RAND.rda")
 
 ################################################################################################
 ################################################################################################
@@ -977,7 +975,7 @@ ModelCompareAUC_Test_100$data_type <- "Testing"
 ModelCompareAUC_Train_100$NofFeatAgn <- "100_Genes"
 ModelCompareAUC_Test_100$NofFeatAgn <- "100_Genes"
 
-save(ModelCompareAUC_Train_100, ModelCompareAUC_Test_100, file = "../../Objs/XGB/ModelCompare_RAND_AUC_100.rda")
+save(ModelCompareAUC_Train_100, ModelCompareAUC_Test_100, file = "./Objs/XGB/ModelCompare_RAND_AUC_100.rda")
 
 ######################
 ## Save for the main figure
@@ -1021,7 +1019,7 @@ ModelCompareAUC_Test_200$data_type <- "Testing"
 ModelCompareAUC_Train_200$NofFeatAgn <- "200_Genes"
 ModelCompareAUC_Test_200$NofFeatAgn <- "200_Genes"
 
-save(ModelCompareAUC_Train_200, ModelCompareAUC_Test_200, file = "../../Objs/XGB/ModelCompare_RAND_AUC_200.rda")
+save(ModelCompareAUC_Train_200, ModelCompareAUC_Test_200, file = "./Objs/XGB/ModelCompare_RAND_AUC_200.rda")
 
 ################################################################################################
 ################################################################################################
@@ -1059,5 +1057,21 @@ ModelCompareAUC_Test_500$data_type <- "Testing"
 ModelCompareAUC_Train_500$NofFeatAgn <- "500_Genes"
 ModelCompareAUC_Test_500$NofFeatAgn <- "500_Genes"
 
-save(ModelCompareAUC_Train_500, ModelCompareAUC_Test_500, file = "../../Objs/XGB/ModelCompare_RAND_AUC_500.rda")
+save(ModelCompareAUC_Train_500, ModelCompareAUC_Test_500, file = "./Objs/XGB/ModelCompare_RAND_AUC_500.rda")
+
+###############################
+## save all
+
+ModelCompare_XGB_RAND_DiffNoFeat <- rbind(ModelCompareAUC_Train_50,
+                                          ModelCompareAUC_Test_50,
+                                          ModelCompareAUC_Train_100,
+                                          ModelCompareAUC_Test_100,
+                                          ModelCompareAUC_Train_200,
+                                          ModelCompareAUC_Test_200,
+                                          ModelCompareAUC_Train_500,
+                                          ModelCompareAUC_Test_500
+)
+
+save(ModelCompare_XGB_RAND_DiffNoFeat, file = "./Objs/XGB/ModelCompare_XGB_RAND_DiffNoFeat.rda")
+
 
