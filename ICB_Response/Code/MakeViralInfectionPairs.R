@@ -147,6 +147,8 @@ colnames(VirInfectionPairs) <- c("ProInfection","AntiInfection")
 ### Make into a matrix
 VirInfectionPairs <- as.matrix(VirInfectionPairs)
 
+write.csv(VirInfectionPairs, file = '/Users/mohamedomar/Dropbox (MechPred)/MechPred/USER/Mohamed/MechanisticModels/BiologicalConstraints/GenePairs/Infection_pairs.csv')
+
 ######################################################################
 ####Save Results
 save(VirInfectionPairs,file="./Objs/VirInfectionPairs.rda")

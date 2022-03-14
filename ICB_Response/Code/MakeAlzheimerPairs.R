@@ -143,6 +143,7 @@ colnames(AlzheimerPairs) <- c("ProAlzheimer","AntiAlzheimer")
 ### Make into a matrix
 AlzheimerPairs <- as.matrix(AlzheimerPairs)
 
+write.csv(AlzheimerPairs, file = '/Users/mohamedomar/Dropbox (MechPred)/MechPred/USER/Mohamed/MechanisticModels/BiologicalConstraints/GenePairs/Alzheimer_pairs.csv')
 ######################################################################
 ####Save Results
 save(AlzheimerPairs,file="./Objs/AlzheimerPairs.rda")

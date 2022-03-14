@@ -53,12 +53,12 @@ AllModelCompare_Breast_DiffNoFeat$FeatureType <- ifelse(AllModelCompare_Breast_D
 ############################################################################
 ## Plot
 My_Theme = theme(
-  axis.title.x = element_text(size = 14),
-  axis.text.x = element_text(size = 12),
-  axis.title.y = element_text(size = 14),
-  axis.text.y = element_text(size = 12),
-  strip.text.x = element_text(size = 14),
-  plot.title = element_text(size=15, face = "bold", hjust = 0.5)
+  axis.title.x = element_text(size = 10),
+  axis.text.x = element_text(size = 8),
+  axis.title.y = element_text(size = 10),
+  axis.text.y = element_text(size = 8),
+  strip.text.x = element_text(size = 10),
+  plot.title = element_text(size=11, face = "bold", hjust = 0.5)
 )
 
 

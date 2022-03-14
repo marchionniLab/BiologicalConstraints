@@ -143,6 +143,8 @@ colnames(DiabetesPairs) <- c("ProDiabetes","AntiDiabetes")
 ### Make into a matrix
 DiabetesPairs <- as.matrix(DiabetesPairs)
 
+write.csv(DiabetesPairs, file = '/Users/mohamedomar/Dropbox (MechPred)/MechPred/USER/Mohamed/MechanisticModels/BiologicalConstraints/GenePairs/Diabetes_pairs.csv')
+
 ######################################################################
 ####Save Results
 save(DiabetesPairs,file="./Objs/DiabetesPairs.rda")

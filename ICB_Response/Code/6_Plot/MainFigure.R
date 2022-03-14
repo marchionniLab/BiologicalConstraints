@@ -75,3 +75,38 @@ BS_AUC_ModelCompare <- ggplot(AllModelCompare_ICB, aes(x = AUC, y = modelType, f
 BS_AUC_ModelCompare
 dev.off()
 
+
+####################################
+####################################
+# for the N of pairs
+load('./objs/ktsp/ModelCompare_KTSP_Npairs.rda')
+
+ModelCompare_KTSP_Npairs$NofFeatAgn <- factor(ModelCompare_KTSP_Npairs$NofFeatAgn, levels = c('50 Genes', '100 Genes', '200 Genes', '500 Genes'))
+table(ModelCompare_KTSP_Npairs$NofFeatAgn)
+
+ModelCompare_KTSP_Npairs$modelType <- factor(ModelCompare_KTSP_Npairs$modelType, levels = c('Mechanistic', 'Agnostic'))
+table(ModelCompare_KTSP_Npairs$modelType)
+
+colnames(ModelCompare_KTSP_Npairs) <- c('N of output pairs', 'model type', 'N of training features')
+
+png(filename = "./Figs/ICB_BS_AllModels_Npairs.png", width = 3000, height = 1500, res = 200)
+BS_AUC_ModelCompare <- ggplot(ModelCompare_KTSP_Npairs, aes(x = `N of output pairs`, y = `N of training features`, fill = `model type`, height = ..ndensity..)) + 
+  geom_density_ridges(stat = "density", scale=1.2, alpha = 0.8) +
+  scale_x_continuous(limits = c(0, 55), breaks = seq(0, 50, by = 5), expand = c(0, 0)) +
+  scale_y_discrete(expand = c(0, 0)) +
+  labs(title="The number of pairs returned by the K-TSPs model in the melanoma response to ICIs case") + 
+  ylab("Model Type") +
+  My_Theme +
+  #scale_fill_manual(values = c("red3", "#78B7C5", "#3B9AB2")) +
+  #scale_fill_jco() +
+  #scale_alpha_manual(values = c(0.4, 1))+
+  scale_fill_viridis(discrete = TRUE)+
+  coord_cartesian(clip = "off") +
+  #facet_wrap(~algorithm, dir = "v", ncol = 1, scales = "free_y") + 
+  theme(axis.text = element_text(face = "bold"), 
+        panel.background = element_rect(fill = "gray93"), 
+        plot.background = element_rect(fill = "white")) + 
+  labs(fill = "model type")
+
+BS_AUC_ModelCompare
+dev.off()

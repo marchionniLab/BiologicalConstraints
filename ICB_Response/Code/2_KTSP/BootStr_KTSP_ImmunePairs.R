@@ -255,6 +255,18 @@ ModelCompareAUCTest_50$data_type <- "Testing"
 ModelCompareAUCTrain_50$NofFeatAgn <- "50_Genes"
 ModelCompareAUCTest_50$NofFeatAgn <- "50_Genes"
 
+################
+## Plot the distributions of the N of Pairs from both methods
+Mechanistic_NofPairs_50 <- data.frame(NofPairs = All_50[, "N_Pairs_Mech"])
+Agnostic_NofPairs_50 <- data.frame(NofPairs = All_50[, "N_Pairs_Agnostic"])
+
+Mechanistic_NofPairs_50$modelType <- "Mechanistic"
+Agnostic_NofPairs_50$modelType <- "Agnostic"
+
+ModelCompare_NofPairs_50 <- rbind(Mechanistic_NofPairs_50, Agnostic_NofPairs_50)
+
+ModelCompare_NofPairs_50$NofFeatAgn <- "50 Genes"
+
 # ###########################################################################
 ## Save for the main figure
 ModelCompare_KTSP <- rbind(ModelCompareAUCTrain_50, ModelCompareAUCTest_50)
@@ -305,6 +317,18 @@ ModelCompareAUCTest_100$data_type <- "Testing"
 
 ModelCompareAUCTrain_100$NofFeatAgn <- "100_Genes"
 ModelCompareAUCTest_100$NofFeatAgn <- "100_Genes"
+
+################
+## Plot the distributions of the N of Pairs from both methods
+Mechanistic_NofPairs_100 <- data.frame(NofPairs = All_100[, "N_Pairs_Mech"])
+Agnostic_NofPairs_100 <- data.frame(NofPairs = All_100[, "N_Pairs_Agnostic"])
+
+Mechanistic_NofPairs_100$modelType <- "Mechanistic"
+Agnostic_NofPairs_100$modelType <- "Agnostic"
+
+ModelCompare_NofPairs_100 <- rbind(Mechanistic_NofPairs_100, Agnostic_NofPairs_100)
+
+ModelCompare_NofPairs_100$NofFeatAgn <- "100 Genes"
 
 # ## Save for the main figure
 #ModelCompare_KTSP <- rbind(ModelCompareAUCTrain_100, ModelCompareAUCTest_100)
@@ -358,6 +382,18 @@ ModelCompareAUCTest_200$data_type <- "Testing"
 ModelCompareAUCTrain_200$NofFeatAgn <- "200_Genes"
 ModelCompareAUCTest_200$NofFeatAgn <- "200_Genes"
 
+################
+## Plot the distributions of the N of Pairs from both methods
+Mechanistic_NofPairs_200 <- data.frame(NofPairs = All_200[, "N_Pairs_Mech"])
+Agnostic_NofPairs_200 <- data.frame(NofPairs = All_200[, "N_Pairs_Agnostic"])
+
+Mechanistic_NofPairs_200$modelType <- "Mechanistic"
+Agnostic_NofPairs_200$modelType <- "Agnostic"
+
+ModelCompare_NofPairs_200 <- rbind(Mechanistic_NofPairs_200, Agnostic_NofPairs_200)
+
+ModelCompare_NofPairs_200$NofFeatAgn <- "200 Genes"
+
 ###############################
 ##############################################################
 ### Work with boot object 500  
@@ -403,6 +439,31 @@ ModelCompareAUCTest_500$data_type <- "Testing"
 
 ModelCompareAUCTrain_500$NofFeatAgn <- "500_Genes"
 ModelCompareAUCTest_500$NofFeatAgn <- "500_Genes"
+
+################
+## Plot the distributions of the N of Pairs from both methods
+Mechanistic_NofPairs_500 <- data.frame(NofPairs = All_500[, "N_Pairs_Mech"])
+Agnostic_NofPairs_500 <- data.frame(NofPairs = All_500[, "N_Pairs_Agnostic"])
+
+Mechanistic_NofPairs_500$modelType <- "Mechanistic"
+Agnostic_NofPairs_500$modelType <- "Agnostic"
+
+ModelCompare_NofPairs_500 <- rbind(Mechanistic_NofPairs_500, Agnostic_NofPairs_500)
+
+ModelCompare_NofPairs_500$NofFeatAgn <- "500 Genes"
+
+
+####################################################################################
+# combine the number of pairs distribution
+
+ModelCompare_KTSP_Npairs <- rbind(ModelCompare_NofPairs_50,
+                                  ModelCompare_NofPairs_100,
+                                  ModelCompare_NofPairs_200,
+                                  ModelCompare_NofPairs_500
+)
+
+save(ModelCompare_KTSP_Npairs, file = "./Objs/KTSP/ModelCompare_KTSP_Npairs.rda")
+
 
 ####################################################################################
 ####################################################################################

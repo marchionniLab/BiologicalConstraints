@@ -42,7 +42,7 @@ sel2 <- which(AllModelCompare_Breast_DiffNoFeat$modelType == "Mechanistic" & All
 AllModelCompare_Breast_DiffNoFeat$NofFeatAgn[sel2] <- "241_Pairs"
 
 AllModelCompare_Breast_DiffNoFeat$NofFeatAgn <- factor(AllModelCompare_Breast_DiffNoFeat$NofFeatAgn, levels =  c("241_Pairs", "50_Genes", "100_Genes", "200_Genes", "500_Genes"))
-levels(AllModelCompare_Breast_DiffNoFeat$NofFeatAgn) <- c("241 Pairs", "74 Genes", "100 Genes", "200 Genes", "500 Genes")
+levels(AllModelCompare_Breast_DiffNoFeat$NofFeatAgn) <- c("241 Pairs", "50 Genes", "100 Genes", "200 Genes", "500 Genes")
 
 table(AllModelCompare_Breast_DiffNoFeat$modelType, AllModelCompare_Breast_DiffNoFeat$NofFeatAgn)
 
@@ -73,7 +73,7 @@ BS_AUC_ModelCompare <- ggplot(AllModelCompare_Breast_DiffNoFeat, aes(x = AUC, y 
   geom_density_ridges(stat = "density", alpha = 0.9, bw = 0.8, adjust= 0.01, scale=1.2) +
   scale_x_continuous(limits = c(0.4, 0.9), breaks = seq(0.4, 0.9, by = 0.1), expand = c(0, 0)) +
   scale_y_discrete(expand = c(0, 0)) +
-  labs(title="Performance of mechanistic (37 FFLs) vs random genes models at predicting the response to NACT in triple-negative breast cancer in the testing data") + 
+  labs(title="Performance of mechanistic vs random genes models at predicting the response to NACT in triple-negative breast cancer in the testing data") + 
   ylab("Model Type") +
   My_Theme +
   #scale_fill_manual(values = c("#21908CFF", "cadetblue1", "#3B9AB2", "cyan4", "#440154FF", "darkcyan", "#21908CFF", "#21908CFF")) +

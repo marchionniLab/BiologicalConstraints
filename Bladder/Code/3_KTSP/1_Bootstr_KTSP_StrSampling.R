@@ -265,19 +265,19 @@ ModelCompareAUCTest_74$NofFeatAgn <- "74_Genes"
 ModelCompare_KTSP <- rbind(ModelCompareAUCTrain_74, ModelCompareAUCTest_74)
 ModelCompare_KTSP$algorithm <- "KTSP"
 save(ModelCompare_KTSP, file = "./Objs/KTSP/ModelCompare_KTSP.rda")
-###########################################################################
 
-
-######################
+################
 ## Plot the distributions of the N of Pairs from both methods
-# Mechanistic_NofPairs_74 <- data.frame(NofPairs = All_74[, "N_Pairs_Mech"])
-# Agnostic_NofPairs_74 <- data.frame(NofPairs = All_74[, "N_Pairs_Agnostic"])
-# 
-# Mechanistic_NofPairs_74$modelType <- "Mech"
-# Agnostic_NofPairs_74$modelType <- "Agnostic"
-# 
-# ModelCompare_NofPairs_74 <- rbind(Mechanistic_NofPairs_74, Agnostic_NofPairs_74)
-# 
+Mechanistic_NofPairs_74 <- data.frame(NofPairs = All_74[, "N_Pairs_Mech"])
+Agnostic_NofPairs_74 <- data.frame(NofPairs = All_74[, "N_Pairs_Agnostic"])
+
+Mechanistic_NofPairs_74$modelType <- "Mechanistic"
+Agnostic_NofPairs_74$modelType <- "Agnostic"
+
+ModelCompare_NofPairs_74 <- rbind(Mechanistic_NofPairs_74, Agnostic_NofPairs_74)
+
+ModelCompare_NofPairs_74$NofFeatAgn <- "74 Genes"
+
 # ##################################
 # ## Plots
 # My_Theme = theme(
@@ -288,34 +288,11 @@ save(ModelCompare_KTSP, file = "./Objs/KTSP/ModelCompare_KTSP.rda")
 #   plot.title = element_text(size=7)
 # )
 # 
-# DiffHist_Agnostic_74 <- ggplot(as.data.frame(Diff_Agnostic_74), aes(Diff_Agnostic_74, fill = "red")) + 
-#   geom_histogram(bins = 25) +
-#   scale_x_continuous(limits = c(0, 0.4)) +
-#   labs(title="Histogram of the difference between the training and testing data using the agnostic model") + My_Theme
-# 
-# DiffHist_Mech_74 <- ggplot(as.data.frame(Diff_Mechanistic_74), aes(Diff_Mechanistic_74, fill = "red")) + 
-#   geom_histogram(bins = 25) +
-#   scale_x_continuous(limits = c(0, 0.4)) +
-#   labs(title="Histogram of the difference between the training and testing data using the mechanistic model") + My_Theme
-# 
-# AUC_Train_DistrHist_74 <- ggplot(ModelCompareAUCTrain_74, aes(AUC, fill = modelType)) + 
+# NofPairs_DistrHist_74 <- ggplot(ModelCompare_NofPairs_74, aes(NofPairs, fill = modelType)) +
 #   geom_density(alpha = 0.5) +
-#   scale_x_continuous(limits = c(0.5, 1)) +
-#   labs(title="AUC distribution of the agnostic (top 50 DEGs) and mechanistic KTSP models in the training data") + My_Theme
-# 
-# AUC_Test_DistrHist_74 <- ggplot(ModelCompareAUCTest_74, aes(AUC, fill = modelType)) + 
-#   geom_density(alpha = 0.5) +
-#   scale_x_continuous(limits = c(0.5, 1)) +
-#   labs(title="AUC distribution of the agnostic and mechanistic KTSP models in the testing data") + My_Theme
-# 
-# NofPairs_DistrHist_74 <- ggplot(ModelCompare_NofPairs_74, aes(NofPairs, fill = modelType)) + 
-#   geom_density(alpha = 0.5) +
-#   scale_x_continuous(limits = c(1, 50)) +
-#   labs(title="N of pairs distribution of the agnostic (top 50 DEGs) and mechanistic KTSP models") + My_Theme
-# 
-# png("./Figs/KTSP/KTSP_BS_AUC_74.png", width = 3000, height = 1500, res = 300)
-# (AUC_Train_DistrHist_74 / AUC_Test_DistrHist_74) | (DiffHist_Agnostic_74 / DiffHist_Mech_74 | NofPairs_DistrHist_74) + plot_layout(widths = c(1, 1.5)) 
-# dev.off()
+#   scale_x_continuous(limits = c(1, 35)) +
+#   labs(title="Number of output pairs distribution of the mechanistic and agnostic (top 74 DEGs) K-TSPs models") + My_Theme
+
 
 ##############################################################
 ### Work with boot object 100  
@@ -364,52 +341,22 @@ ModelCompareAUCTest_100$NofFeatAgn <- "100_Genes"
 
 
 ## Plot the distributions of the N of Pairs from both methods
-# Mechanistic_NofPairs_100 <- data.frame(NofPairs = All_100[, "N_Pairs_Mech"])
-# Agnostic_NofPairs_100 <- data.frame(NofPairs = All_100[, "N_Pairs_Agnostic"])
-# 
-# Mechanistic_NofPairs_100$modelType <- "Mech"
-# Agnostic_NofPairs_100$modelType <- "Agnostic"
-# 
-# ModelCompare_NofPairs_100 <- rbind(Mechanistic_NofPairs_100, Agnostic_NofPairs_100)
-# 
-# ##################################
+Mechanistic_NofPairs_100 <- data.frame(NofPairs = All_100[, "N_Pairs_Mech"])
+Agnostic_NofPairs_100 <- data.frame(NofPairs = All_100[, "N_Pairs_Agnostic"])
+
+Mechanistic_NofPairs_100$modelType <- "Mechanistic"
+Agnostic_NofPairs_100$modelType <- "Agnostic"
+
+ModelCompare_NofPairs_100 <- rbind(Mechanistic_NofPairs_100, Agnostic_NofPairs_100)
+
+ModelCompare_NofPairs_100$NofFeatAgn <- "100 Genes"
+
+# #######
 # ## Plots
-# My_Theme = theme(
-#   axis.title.x = element_text(size = 5),
-#   axis.text.x = element_text(size = 5),
-#   axis.title.y = element_text(size = 5),
-#   axis.text.y = element_text(size = 5),
-#   plot.title = element_text(size=7)
-# )
-# 
-# DiffHist_Agnostic_100 <- ggplot(as.data.frame(Diff_Agnostic_100), aes(Diff_Agnostic_100, fill = "red")) + 
-#   geom_histogram(bins = 25) +
-#   scale_x_continuous(limits = c(0, 0.4)) +
-#   labs(title="Histogram of the difference between the training and testing data using the agnostic model") + My_Theme
-# 
-# DiffHist_Mech_100 <- ggplot(as.data.frame(Diff_Mechanistic_100), aes(Diff_Mechanistic_100, fill = "red")) + 
-#   geom_histogram(bins = 25) +
-#   scale_x_continuous(limits = c(0, 0.4)) +
-#   labs(title="Histogram of the difference between the training and testing data using the mechanistic model") + My_Theme
-# 
-# AUC_Train_DistrHist_100 <- ggplot(ModelCompareAUCTrain_100, aes(AUC, fill = modelType)) + 
-#   geom_density(alpha = 0.5) +
-#   scale_x_continuous(limits = c(0.5, 1)) +
-#   labs(title="AUC distribution of the agnostic (top 100 DEGs) and mechanistic KTSP models in the training data") + My_Theme
-# 
-# AUC_Test_DistrHist_100 <- ggplot(ModelCompareAUCTest_100, aes(AUC, fill = modelType)) + 
-#   geom_density(alpha = 0.5) +
-#   scale_x_continuous(limits = c(0.5, 1)) +
-#   labs(title="AUC distribution of the agnostic (top 100 DEGs) and mechanistic KTSP models in the testing data") + My_Theme
-# 
-# NofPairs_DistrHist_100 <- ggplot(ModelCompare_NofPairs_100, aes(NofPairs, fill = modelType)) + 
+# NofPairs_DistrHist_100 <- ggplot(ModelCompare_NofPairs_100, aes(NofPairs, fill = modelType)) +
 #   geom_density(alpha = 0.5) +
 #   scale_x_continuous(limits = c(1, 50)) +
-#   labs(title="N of pairs distribution of the agnostic and mechanistic KTSP models") + My_Theme
-# 
-# png("./Figs/KTSP/KTSP_BS_AUC_100.png", width = 3000, height = 1500, res = 300)
-# (AUC_Train_DistrHist_100 / AUC_Test_DistrHist_100) | (DiffHist_Agnostic_100 / DiffHist_Mech_100 | NofPairs_DistrHist_100) + plot_layout(widths = c(1, 1.5)) 
-# dev.off()
+#   labs(title="Number of output pairs distribution of the mechanistic and agnostic (top 100 DEGs) K-TSPs models") + My_Theme
 
 ###############################
 ##############################################################
@@ -426,11 +373,6 @@ quantile(Diff_Agnostic_200, c(0.025, 0.975))
 Diff_Mechanistic_200 <- All_200[,"Diff_Mechanistic"]
 range(Diff_Mechanistic_200)
 quantile(Diff_Mechanistic_200, c(0.025, 0.975))
-
-## Calculate the difference and CI of the difference
-#Diff <- MechKTSP_AUC_Test - AgnosticKTSP_AUC_Test
-#quantile(Diff, c(0.025, 0.975))
-
 
 ## Plot the distributions of the AUCs from both methods in the training data
 MechanisticAUCTrain_200 <- data.frame(AUC = All_200[, "AUC_Train_Mech"])
@@ -458,60 +400,23 @@ ModelCompareAUCTrain_200$NofFeatAgn <- "200_Genes"
 ModelCompareAUCTest_200$NofFeatAgn <- "200_Genes"
 
 ## Plot the distributions of the N of Pairs from both methods
-# Mechanistic_NofPairs_200 <- data.frame(NofPairs = All_200[, "N_Pairs_Mech"])
-# Agnostic_NofPairs_200 <- data.frame(NofPairs = All_200[, "N_Pairs_Agnostic"])
-# 
-# Mechanistic_NofPairs_200$modelType <- "Mech"
-# Agnostic_NofPairs_200$modelType <- "Agnostic"
-# 
-# ModelCompare_NofPairs_200 <- rbind(Mechanistic_NofPairs_200, Agnostic_NofPairs_200)
-# 
+Mechanistic_NofPairs_200 <- data.frame(NofPairs = All_200[, "N_Pairs_Mech"])
+Agnostic_NofPairs_200 <- data.frame(NofPairs = All_200[, "N_Pairs_Agnostic"])
+
+Mechanistic_NofPairs_200$modelType <- "Mechanistic"
+Agnostic_NofPairs_200$modelType <- "Agnostic"
+
+ModelCompare_NofPairs_200 <- rbind(Mechanistic_NofPairs_200, Agnostic_NofPairs_200)
+
+ModelCompare_NofPairs_200$NofFeatAgn <- "200 Genes"
+
 # ##################################
 # ## Plots
-# My_Theme = theme(
-#   axis.title.x = element_text(size = 5),
-#   axis.text.x = element_text(size = 5),
-#   axis.title.y = element_text(size = 5),
-#   axis.text.y = element_text(size = 5),
-#   plot.title = element_text(size=7)
-# )
-# 
-# My_Theme2 = theme(
-#   axis.title.x = element_text(size = 5),
-#   axis.text.x = element_text(size = 5),
-#   axis.title.y = element_text(size = 5),
-#   axis.text.y = element_text(size = 5),
-#   plot.title = element_text(size=15)
-# )
-# 
-# DiffHist_Agnostic_200 <- ggplot(as.data.frame(Diff_Agnostic_200), aes(Diff_Agnostic_200, fill = "red")) + 
-#   geom_histogram(bins = 25) +
-#   scale_x_continuous(limits = c(0, 0.4)) +
-#   labs(title="Histogram of the difference between the training and testing data using the agnostic model") + My_Theme
-# 
-# DiffHist_Mech_200 <- ggplot(as.data.frame(Diff_Mechanistic_200), aes(Diff_Mechanistic_200, fill = "red")) + 
-#   geom_histogram(bins = 25) +
-#   scale_x_continuous(limits = c(0, 0.4)) +
-#   labs(title="Histogram of the difference between the training and testing data using the mechanistic model") + My_Theme
-# 
-# AUC_Train_DistrHist_200 <- ggplot(ModelCompareAUCTrain_200, aes(AUC, fill = modelType)) + 
-#   geom_density(alpha = 0.5) +
-#   scale_x_continuous(limits = c(0.5, 1)) +
-#   labs(title="AUC distribution of the agnostic (top 200 DEGs) and mechanistic KTSP models in the training data") + My_Theme
-# 
-# AUC_Test_DistrHist_200 <- ggplot(ModelCompareAUCTest_200, aes(AUC, fill = modelType)) + 
-#   geom_density(alpha = 0.5) +
-#   scale_x_continuous(limits = c(0.5, 1)) +
-#   labs(title="AUC distribution of the agnostic (top 200 DEGs) and mechanistic KTSP models in the testing data") + My_Theme
-# 
-# NofPairs_DistrHist_200 <- ggplot(ModelCompare_NofPairs_200, aes(NofPairs, fill = modelType)) + 
+
+# NofPairs_DistrHist_200 <- ggplot(ModelCompare_NofPairs_200, aes(NofPairs, fill = modelType)) +
 #   geom_density(alpha = 0.5) +
 #   scale_x_continuous(limits = c(1, 50)) +
-#   labs(title="N of pairs distribution of the agnostic and mechanistic KTSP models") + My_Theme
-# 
-# png("./Figs/KTSP/KTSP_BS_AUC_200.png", width = 3000, height = 1500, res = 300)
-# (AUC_Train_DistrHist_200 / AUC_Test_DistrHist_200) | (DiffHist_Agnostic_200 / DiffHist_Mech_200 | NofPairs_DistrHist_200) + plot_layout(widths = c(1, 1.5)) 
-# dev.off()
+#   labs(title="Number of output pairs distribution of the mechanistic and agnostic (top 200 DEGs) K-TSPs models") + My_Theme
 
 ###############################
 ##############################################################
@@ -559,7 +464,36 @@ ModelCompareAUCTest_500$data_type <- "Testing"
 ModelCompareAUCTrain_500$NofFeatAgn <- "500_Genes"
 ModelCompareAUCTest_500$NofFeatAgn <- "500_Genes"
 
+## Plot the distributions of the N of Pairs from both methods
+Mechanistic_NofPairs_500 <- data.frame(NofPairs = All_500[, "N_Pairs_Mech"])
+Agnostic_NofPairs_500 <- data.frame(NofPairs = All_500[, "N_Pairs_Agnostic"])
+
+Mechanistic_NofPairs_500$modelType <- "Mechanistic"
+Agnostic_NofPairs_500$modelType <- "Agnostic"
+
+ModelCompare_NofPairs_500 <- rbind(Mechanistic_NofPairs_500, Agnostic_NofPairs_500)
+
+ModelCompare_NofPairs_500$NofFeatAgn <- "500 Genes"
+
+########
+# plot
+# NofPairs_DistrHist_500 <- ggplot(ModelCompare_NofPairs_500, aes(NofPairs, fill = modelType)) +
+#   geom_density(alpha = 0.5) +
+#   scale_x_continuous(limits = c(1, 50)) +
+#   labs(title="Number of output pairs distribution of the mechanistic and agnostic (top 500 DEGs) K-TSPs models") + My_Theme
+# 
+
 ####################################################################################
+# combine the number of pairs distribution
+
+ModelCompare_KTSP_Npairs <- rbind(ModelCompare_NofPairs_74,
+                                      ModelCompare_NofPairs_100,
+                                      ModelCompare_NofPairs_200,
+                                      ModelCompare_NofPairs_500
+)
+
+save(ModelCompare_KTSP_Npairs, file = "./Objs/KTSP/ModelCompare_KTSP_Npairs.rda")
+
 ####################################################################################
 ####################################################################################
 # Combine all together in one dataframe
