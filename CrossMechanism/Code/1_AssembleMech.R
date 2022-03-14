@@ -71,16 +71,6 @@ myTSPs <- t(combn(Genes,2))
 list.mech[["GO"]] = myTSPs
 
 ## -------------
-## T cell activation mechanism
-
-l4 = load("/Users/mohamedomar/Dropbox (MechPred)/MechPred/USER/Mohamed/MechanisticModels/BiologicalConstraints/ICB_Response/Objs/ImmunePairs.rda")
-
-list.mech[["T-cell activation"]] = ImmunePairs
-
-rm(list=l4)
-
-
-## -------------
 ## Alzheimer mechanism
 
 l5 = load("../CrossMechanism/Objs/CancerUnrelatedMechanisms/AlzheimerPairs.rda")

@@ -86,40 +86,6 @@ list.data[["Prostate"]] = list(
 rm(list = c(l4,l5))
 
 ## -------------
-## ICB response
-
-l6 = load("../ICB_Response/Objs/icbData.rda")
-
-usedTrainMat <- normalizeBetweenArrays(mixTrainMat, method = "quantile")
-usedTestMat <- normalizeBetweenArrays(mixTestMat, method = "quantile")
-
-usedTrainGroup <- mixTrainGroup
-usedTestGroup <- mixTestGroup
-
-list.data[["ICB_Response"]] = list(
-  trainMat = usedTrainMat,
-  testMat = usedTestMat,
-  trainGroup = usedTrainGroup,
-  testGroup = usedTestGroup
-)
-
-rm(list = l6)
-
-## -------------
 
 save(list.data, file="../CrossMechanism/Objs/list.data.rda")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
