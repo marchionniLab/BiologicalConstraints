@@ -145,20 +145,19 @@ save(GSE25055_Out_MechPerformance, file = "./Objs/KTSP/GSE25055_Out_MechPerforma
 ############################################################################
 ## Plot ROC curves
 ### Prepare the legend
-# forLegend_KTSP <- apply(rbind(
-#   ci(roc(usedTrainGroup, ktspStatsTrainRes$statistics, levels = c("Sensitive", "Resistant"), direction = "<")),
-#   ci(roc(usedTestGroup, ktspStatsTestRes$statistics, levels = c("Sensitive", "Resistant"), direction = "<")),
-#   ci(roc(usedTrainGroup, ktspStatsTrainUnRes$statistics, levels = c("Sensitive", "Resistant"), direction = "<")),
-#   ci(roc(usedTestGroup, ktspStatsTestUnRes$statistics, levels = c("Sensitive", "Resistant"), direction = "<"))
-# ),  1, function(x) {
-#   x <- format(round(x, digits=2), nsmall=2)
-#   paste("AUC: ", x[[2]], ";", "95% CI: ", x[[1]], "-", x[[3]])
-# })
-# 
-# 
-# #################################################################
+forLegend_KTSP <- apply(rbind(
+  ci(roc(usedTrainGroup, ktspStatsTrainRes$statistics, levels = c("Sensitive", "Resistant"), direction = "<")),
+  ci(roc(usedTestGroup, ktspStatsTestRes$statistics, levels = c("Sensitive", "Resistant"), direction = "<")),
+  ci(roc(usedTrainGroup, ktspStatsTrainUnRes$statistics, levels = c("Sensitive", "Resistant"), direction = "<")),
+  ci(roc(usedTestGroup, ktspStatsTestUnRes$statistics, levels = c("Sensitive", "Resistant"), direction = "<"))
+),  1, function(x) {
+  x <- format(round(x, digits=2), nsmall=2)
+  paste("AUC: ", x[[2]], ";", "95% CI: ", x[[1]], "-", x[[3]])
+})
+
+##################################################################
 # ### ROC curves Using ggplot2
-# 
+#
 # ### Training
 # datTrn_KTSP <- melt(data.frame(
 #   ## Training Group
@@ -169,8 +168,8 @@ save(GSE25055_Out_MechPerformance, file = "./Objs/KTSP/GSE25055_Out_MechPerforma
 #   Mechanistic.Training=ktspStatsTrainRes$statistics))
 # ### Change Colnames
 # colnames(datTrn_KTSP) <- c("Status", "KTSP_type", "KTSP_sum")
-# 
-# 
+#
+#
 # ### Testing
 # datTst_KTSP <- melt(data.frame(
 #   ## Testing group
@@ -181,15 +180,15 @@ save(GSE25055_Out_MechPerformance, file = "./Objs/KTSP/GSE25055_Out_MechPerforma
 #   Mechanistic.Testing=ktspStatsTestRes$statistics))
 # ### Change Colnames
 # colnames(datTst_KTSP) <- c("Status", "KTSP_type", "KTSP_sum")
-# 
+#
 # ### Combine
 # dat_KTSP <- rbind(datTrn_KTSP, datTst_KTSP)
 # dat_KTSP$Status <- as.numeric(dat_KTSP$Status)-1
-# 
+#
 # ### Replace levels
 # levels(dat_KTSP$KTSP_type) <- gsub("\\.", "-", levels(dat_KTSP$KTSP_type))
 # levels(dat_KTSP$KTSP_type) <- paste(levels(dat_KTSP$KTSP_type), forLegend_KTSP[c(3,1,4,2)])
-# 
+#
 # #################################################################
 # ### Plot Curve
 # png("./Figs/KTSP/CompareAUCggplot_GSE25055Out.png",
@@ -219,9 +218,9 @@ save(GSE25055_Out_MechPerformance, file = "./Objs/KTSP/GSE25055_Out_MechPerforma
 # basicplot_KTSP_EMTABOut
 # ### Close device
 # dev.off()
-# 
+#
 # save(basicplot_KTSP_EMTABOut, file = "./Objs/KTSP/BasicPlot_KTSP_GSE25055out.rda")
-# 
+#
 
 ###########################################################################
 ######

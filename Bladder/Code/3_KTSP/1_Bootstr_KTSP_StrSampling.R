@@ -25,6 +25,8 @@ library(xtable)
 library(boot)
 library(tidyverse)
 library(patchwork)
+library(qdapRegex)
+library(data.table)
 
 ### Load expression and phenotype data
 load("./Objs/progressionDataGood2.rda")
@@ -79,6 +81,17 @@ SWAP.Train.KTSPStrap <- function(data, indices) {
   KTSP_Train_Mech <- SWAP.Train.KTSP(inputMat=ExprMat, phenoGroup = Pheno, krange=ktsp, FilterFunc = SWAP.Filter.Wilcoxon, featureNo=featNo, RestrictedPairs = myTSPs)  
   N_Pairs_Agnostic <- nrow(KTSP_Train_Agnostic$TSPs)
   N_Pairs_Mech <- nrow(KTSP_Train_Mech$TSPs)
+  # get the pairs
+  rownames(KTSP_Train_Agnostic$TSPs) <- gsub(',', '-', rownames(KTSP_Train_Agnostic$TSPs))
+  rownames(KTSP_Train_Mech$TSPs) <- gsub(',', '-', rownames(KTSP_Train_Mech$TSPs))
+  pairs_agnostic <- paste(rownames(KTSP_Train_Agnostic$TSPs), collapse = ',')
+  pairs_Mech <- paste(rownames(KTSP_Train_Mech$TSPs), collapse = ',')
+  # get the invidiual genes
+  gene1_agnostic <- paste(KTSP_Train_Agnostic$TSPs[,1], collapse = ',')
+  gene2_agnostic <- paste(KTSP_Train_Agnostic$TSPs[,2], collapse = ',')
+  gene1_Mech <- paste(KTSP_Train_Mech$TSPs[,1], collapse = ',')
+  gene2_Mech <- paste(KTSP_Train_Mech$TSPs[,2], collapse = ',')
+  # predictions
   ktspStatsTrainAgnostic <- SWAP.KTSP.Statistics(inputMat = ExprMat, classifier = KTSP_Train_Agnostic, CombineFunc = sum)
   ktspStatsTestAgnostic <- SWAP.KTSP.Statistics(inputMat = usedTestMat, classifier = KTSP_Train_Agnostic, CombineFunc = sum)
   ktspStatsTrainMech <- SWAP.KTSP.Statistics(inputMat = ExprMat, classifier = KTSP_Train_Mech, CombineFunc = sum)
@@ -93,9 +106,8 @@ SWAP.Train.KTSPStrap <- function(data, indices) {
   AUC_Test_Mech <- ROCTestMech$auc
   Diff_Agnostic <- AUC_Train_Agnostic - AUC_Test_Agnostic
   Diff_Mechanistic <- AUC_Train_Mech - AUC_Test_Mech
-  return(c(N_Pairs_Agnostic, AUC_Train_Agnostic, AUC_Test_Agnostic, N_Pairs_Mech, AUC_Train_Mech, AUC_Test_Mech, Diff_Agnostic, Diff_Mechanistic))
+  return(c(N_Pairs_Agnostic, AUC_Train_Agnostic, AUC_Test_Agnostic, N_Pairs_Mech, AUC_Train_Mech, AUC_Test_Mech, Diff_Agnostic, Diff_Mechanistic, pairs_agnostic, pairs_Mech, gene1_agnostic, gene2_agnostic, gene1_Mech, gene2_Mech))
 }
-
 
 set.seed(333)
 bootobject_74 <- boot(data= Data, statistic= SWAP.Train.KTSPStrap, R= 1000, parallel = "multicore", ncpus = 15) 
@@ -212,7 +224,7 @@ load("./Objs/KTSP/bootobjectKTSP.rda")
 ##############################################################
 ### Work with boot object 50  
 All_74 <- bootobject_74$t
-colnames(All_74) <- c("N_Pairs_Agnostic", "AUC_Train_Agnostic", "AUC_Test_Agnostic", "N_Pairs_Mech", "AUC_Train_Mech", "AUC_Test_Mech", "Diff_Agnostic", "Diff_Mechanistic")
+colnames(All_74) <- c("N_Pairs_Agnostic", "AUC_Train_Agnostic", "AUC_Test_Agnostic", "N_Pairs_Mech", "AUC_Train_Mech", "AUC_Test_Mech", "Diff_Agnostic", "Diff_Mechanistic", "pairs_agnostic", "pairs_Mech", "gene1_agnostic", "gene2_agnostic", "gene1_Mech", "gene2_Mech")
 
 ## Calculate the difference and CI of the difference (Training data)
 Diff_Agnostic_74 <- All_74[,"Diff_Agnostic"]
@@ -278,7 +290,73 @@ ModelCompare_NofPairs_74 <- rbind(Mechanistic_NofPairs_74, Agnostic_NofPairs_74)
 
 ModelCompare_NofPairs_74$NofFeatAgn <- "74 Genes"
 
-# ##################################
+
+###############
+# get the common pairs (repeated)
+pairs_agnostic <- strsplit(All_74[, 'pairs_agnostic'], ',')
+pairs_mech <- strsplit(All_74[, 'pairs_Mech'], ',')
+
+pairs_agnostic_df <- plyr::ldply(pairs_agnostic, rbind)
+pairs_mech_df <- plyr::ldply(pairs_mech, rbind)
+
+find_rep <- function(dat, feature){
+  # NAs create problems in the function so we substitute that with "unknown"
+  dat[is.na(dat)] <- "unknown"
+  rep_rows <- sum(apply(dat, 1,  function(x) any(x == feature)))
+  names(rep_rows) <- feature
+  as.data.frame(rep_rows)
+}
+
+features_agnostic <- na.omit(unique(as.vector(as.matrix(pairs_agnostic_df))))
+list_results_agnostic <- lapply(features_agnostic, find_rep, dat = pairs_agnostic_df)
+sum_result_agnostic <- do.call(rbind, list_results_agnostic)
+sum_result_agnostic$feature <- rownames(sum_result_agnostic)
+sum_result_agnostic <- as.data.frame(sum_result_agnostic[order(sum_result_agnostic$rep_rows, decreasing = T), ])
+
+features_mech <- na.omit(unique(as.vector(as.matrix(pairs_mech_df))))
+list_results_mech <- lapply(features_mech, find_rep, dat = pairs_mech_df)
+sum_result_mech <- do.call(rbind, list_results_mech)
+sum_result_mech$feature <- rownames(sum_result_mech)
+sum_result_mech <- as.data.frame(sum_result_mech[order(sum_result_mech$rep_rows, decreasing = T), ])
+
+###
+# bar plots
+MechFreq <- ggplot(data=sum_result_mech[c(1:20), ], aes(x=rep_rows, y=reorder(feature, rep_rows))) +
+  geom_col(width=0.5) + 
+  #coord_cartesian(xlim = c(1, 600))
+  scale_x_continuous(limits = c(1,550), n.breaks =10, oob = scales::squish) +
+  labs(y = "Pair", x = "Frequency", title = "Mechanistic") +
+  theme(plot.title = element_text(size=10, hjust=0.5), 
+        axis.text.y = element_text(size=8), 
+        axis.title.x = element_text(size=8),
+        axis.title.y = element_text(size=8)
+  )
+
+AgnFreq <- ggplot(data=sum_result_agnostic[c(1:20), ], aes(x=rep_rows, y=reorder(feature, rep_rows))) +
+  geom_col(width=0.5) + 
+  #coord_cartesian(xlim = c(1, 600))
+  scale_x_continuous(limits = c(1,55), n.breaks =10, oob = scales::squish) +
+  labs(y = "Pair", x = "Frequency", title = "Agnostic") +
+  theme(plot.title = element_text(size=10, hjust=0.5), 
+        axis.text.y = element_text(size=8), 
+        axis.title.x = element_text(size=8),
+        axis.title.y = element_text(size=8)
+        )
+
+
+tiff(filename = "./Figs/bladder_frequency.tiff", width = 3000, height = 2000, res = 300)
+((MechFreq + plot_layout(tag_level = "new") & theme(plot.tag = element_text(size = 10))) | 
+    (AgnFreq + plot_layout(tag_level = "new") & theme(plot.tag = element_text(size = 10))) 
+) +
+  #plot_layout(widths = c(0.4, 1)) + 
+  plot_annotation(
+    title = 'The 20 most frequent gene pairs returned by the k-TSPs model',
+    tag_levels = c('A'),
+    theme = theme(plot.title = element_text(size = 12, face = "bold"))
+  )
+dev.off()
+
+##################################
 # ## Plots
 # My_Theme = theme(
 #   axis.title.x = element_text(size = 5),
