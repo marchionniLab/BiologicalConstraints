@@ -118,6 +118,17 @@ SWAP.Train.KTSPStrap <- function(data, indices) {
   # Finally the function
   KTSP_Train_Agnostic <- SWAP.Train.KTSP(inputMat=ExprMat, phenoGroup = Pheno, krange=ktsp, FilterFunc = SWAP.Filter.Wilcoxon, featureNo=100)
   KTSP_Train_Mech <- SWAP.Train.KTSP(inputMat=ExprMat, phenoGroup = Pheno, krange=ktsp, FilterFunc = SWAP.Filter.Wilcoxon, featureNo=featNo, RestrictedPairs = myTSPs)  
+  # get the pairs
+  rownames(KTSP_Train_Agnostic$TSPs) <- gsub(',', '-', rownames(KTSP_Train_Agnostic$TSPs))
+  rownames(KTSP_Train_Mech$TSPs) <- gsub(',', '-', rownames(KTSP_Train_Mech$TSPs))
+  pairs_agnostic <- paste(rownames(KTSP_Train_Agnostic$TSPs), collapse = ',')
+  pairs_Mech <- paste(rownames(KTSP_Train_Mech$TSPs), collapse = ',')
+  # get the invidiual genes
+  gene1_agnostic <- paste(KTSP_Train_Agnostic$TSPs[,1], collapse = ',')
+  gene2_agnostic <- paste(KTSP_Train_Agnostic$TSPs[,2], collapse = ',')
+  gene1_Mech <- paste(KTSP_Train_Mech$TSPs[,1], collapse = ',')
+  gene2_Mech <- paste(KTSP_Train_Mech$TSPs[,2], collapse = ',')
+  ##
   N_Pairs_Agnostic <- nrow(KTSP_Train_Agnostic$TSPs)
   N_Pairs_Mech <- nrow(KTSP_Train_Mech$TSPs)
   ktspStatsTrainAgnostic <- SWAP.KTSP.Statistics(inputMat = ExprMat, classifier = KTSP_Train_Agnostic, CombineFunc = sum)
@@ -134,7 +145,7 @@ SWAP.Train.KTSPStrap <- function(data, indices) {
   AUC_Test_Mech <- ROCTestMech$auc
   Diff_Agnostic <- AUC_Train_Agnostic - AUC_Test_Agnostic
   Diff_Mechanistic <- AUC_Train_Mech - AUC_Test_Mech
-  return(c(N_Pairs_Agnostic, AUC_Train_Agnostic, AUC_Test_Agnostic, N_Pairs_Mech, AUC_Train_Mech, AUC_Test_Mech, Diff_Agnostic, Diff_Mechanistic))
+  return(c(N_Pairs_Agnostic, AUC_Train_Agnostic, AUC_Test_Agnostic, N_Pairs_Mech, AUC_Train_Mech, AUC_Test_Mech, Diff_Agnostic, Diff_Mechanistic, pairs_agnostic, pairs_Mech, gene1_agnostic, gene2_agnostic, gene1_Mech, gene2_Mech))
 }
 
 
@@ -283,7 +294,7 @@ save(ModelCompare_KTSP, file = "./Objs/KTSP/ModelCompare_KTSP.rda")
 ##############################################################
 ### Work with boot object 100  
 All_100 <- bootobject_100$t
-colnames(All_100) <- c("N_Pairs_Agnostic", "AUC_Train_Agnostic", "AUC_Test_Agnostic", "N_Pairs_Mech", "AUC_Train_Mech", "AUC_Test_Mech", "Diff_Agnostic", "Diff_Mechanistic")
+colnames(All_100) <- c("N_Pairs_Agnostic", "AUC_Train_Agnostic", "AUC_Test_Agnostic", "N_Pairs_Mech", "AUC_Train_Mech", "AUC_Test_Mech", "Diff_Agnostic", "Diff_Mechanistic", "pairs_agnostic", "pairs_Mech", "gene1_agnostic", "gene2_agnostic", "gene1_Mech", "gene2_Mech")
 
 ## Calculate the difference and CI of the difference (Training data)
 Diff_Agnostic_100 <- All_100[,"Diff_Agnostic"]
@@ -342,6 +353,70 @@ ModelCompare_NofPairs_100$NofFeatAgn <- "100 Genes"
 #ModelCompare_KTSP$algorithm <- "KTSP"
 #save(ModelCompare_KTSP, file = "./Objs/KTSP/ModelCompare_KTSP.rda")
 
+###############
+# get the common pairs (repeated)
+pairs_agnostic <- strsplit(All_100[, 'pairs_agnostic'], ',')
+pairs_mech <- strsplit(All_100[, 'pairs_Mech'], ',')
+
+pairs_agnostic_df <- plyr::ldply(pairs_agnostic, rbind)
+pairs_mech_df <- plyr::ldply(pairs_mech, rbind)
+
+find_rep <- function(dat, feature){
+  # NAs create problems in the function so we substitute that with "unknown"
+  dat[is.na(dat)] <- "unknown"
+  rep_rows <- sum(apply(dat, 1,  function(x) any(x == feature)))
+  names(rep_rows) <- feature
+  as.data.frame(rep_rows)
+}
+
+features_agnostic <- na.omit(unique(as.vector(as.matrix(pairs_agnostic_df))))
+list_results_agnostic <- lapply(features_agnostic, find_rep, dat = pairs_agnostic_df)
+sum_result_agnostic <- do.call(rbind, list_results_agnostic)
+sum_result_agnostic$feature <- rownames(sum_result_agnostic)
+sum_result_agnostic <- as.data.frame(sum_result_agnostic[order(sum_result_agnostic$rep_rows, decreasing = T), ])
+
+features_mech <- na.omit(unique(as.vector(as.matrix(pairs_mech_df))))
+list_results_mech <- lapply(features_mech, find_rep, dat = pairs_mech_df)
+sum_result_mech <- do.call(rbind, list_results_mech)
+sum_result_mech$feature <- rownames(sum_result_mech)
+sum_result_mech <- as.data.frame(sum_result_mech[order(sum_result_mech$rep_rows, decreasing = T), ])
+
+###
+# bar plots
+MechFreq <- ggplot(data=sum_result_mech[c(1:20), ], aes(x=rep_rows, y=reorder(feature, rep_rows))) +
+  geom_col(width=0.5) + 
+  #coord_cartesian(xlim = c(1, 600))
+  scale_x_continuous(limits = c(1,550), n.breaks =10, oob = scales::squish) +
+  labs(y = "Pair", x = "Frequency", title = "Mechanistic") +
+  theme(plot.title = element_text(size=10, hjust=0.5), 
+        axis.text.y = element_text(size=8), 
+        axis.title.x = element_text(size=8),
+        axis.title.y = element_text(size=8)
+  )
+
+AgnFreq <- ggplot(data=sum_result_agnostic[c(1:20), ], aes(x=rep_rows, y=reorder(feature, rep_rows))) +
+  geom_col(width=0.5) + 
+  #coord_cartesian(xlim = c(1, 600))
+  scale_x_continuous(limits = c(1,350), n.breaks =10, oob = scales::squish) +
+  labs(y = "Pair", x = "Frequency", title = "Agnostic") +
+  theme(plot.title = element_text(size=10, hjust=0.5), 
+        axis.text.y = element_text(size=8), 
+        axis.title.x = element_text(size=8),
+        axis.title.y = element_text(size=8)
+  )
+
+
+tiff(filename = "./Figs/prostate_frequency.tiff", width = 3000, height = 2000, res = 300)
+((MechFreq + plot_layout(tag_level = "new") & theme(plot.tag = element_text(size = 10))) | 
+    (AgnFreq + plot_layout(tag_level = "new") & theme(plot.tag = element_text(size = 10))) 
+) +
+  #plot_layout(widths = c(0.4, 1)) + 
+  plot_annotation(
+    title = 'The 20 most frequent gene pairs returned by the k-TSPs model',
+    tag_levels = c('A'),
+    theme = theme(plot.title = element_text(size = 12, face = "bold"))
+  )
+dev.off()
 
 ###############################
 ##############################################################
