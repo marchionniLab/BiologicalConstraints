@@ -312,16 +312,18 @@ list_results_agnostic <- lapply(features_agnostic, find_rep, dat = pairs_agnosti
 sum_result_agnostic <- do.call(rbind, list_results_agnostic)
 sum_result_agnostic$feature <- rownames(sum_result_agnostic)
 sum_result_agnostic <- as.data.frame(sum_result_agnostic[order(sum_result_agnostic$rep_rows, decreasing = T), ])
+sum_result_agnostic_top <- sum_result_agnostic[c(1:20), ]
 
 features_mech <- na.omit(unique(as.vector(as.matrix(pairs_mech_df))))
 list_results_mech <- lapply(features_mech, find_rep, dat = pairs_mech_df)
 sum_result_mech <- do.call(rbind, list_results_mech)
 sum_result_mech$feature <- rownames(sum_result_mech)
 sum_result_mech <- as.data.frame(sum_result_mech[order(sum_result_mech$rep_rows, decreasing = T), ])
+sum_result_mech_top <- sum_result_mech[c(1:20), ]
 
 ###
 # bar plots
-MechFreq <- ggplot(data=sum_result_mech[c(1:20), ], aes(x=rep_rows, y=reorder(feature, rep_rows))) +
+MechFreq <- ggplot(data=sum_result_mech_top, aes(x=rep_rows, y=reorder(feature, rep_rows))) +
   geom_col(width=0.5) + 
   #coord_cartesian(xlim = c(1, 600))
   scale_x_continuous(limits = c(1,550), n.breaks =10, oob = scales::squish) +
@@ -332,7 +334,7 @@ MechFreq <- ggplot(data=sum_result_mech[c(1:20), ], aes(x=rep_rows, y=reorder(fe
         axis.title.y = element_text(size=8)
   )
 
-AgnFreq <- ggplot(data=sum_result_agnostic[c(1:20), ], aes(x=rep_rows, y=reorder(feature, rep_rows))) +
+AgnFreq <- ggplot(data=sum_result_agnostic_top, aes(x=rep_rows, y=reorder(feature, rep_rows))) +
   geom_col(width=0.5) + 
   #coord_cartesian(xlim = c(1, 600))
   scale_x_continuous(limits = c(1,55), n.breaks =10, oob = scales::squish) +
@@ -356,6 +358,233 @@ tiff(filename = "./Figs/bladder_frequency.tiff", width = 3000, height = 2000, re
   )
 dev.off()
 
+###########
+## histogram
+# join the agnostic and mechanistic frequency
+sum_result_agnostic$type <- 'agnostic'
+sum_result_agnostic$frequency <- sum_result_agnostic$rep_rows/1000
+sum_result_agnostic <- sum_result_agnostic[c(1:50), ]
+
+sum_result_mech$type <- 'mechanistic'
+sum_result_mech$frequency <- sum_result_mech$rep_rows/1000
+sum_result_mech <- sum_result_mech[c(1:50), ]
+
+sum_result_all <- rbind(sum_result_agnostic, sum_result_mech)
+table(sum_result_all$type)
+
+ggplot(sum_result_all, aes(y = frequency, fill = type)) +
+  geom_density(alpha = 0.5)
+
+ggplot(sum_result_all, aes(x = frequency, fill = type)) +
+  geom_histogram(alpha = 0.5)
+
+#comp <- sm.density.compare(x = sum_result_all$frequency, group = sum_result_all$type, model = 'equal')
+#legend("topleft", comp$levels, col = comp$col, lty = comp$lty, lwd = comp$lwd)
+
+#########
+## get the individual genes for pairs of interest
+
+# agnostic
+agnostic_indvGns_good <- All_74 %>%
+  as.data.frame() %>%
+  dplyr::select(pairs_agnostic, gene1_agnostic, gene2_agnostic) %>%
+  #mutate(tmp = strsplit(as.character(pairs_Mech),',')) %>%
+  #unnest(tmp) %>%
+  group_by(pairs_agnostic) %>%
+  #mutate(row = row_number()) %>%
+  #spread(row, tmp) %>%
+  #pivot_longer(cols = c(4:13), values_to = 'pair', values_drop_na = TRUE) %>%
+  #select(-name) %>%
+  #mutate(tmp_gene1 = strsplit(as.character(gene1_Mech),',')) %>%
+  #group_by(pair) %>%
+  #unnest(tmp_gene1, keep_empty = T) %>%
+  #mutate(row = row_number()) %>%
+  #spread(row, tmp_gene1) %>%
+  separate_rows(c(pairs_agnostic, gene1_agnostic, gene2_agnostic), sep = ',') %>%
+  #select(-pairs_Mech) %>%
+  dplyr::rename(gene1=gene1_agnostic, gene2=gene2_agnostic)
+
+agnostic_genes_notGood <- sum_result_agnostic %>%
+  dplyr::mutate(tmp = strsplit(as.character(feature),'-')) %>%
+  dplyr::mutate(gene1 = map_chr(tmp, 1),
+                gene2 = map_chr(tmp, 2)) %>%
+  select(-tmp, -feature) %>%
+  relocate(rep_rows, .after = gene2)
+
+agnostic_genes_freq <- data.frame(rep_rows = agnostic_genes_notGood$rep_rows, 
+                                  pairs_agnostic = rownames(agnostic_genes_notGood),
+                                  row.names = rownames(agnostic_genes_notGood))
+
+
+# merge
+agnostic_indvGns_good_unique <- agnostic_indvGns_good[!duplicated(agnostic_indvGns_good$pairs_agnostic), ]
+agnostic_indvGns_good_clean <- merge(x = agnostic_indvGns_good_unique, y = agnostic_genes_freq, 
+                                 by = 'pairs_agnostic', suffixes = colnames(agnostic_indvGns_good_unique))
+
+agnostic_indvGns_good_clean <- agnostic_indvGns_good_clean[order(agnostic_indvGns_good_clean$rep_rows, decreasing = T), ] 
+agnostic_indvGns_good_clean$pairs_agnostic <- NULL
+
+agnostic_indvGns_good_clean_top93 <- agnostic_indvGns_good_clean[1:93,]
+
+#######
+# mechanistic
+mech_indvGns_good <- All_74 %>%
+  as.data.frame() %>%
+  dplyr::select(pairs_Mech, gene1_Mech, gene2_Mech) %>%
+  #mutate(tmp = strsplit(as.character(pairs_Mech),',')) %>%
+  #unnest(tmp) %>%
+  group_by(pairs_Mech) %>%
+  #mutate(row = row_number()) %>%
+  #spread(row, tmp) %>%
+  #pivot_longer(cols = c(4:13), values_to = 'pair', values_drop_na = TRUE) %>%
+  #select(-name) %>%
+  #mutate(tmp_gene1 = strsplit(as.character(gene1_Mech),',')) %>%
+  #group_by(pair) %>%
+  #unnest(tmp_gene1, keep_empty = T) %>%
+  #mutate(row = row_number()) %>%
+  #spread(row, tmp_gene1) %>%
+  separate_rows(c(pairs_Mech, gene1_Mech, gene2_Mech), sep = ',') %>%
+  #select(-pairs_Mech) %>%
+  dplyr::rename(gene1=gene1_Mech, gene2=gene2_Mech)
+ 
+
+mech_genes_notGood <- sum_result_mech %>%
+  dplyr::mutate(tmp = strsplit(as.character(feature),'-')) %>%
+  dplyr::mutate(gene1 = map_chr(tmp, 1),
+         gene2 = map_chr(tmp, 2)) %>%
+  select(-tmp, -feature) %>%
+  relocate(rep_rows, .after = gene2)
+
+mech_genes_freq <- data.frame(rep_rows = mech_genes_notGood$rep_rows, 
+                               pairs_Mech = rownames(mech_genes_notGood),
+                                 row.names = rownames(mech_genes_notGood))
+
+# merge
+mech_indvGns_good_unique <- mech_indvGns_good[!duplicated(mech_indvGns_good$pairs_Mech), ]
+mech_indvGns_good_clean <- merge(x = mech_indvGns_good_unique, y = mech_genes_freq, 
+                                 by = 'pairs_Mech', suffixes = colnames(mech_indvGns_good_unique))
+
+mech_indvGns_good_clean <- mech_indvGns_good_clean[order(mech_indvGns_good_clean$rep_rows, decreasing = T), ] 
+mech_indvGns_good_clean$pairs_Mech <- NULL
+#############################
+## plot
+
+# weighted bipartite network
+library(GGally)
+library(network)
+library(igraph)
+
+#mech_genes_net <- as.network(as.matrix(mech_indvGns), 
+#                             ignore.eval = F, 
+#                             names.eval = "rep_rows")
+
+#ggnet2(mech_genes_net, label = T, label.size = 3)
+
+##########################
+#network_mech <- graph_from_data_frame(d=mech_indvGns, directed = T)
+#network_mech <- graph_from_edgelist(as.matrix(mech_indvGns), directed = T) 
+#deg_mech <- degree(network_mech, mode="all", normalized = T)
+
+#rescale = function(x,a,b,c,d){c + (x-a)/(b-a)*(d-c)}
+#deg_mech2 <- rescale(degree(network_mech), 1, 1000, 1,10)
+
+#l <- layout_nicely(network_mech, dim = 2)
+
+# plot(network_mech, 
+#      vertex.size=log(degree(network_mech)), 
+#      vertex.label.dist=0.1,
+#      edge.arrow.width=0.3, 
+#      edge.arrow.size=0.2, 
+#      edge.width = 0.5,
+#      arrow.size = 0.5, 
+#      arrow.width = 0.5,
+#      #label.cex=0.05,
+#      vertex.label.cex=0.6,
+#      layout = layout_with_lgl)
+
+
+network_mech <- graph_from_data_frame(as.matrix(mech_indvGns_good_clean), directed = T)
+E(network_mech)$width <- log(mech_indvGns_good_clean$rep_rows)+1
+#V(network_mech)$color <- ifelse(names(V(network_mech)) %in% mech_indvGns_good_clean$gene1, 'green', 'red')
+
+set.seed(333)
+tiff(filename = 'figs/bladder_mech.tiff', width =  3000, height = 2000, res = 200)
+l_mech <- layout_nicely(network_mech)
+l_mech <- norm_coords(l_mech, ymin=-1, ymax=1, xmin=-1.5, xmax=1.5) #default -- scaled
+plot(network_mech, 
+     vertex.size=degree(network_mech), 
+     vertex.label.dist=0.1,
+     edge.arrow.width=0.1, 
+     edge.arrow.size=0.1, 
+     #edge.width = 0.5,
+     arrow.size = 0.5, 
+     arrow.width = 0.5,
+     #label.cex=0.05,
+     vertex.label.cex=0.5,
+     rescale=F,
+     layout = l_mech)
+dev.off()
+
+network_agnostic <- graph_from_data_frame(as.matrix(agnostic_indvGns_good_clean_top93), directed = F) 
+E(network_agnostic)$width <- log(agnostic_indvGns_good_clean_top93$rep_rows)
+tiff(filename = 'figs/bladder_agnostic.tiff', width =  3000, height = 2000, res = 200)
+l_agnostic <- layout_nicely(network_agnostic)
+l_agnostic <- norm_coords(l_agnostic, ymin=-1, ymax=1, xmin=-1.5, xmax=1.5) #default -- scaled
+plot(network_agnostic, 
+     vertex.size=degree(network_agnostic), 
+     vertex.label.dist=0.1,
+     edge.arrow.width=0.1, 
+     edge.arrow.size=0.1, 
+     #edge.width = 0.5,
+     arrow.size = 0.5, 
+     arrow.width = 0.5,
+     #label.cex=0.05,
+     vertex.label.cex=0.5,
+     layout = l_agnostic
+     )
+dev.off()
+###########################################
+### Plot genes in the training set
+## Which TSPs
+
+mech_features <- gsub('-', ',', sum_result_mech_top)
+
+i <- 1:nrow(sum_result_mech_top)
+
+## Assemble in a data frame
+tsp <- lapply(i , function(i, x) as.character(unlist(str_split(x[i], '-', simplify = F))), 
+              x=sum_result_mech_top$feature)
+
+## Assemble
+dfTspTrain <- lapply(tsp, function(i,x,g){
+  out <- data.frame(t(x[i, ]), Group=g)
+  out <- cbind(pair= paste("TSP:", paste(i, collapse = "-")), out)
+}, x=usedTrainMat, g=usedTrainGroup)
+
+
+names(dfTspTrain) <- sum_result_mech_top$feature
+
+# Change the names of elements inside each element in dfTspTrain (For Plotting)  
+for(i in seq_along(dfTspTrain)) names(dfTspTrain[[i]]) <-  c("pair", "Gene1", "Gene2", "Group")
+
+## Assemble
+dfTspTrain <- lapply(tsp, function(i,x,g){
+  out <- data.frame(t(x[i, ]), Group=g)
+  out <- cbind(pair= paste("TSP:", paste(i, collapse = "-")), melt(out))
+}, x=usedTrainMat, g=usedTrainGroup)
+
+## Reduce
+datTrain <- Reduce("rbind", dfTspTrain)
+
+## Rename columns
+colnames(datTrain)[colnames(datTrain) %in% c("variable", "value")] <- c("Gene", "Expression")
+
+bxplt <- ggplot(na.omit(datTrain), aes(x=Gene, y=Expression, fill=Group)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_point(aes(group=Group), position = position_jitterdodge(), size=0.75, color=rgb(0.2,0.2,0.2,0.5)) +
+  facet_wrap(~pair, scales = "free", nrow = 2) +
+  theme(axis.text = element_text(face = "bold", size = 12), axis.title = element_text(face = "bold", size = 12), legend.position = "bottom", legend.text = element_text(face = "bold", size = 17.5), legend.title = element_text(face = "bold", size = 17.5), strip.text.x = element_text(face = "bold", size = 11))
+bxplt
 ##################################
 # ## Plots
 # My_Theme = theme(
