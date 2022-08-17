@@ -22,6 +22,8 @@ library(mltools)
 library(xtable)
 library(boot)
 library(patchwork)
+library(igraph)
+library(tidyverse)
 
 ### Load expression and phenotype data
 load("./Objs/ChemoDataNew.rda")
@@ -606,7 +608,23 @@ agnostic_indvGns_good_clean$pairs_agnostic <- NULL
 agnostic_indvGns_good_clean <- filter(agnostic_indvGns_good_clean, !grepl("///", gene1, ignore.case = TRUE))
 agnostic_indvGns_good_clean <- filter(agnostic_indvGns_good_clean, !grepl("///", gene2, ignore.case = TRUE))
 
-agnostic_indvGns_good_clean <- agnostic_indvGns_good_clean[agnostic_indvGns_good_clean$rep_rows>10, ]
+agnostic_indvGns_good_clean <- aggregate(rep_rows~(gene1+ gene2),data=agnostic_indvGns_good_clean, FUN = sum)
+agnostic_indvGns_good_clean <- agnostic_indvGns_good_clean[order(agnostic_indvGns_good_clean$rep_rows, decreasing = T), ] 
+
+## matrix for vertices
+agnostic_vertics <- agnostic_indvGns_good_clean %>%
+  pivot_longer(cols = c('gene1', 'gene2'), values_to = 'gene') %>%
+  rename(pair_frequency = rep_rows, order = name) %>%
+  group_by(gene) %>%
+  mutate(gene_frequency = n()) %>%
+  relocate(gene, .before = pair_frequency) %>%
+  relocate(order, .after = gene) %>%
+  group_by(gene) %>%
+  dplyr::filter(!duplicated(gene))
+
+# get the top pairs only
+agnostic_indvGns_good_clean <- agnostic_indvGns_good_clean[c(1:100), ]
+agnostic_vertics <- agnostic_vertics[agnostic_vertics$gene %in% agnostic_indvGns_good_clean$gene1 | agnostic_vertics$gene %in% agnostic_indvGns_good_clean$gene2, ]
 
 #######
 # mechanistic
@@ -649,83 +667,162 @@ mech_indvGns_good_clean <- merge(x = mech_indvGns_good_unique, y = mech_genes_fr
 mech_indvGns_good_clean <- mech_indvGns_good_clean[order(mech_indvGns_good_clean$rep_rows, decreasing = T), ] 
 mech_indvGns_good_clean$pairs_Mech <- NULL
 
-mech_indvGns_good_clean <- mech_indvGns_good_clean[mech_indvGns_good_clean$rep_rows>10, ]
+## matrix for vertices
+mech_vertics <- mech_indvGns_good_clean %>%
+  pivot_longer(cols = c('gene1', 'gene2'), values_to = 'gene') %>%
+  rename(pair_frequency = rep_rows, order = name) %>%
+  group_by(gene) %>%
+  mutate(gene_frequency = n()) %>%
+  relocate(gene, .before = pair_frequency) %>%
+  relocate(order, .after = gene) %>%
+  group_by(gene) %>%
+  dplyr::filter(!duplicated(gene))
+
+# get the top pairs only
+mech_indvGns_good_clean <- mech_indvGns_good_clean[c(1:100), ]
+mech_vertics <- mech_vertics[mech_vertics$gene %in% mech_indvGns_good_clean$gene1 | mech_vertics$gene %in% mech_indvGns_good_clean$gene2, ]
 
 #############################
 ## plot
 
-# weighted bipartite network
 library(igraph)
 
-#mech_genes_net <- as.network(as.matrix(mech_indvGns), 
-#                             ignore.eval = F, 
-#                             names.eval = "rep_rows")
+# make the graph
+network_mech <- graph_from_data_frame(mech_indvGns_good_clean, 
+                                      directed = T, 
+                                      vertices = mech_vertics)
 
-#ggnet2(mech_genes_net, label = T, label.size = 3)
+# edges parameters
+E(network_mech)$width <- log2(E(network_mech)$rep_rows)/2
+E(network_mech)$edge.color <- "black"
+edge.start <- ends(network_mech, es=E(network_mech), names=F)[,1]
 
-##########################
-#network_mech <- graph_from_data_frame(d=mech_indvGns, directed = T)
-#network_mech <- graph_from_edgelist(as.matrix(mech_indvGns), directed = T) 
-#deg_mech <- degree(network_mech, mode="all", normalized = T)
+# vertices parameters
+V(network_mech)$size <- V(network_mech)$gene_frequency*0.2
+V(network_mech)$color <- ifelse(V(network_mech)$order == 'gene1', "tomato", "gold")
 
-#rescale = function(x,a,b,c,d){c + (x-a)/(b-a)*(d-c)}
-#deg_mech2 <- rescale(degree(network_mech), 1, 1000, 1,10)
+# filter edges
+#hist(mech_indvGns_good_clean$rep_rows)
+mean(mech_indvGns_good_clean$rep_rows)
+sd(mech_indvGns_good_clean$rep_rows)
+cut.off <- mean(mech_indvGns_good_clean$rep_rows) 
+network_mech_FilEdges <- delete_edges(network_mech, E(network_mech)[rep_rows<cut.off])
 
-#l <- layout_nicely(network_mech, dim = 2)
-
-# plot(network_mech, 
-#      vertex.size=log(degree(network_mech)), 
-#      vertex.label.dist=0.1,
-#      edge.arrow.width=0.3, 
-#      edge.arrow.size=0.2, 
-#      edge.width = 0.5,
-#      arrow.size = 0.5, 
-#      arrow.width = 0.5,
-#      #label.cex=0.05,
-#      vertex.label.cex=0.6,
-#      layout = layout_with_lgl)
-
-
-network_mech <- graph_from_data_frame(as.matrix(mech_indvGns_good_clean), directed = T)
-E(network_mech)$width <- log(mech_indvGns_good_clean$rep_rows)+1
-#V(network_mech)$color <- ifelse(names(V(network_mech)) %in% mech_indvGns_good_clean$gene1, 'green', 'red')
-
+###
+## plot
 set.seed(333)
-tiff(filename = 'figs/breast_mech.tiff', width =  3000, height = 2000, res = 200)
+tiff(filename = 'figs/breast_mech.tiff', width =  3000, height = 2000, res = 300)
 l_mech <- layout_nicely(network_mech)
 l_mech <- norm_coords(l_mech, ymin=-1, ymax=1, xmin=-1.5, xmax=1.5) #default -- scaled
 plot(network_mech, 
-     vertex.size=degree(network_mech), 
+     #vertex.size=degree(network_mech), 
      vertex.label.dist=0,
-     edge.arrow.width=0.1, 
-     edge.arrow.size=0.1, 
-     #edge.width = 0.5,
-     arrow.size = 0.5, 
-     arrow.width = 0.5,
+     #edge.arrow.width=0, 
+     edge.arrow.size=0, 
+     arrow.size = 0, 
+     arrow.width = 0,
      #label.cex=0.05,
      vertex.label.cex=0.4,
-     rescale=F,
-     layout = l_mech)
+     rescale=T,
+     layout = l_mech, 
+     edge.curved=0.1,
+     main = 'Mechanistic gene pairs in predicting the NACT response in TNBC')
+legend(x=-1.5, y=-1.0, c("gene1","gene2"), pch=21,
+       col="#777777", pt.bg=c("tomato", "gold"), pt.cex=2, cex=.8, bty="n", ncol=1)
 dev.off()
 
-network_agnostic <- graph_from_data_frame(as.matrix(agnostic_indvGns_good_clean), directed = F) 
-E(network_agnostic)$width <- log(agnostic_indvGns_good_clean$rep_rows)
-tiff(filename = 'figs/breast_agnostic.tiff', width =  3000, height = 2000, res = 200)
+#####
+# cfg
+cfg_mech <- cluster_fast_greedy(as.undirected(network_mech))
+set.seed(333)
+tiff(filename = 'figs/breast_mech_cfg.tiff', width =  3000, height = 2000, res = 300)
+plot(cfg_mech, network_mech, 
+     #vertex.size=degree(network_mech), 
+     vertex.label.dist=0,
+     #edge.arrow.width=0, 
+     edge.arrow.size=0, 
+     arrow.size = 0, 
+     arrow.width = 0,
+     #label.cex=0.05,
+     vertex.label.cex=0.4,
+     rescale=T,
+     layout = l_mech, 
+     edge.curved=0.1,
+     main = 'Mechanistic gene pairs in predicting the NACT response in TNBC (clusters)')
+legend(x=-1.5, y=-1.0, c("gene1","gene2"), pch=21,
+       col="#777777", pt.bg=c("tomato", "gold"), pt.cex=2, cex=.8, bty="n", ncol=1)
+dev.off()
+
+############################
+## agnostic
+
+# make the graph
+network_agnostic <- graph_from_data_frame(agnostic_indvGns_good_clean, 
+                                          directed = T, 
+                                          vertices = agnostic_vertics)
+
+# edges parameters
+E(network_agnostic)$width <- log2(E(network_agnostic)$rep_rows)/2
+E(network_agnostic)$edge.color <- "black"
+edge.start <- ends(network_agnostic, es=E(network_agnostic), names=F)[,1]
+
+# vertices parameters
+V(network_agnostic)$size <- V(network_agnostic)$gene_frequency*0.1
+V(network_agnostic)$color <- ifelse(V(network_agnostic)$order == 'gene1', "tomato", "gold")
+
+# filter edges
+#hist(agnostic_indvGns_good_clean$rep_rows)
+mean(agnostic_indvGns_good_clean$rep_rows)
+sd(agnostic_indvGns_good_clean$rep_rows)
+cut.off <- mean(agnostic_indvGns_good_clean$rep_rows) 
+network_agnostic_FilEdges <- delete_edges(network_agnostic, E(network_agnostic)[rep_rows<cut.off])
+
+###
+## plot
+tiff(filename = 'figs/breast_agnostic.tiff', width =  3000, height = 2000, res = 300)
 l_agnostic <- layout_nicely(network_agnostic)
 l_agnostic <- norm_coords(l_agnostic, ymin=-1, ymax=1, xmin=-1.5, xmax=1.5) #default -- scaled
 plot(network_agnostic, 
-     vertex.size=degree(network_agnostic), 
+     #vertex.size=degree(network_agnostic), 
      vertex.label.dist=0,
-     edge.arrow.width=0.1, 
-     edge.arrow.size=0.1, 
+     edge.arrow.width=0, 
+     edge.arrow.size=0, 
      #edge.width = 0.5,
-     arrow.size = 0.5, 
-     arrow.width = 0.5,
+     arrow.size = 0, 
+     arrow.width = 0,
      #label.cex=0.05,
      vertex.label.cex=0.4,
-     layout = l_agnostic
+     layout = l_agnostic,
+     edge_curved =0.1,
+     main = 'Agnostic gene pairs in predicting the NACT response in TNBC' 
 )
+legend(x=-1.5, y=-1.0, c("gene1","gene2"), pch=21,
+       col="#777777", pt.bg=c("tomato", "gold"), pt.cex=2, cex=.8, bty="n", ncol=1)
 dev.off()
+
+#####
+# cfg
+cfg_agnostic <- cluster_fast_greedy(as.undirected(network_agnostic))
+set.seed(333)
+tiff(filename = 'figs/breast_agnostic_cfg.tiff', width =  3000, height = 2000, res = 300)
+plot(cfg_agnostic, network_agnostic, 
+     #vertex.size=degree(network_mech), 
+     vertex.label.dist=0,
+     #edge.arrow.width=0, 
+     edge.arrow.size=0, 
+     arrow.size = 0, 
+     arrow.width = 0,
+     #label.cex=0.05,
+     vertex.label.cex=0.4,
+     rescale=T,
+     layout = l_agnostic, 
+     edge.curved=0.1,
+     main = 'Mechanistic gene pairs in predicting the NACT response in TNBC (clusters)')
+legend(x=-1.5, y=-1.0, c("gene1","gene2"), pch=21,
+       col="#777777", pt.bg=c("tomato", "gold"), pt.cex=2, cex=.8, bty="n", ncol=1)
+dev.off()
+
+
 
 ####################################################################################
 # combine the number of pairs distribution
